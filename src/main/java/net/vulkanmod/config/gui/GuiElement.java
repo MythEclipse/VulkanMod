@@ -1,22 +1,11 @@
 package net.vulkanmod.config.gui;
 
-import net.minecraft.Util;
-import net.minecraft.client.gui.ComponentPath;
-import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.narration.NarratableEntry;
-import net.minecraft.client.gui.narration.NarrationElementOutput;
-import net.minecraft.client.gui.navigation.FocusNavigationEvent;
-import net.minecraft.client.gui.navigation.ScreenRectangle;
-import net.minecraft.client.input.MouseButtonEvent;
-import org.jetbrains.annotations.Nullable;
-
-public abstract class GuiElement implements GuiEventListener, NarratableEntry {
-
+/* JADX INFO: loaded from: VulkanMod_1.21.11-0.6.0.jar:net/vulkanmod/config/gui/GuiElement.class */
+public abstract class GuiElement implements net.minecraft.client.gui.components.events.GuiEventListener, net.minecraft.client.gui.narration.NarratableEntry {
     protected int width;
     protected int height;
     public int x;
     public int y;
-
     protected boolean hovered;
     protected long hoverStartTime;
     protected int hoverTime;
@@ -40,89 +29,74 @@ public abstract class GuiElement implements GuiEventListener, NarratableEntry {
     }
 
     public int getX() {
-        return x;
+        return this.x;
     }
 
     public int getY() {
-        return y;
+        return this.y;
     }
 
     public int getWidth() {
-        return width;
+        return this.width;
     }
 
     public int getHeight() {
-        return height;
+        return this.height;
     }
 
     public void updateState(double mX, double mY) {
-        // Update hover
         if (isMouseOver(mX, mY)) {
             if (!this.hovered) {
-                this.hoverStartTime = Util.getMillis();
+                this.hoverStartTime = net.minecraft.util.Util.getMillis();
             }
-
             this.hovered = true;
-            this.hoverTime = (int) (Util.getMillis() - this.hoverStartTime);
-        } else {
-            if (this.hovered) {
-                this.hoverStopTime = Util.getMillis();
-            }
-            this.hovered = false;
-            this.hoverTime = 0;
+            this.hoverTime = (int) (net.minecraft.util.Util.getMillis() - this.hoverStartTime);
+            return;
         }
+        if (this.hovered) {
+            this.hoverStopTime = net.minecraft.util.Util.getMillis();
+        }
+        this.hovered = false;
+        this.hoverTime = 0;
     }
 
     public float getHoverMultiplier(float time) {
         if (this.hovered) {
-            return Math.min(((this.hoverTime) / time), 1.0f);
+            return java.lang.Math.min(this.hoverTime / time, 1.0f);
         }
-        else {
-            int delta = (int) (Util.getMillis() - this.hoverStopTime);
-            return Math.max(1.0f - (delta / time), 0.0f);
-        }
+        int delta = (int) (net.minecraft.util.Util.getMillis() - this.hoverStopTime);
+        return java.lang.Math.max(1.0f - (delta / time), 0.0f);
     }
 
-    @Nullable
-    @Override
-    public ComponentPath nextFocusPath(FocusNavigationEvent focusNavigationEvent) {
-        return GuiEventListener.super.nextFocusPath(focusNavigationEvent);
+    @org.jetbrains.annotations.Nullable
+    public net.minecraft.client.gui.ComponentPath nextFocusPath(net.minecraft.client.gui.navigation.FocusNavigationEvent focusNavigationEvent) {
+        return null;
     }
 
-    @Override
     public boolean isMouseOver(double mouseX, double mouseY) {
-        return mouseX >= this.x && mouseY >= this.y
-                && mouseX <= (this.x + this.width) && mouseY <= (this.y + this.height);
+        return mouseX >= ((double) this.x) && mouseY >= ((double) this.y) && mouseX <= ((double) (this.x + this.width)) && mouseY <= ((double) (this.y + this.height));
     }
 
-    @Nullable
-    @Override
-    public ComponentPath getCurrentFocusPath() {
-        return GuiEventListener.super.getCurrentFocusPath();
+    @org.jetbrains.annotations.Nullable
+    public net.minecraft.client.gui.ComponentPath getCurrentFocusPath() {
+        return null;
     }
 
-    @Override
-    public ScreenRectangle getRectangle() {
-        return GuiEventListener.super.getRectangle();
+    public net.minecraft.client.gui.navigation.ScreenRectangle getRectangle() {
+        return new net.minecraft.client.gui.navigation.ScreenRectangle(this.x, this.y, this.width, this.height);
     }
 
-    @Override
     public void setFocused(boolean bl) {
-
     }
 
-    @Override
     public boolean isFocused() {
         return false;
     }
 
-    @Override
-    public NarrationPriority narrationPriority() {
-        return NarrationPriority.NONE;
+    public net.minecraft.client.gui.narration.NarratableEntry.NarrationPriority narrationPriority() {
+        return net.minecraft.client.gui.narration.NarratableEntry.NarrationPriority.NONE;
     }
 
-    @Override
-    public void updateNarration(NarrationElementOutput narrationElementOutput) {
-
+    public void updateNarration(net.minecraft.client.gui.narration.NarrationElementOutput narrationElementOutput) {
     }
 }

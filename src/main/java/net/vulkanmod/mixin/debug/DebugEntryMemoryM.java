@@ -1,55 +1,28 @@
 package net.vulkanmod.mixin.debug;
 
-import net.minecraft.client.gui.components.debug.DebugEntryMemory;
-import net.minecraft.client.gui.components.debug.DebugScreenDisplayer;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.chunk.LevelChunk;
-import net.vulkanmod.vulkan.memory.MemoryManager;
-import org.jetbrains.annotations.Nullable;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
-
-import java.lang.management.ManagementFactory;
-import java.util.List;
-import java.util.Locale;
-
-@Mixin(DebugEntryMemory.class)
+/* JADX INFO: loaded from: VulkanMod_1.21.11-0.6.0.jar:net/vulkanmod/mixin/debug/DebugEntryMemoryM.class */
+@org.spongepowered.asm.mixin.Mixin({net.minecraft.client.gui.components.debug.DebugEntryMemory.class})
 public abstract class DebugEntryMemoryM {
 
-    @Shadow @Final private static ResourceLocation GROUP;
+    @org.spongepowered.asm.mixin.Shadow
+    @org.spongepowered.asm.mixin.Final
+    private static net.minecraft.resources.Identifier GROUP;
 
-    @Shadow
+    @org.spongepowered.asm.mixin.Shadow
     protected static long bytesToMegabytes(long l) {
-        return 0;
+        return 0L;
     }
 
-    // TODO
-//    @Shadow @Final private DebugEntryMemory.AllocationRateCalculator allocationRateCalculator;
-
-    @Overwrite
-    public void display(DebugScreenDisplayer debugScreenDisplayer, @Nullable Level level, @Nullable LevelChunk levelChunk, @Nullable LevelChunk levelChunk2) {
-        long l = Runtime.getRuntime().maxMemory();
-        long m = Runtime.getRuntime().totalMemory();
-        long n = Runtime.getRuntime().freeMemory();
+    @org.spongepowered.asm.mixin.Overwrite
+    public void display(net.minecraft.client.gui.components.debug.DebugScreenDisplayer debugScreenDisplayer, @org.jetbrains.annotations.Nullable net.minecraft.world.level.Level level, @org.jetbrains.annotations.Nullable net.minecraft.world.level.chunk.LevelChunk levelChunk, @org.jetbrains.annotations.Nullable net.minecraft.world.level.chunk.LevelChunk levelChunk2) {
+        long l = java.lang.Runtime.getRuntime().maxMemory();
+        long m = java.lang.Runtime.getRuntime().totalMemory();
+        long n = java.lang.Runtime.getRuntime().freeMemory();
         long o = m - n;
-        debugScreenDisplayer.addToGroup(
-                GROUP,
-                List.of(
-                        String.format(Locale.ROOT, "Mem: %2d%% %03d/%03dMB", o * 100L / l, bytesToMegabytes(o), bytesToMegabytes(l)),
-//                        String.format(Locale.ROOT, "Allocation rate: %03dMB/s", bytesToMegabytes(this.allocationRateCalculator.bytesAllocatedPerSecond(o))),
-                        String.format(Locale.ROOT, "Allocated: %2d%% %03dMB", m * 100L / l, bytesToMegabytes(m)),
-                        String.format("Off-heap: " + getOffHeapMemory() + "MB"),
-                        "NativeMemory: %dMB".formatted(MemoryManager.getInstance().getNativeMemoryMB()),
-                        "DeviceMemory: %dMB".formatted(MemoryManager.getInstance().getAllocatedDeviceMemoryMB())
-                )
-        );
-
+        debugScreenDisplayer.addToGroup(GROUP, java.util.List.of(java.lang.String.format(java.util.Locale.ROOT, "Mem: %2d%% %03d/%03dMB", java.lang.Long.valueOf((o * 100) / l), java.lang.Long.valueOf(bytesToMegabytes(o)), java.lang.Long.valueOf(bytesToMegabytes(l))), java.lang.String.format(java.util.Locale.ROOT, "Allocated: %2d%% %03dMB", java.lang.Long.valueOf((m * 100) / l), java.lang.Long.valueOf(bytesToMegabytes(m))), java.lang.String.format("Off-heap: " + getOffHeapMemory() + "MB", new java.lang.Object[0]), "NativeMemory: %dMB".formatted(java.lang.Integer.valueOf(net.vulkanmod.vulkan.memory.MemoryManager.getInstance().getNativeMemoryMB())), "DeviceMemory: %dMB".formatted(java.lang.Integer.valueOf(net.vulkanmod.vulkan.memory.MemoryManager.getInstance().getAllocatedDeviceMemoryMB()))));
     }
 
     private long getOffHeapMemory() {
-        return bytesToMegabytes(ManagementFactory.getMemoryMXBean().getNonHeapMemoryUsage().getUsed());
+        return bytesToMegabytes(java.lang.management.ManagementFactory.getMemoryMXBean().getNonHeapMemoryUsage().getUsed());
     }
 }

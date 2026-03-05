@@ -1,98 +1,140 @@
 package net.vulkanmod.render.vertex;
 
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
-import net.vulkanmod.Initializer;
-import net.vulkanmod.interfaces.ExtendedRenderType;
-import net.vulkanmod.vulkan.VRenderSystem;
-
-import java.util.EnumSet;
-import java.util.function.Function;
-
+/* JADX INFO: loaded from: VulkanMod_1.21.11-0.6.0.jar:net/vulkanmod/render/vertex/TerrainRenderType.class */
 public enum TerrainRenderType {
     SOLID(0.0f),
-    CUTOUT_MIPPED(0.5f),
-    CUTOUT(0.1f),
-    TRANSLUCENT(0.0f),
+    CUTOUT(0.5f),
+    TRANSLUCENT(0.01f),
     TRIPWIRE(0.1f);
 
-    public static final TerrainRenderType[] VALUES = TerrainRenderType.values();
-
-    public static final EnumSet<TerrainRenderType> COMPACT_RENDER_TYPES = EnumSet.of(CUTOUT_MIPPED, TRANSLUCENT);
-    public static final EnumSet<TerrainRenderType> SEMI_COMPACT_RENDER_TYPES = EnumSet.of(CUTOUT_MIPPED, CUTOUT, TRANSLUCENT);
-
-    private static Function<TerrainRenderType, TerrainRenderType> remapper;
+    private static java.util.function.Function<net.vulkanmod.render.vertex.TerrainRenderType, net.vulkanmod.render.vertex.TerrainRenderType> remapper;
+    public final float alphaCutout;
+    public static final net.vulkanmod.render.vertex.TerrainRenderType[] VALUES = values();
+    public static final java.util.EnumSet<net.vulkanmod.render.vertex.TerrainRenderType> COMPACT_RENDER_TYPES = java.util.EnumSet.of(CUTOUT, TRANSLUCENT);
+    public static final java.util.EnumSet<net.vulkanmod.render.vertex.TerrainRenderType> SEMI_COMPACT_RENDER_TYPES = java.util.EnumSet.of(SOLID, CUTOUT, TRANSLUCENT);
 
     static {
         SEMI_COMPACT_RENDER_TYPES.add(CUTOUT);
-        SEMI_COMPACT_RENDER_TYPES.add(CUTOUT_MIPPED);
         SEMI_COMPACT_RENDER_TYPES.add(TRANSLUCENT);
-
-        COMPACT_RENDER_TYPES.add(CUTOUT_MIPPED);
         COMPACT_RENDER_TYPES.add(TRANSLUCENT);
     }
-
-    public final float alphaCutout;
 
     TerrainRenderType(float alphaCutout) {
         this.alphaCutout = alphaCutout;
     }
 
     public void setCutoutUniform() {
-        VRenderSystem.alphaCutout = this.alphaCutout;
+        net.vulkanmod.vulkan.VRenderSystem.alphaCutout = this.alphaCutout;
     }
 
-    public static TerrainRenderType get(RenderType renderType) {
-        return ((ExtendedRenderType)renderType).getTerrainRenderType();
+    public static net.vulkanmod.render.vertex.TerrainRenderType get(net.minecraft.client.renderer.rendertype.RenderType renderType) {
+        return ((net.vulkanmod.interfaces.ExtendedRenderType) renderType).getTerrainRenderType();
     }
 
-    public static TerrainRenderType get(ChunkSectionLayer layer) {
-        return switch (layer) {
-            case SOLID -> SOLID;
-            case CUTOUT_MIPPED -> CUTOUT_MIPPED;
-            case CUTOUT -> CUTOUT;
-            case TRANSLUCENT -> TRANSLUCENT;
-            case TRIPWIRE -> TRIPWIRE;
-        };
+    /* JADX INFO: renamed from: net.vulkanmod.render.vertex.TerrainRenderType$1, reason: invalid class name */
+    /* JADX INFO: loaded from: VulkanMod_1.21.11-0.6.0.jar:net/vulkanmod/render/vertex/TerrainRenderType$1.class */
+    static /* synthetic */ class AnonymousClass1 {
+        static final /* synthetic */ int[] $SwitchMap$net$minecraft$client$renderer$chunk$ChunkSectionLayer = new int[net.minecraft.client.renderer.chunk.ChunkSectionLayer.values().length];
+
+        static {
+            try {
+                $SwitchMap$net$minecraft$client$renderer$chunk$ChunkSectionLayer[net.minecraft.client.renderer.chunk.ChunkSectionLayer.SOLID.ordinal()] = 1;
+            } catch (java.lang.NoSuchFieldError e) {
+            }
+            try {
+                $SwitchMap$net$minecraft$client$renderer$chunk$ChunkSectionLayer[net.minecraft.client.renderer.chunk.ChunkSectionLayer.CUTOUT.ordinal()] = 2;
+            } catch (java.lang.NoSuchFieldError e2) {
+            }
+            try {
+                $SwitchMap$net$minecraft$client$renderer$chunk$ChunkSectionLayer[net.minecraft.client.renderer.chunk.ChunkSectionLayer.TRANSLUCENT.ordinal()] = 3;
+            } catch (java.lang.NoSuchFieldError e3) {
+            }
+            try {
+                $SwitchMap$net$minecraft$client$renderer$chunk$ChunkSectionLayer[net.minecraft.client.renderer.chunk.ChunkSectionLayer.TRIPWIRE.ordinal()] = 4;
+            } catch (java.lang.NoSuchFieldError e4) {
+            }
+        }
     }
 
-    public static TerrainRenderType get(String name) {
-        return switch (name) {
-            case "solid" -> TerrainRenderType.SOLID;
-            case "cutout" -> TerrainRenderType.CUTOUT;
-            case "cutout_mipped" -> TerrainRenderType.CUTOUT_MIPPED;
-            case "translucent" -> TerrainRenderType.TRANSLUCENT;
-            case "tripwire" -> TerrainRenderType.TRIPWIRE;
-            default -> null;
-        };
+    /* JADX INFO: Thrown type has an unknown type hierarchy: java.lang.MatchException */
+    public static net.vulkanmod.render.vertex.TerrainRenderType get(net.minecraft.client.renderer.chunk.ChunkSectionLayer layer) throws java.lang.MatchException {
+        switch (net.vulkanmod.render.vertex.TerrainRenderType.AnonymousClass1.$SwitchMap$net$minecraft$client$renderer$chunk$ChunkSectionLayer[layer.ordinal()]) {
+            case 1:
+                return SOLID;
+            case 2:
+                return CUTOUT;
+            case 3:
+                return TRANSLUCENT;
+            case 4:
+                return TRIPWIRE;
+            default:
+                throw new java.lang.MatchException((java.lang.String) null, (java.lang.Throwable) null);
+        }
     }
 
-    public static ChunkSectionLayer getLayer(TerrainRenderType renderType) {
-        return switch (renderType) {
-            case SOLID -> ChunkSectionLayer.SOLID;
-            case CUTOUT -> ChunkSectionLayer.CUTOUT;
-            case CUTOUT_MIPPED -> ChunkSectionLayer.CUTOUT_MIPPED;
-            case TRANSLUCENT -> ChunkSectionLayer.TRANSLUCENT;
-            case TRIPWIRE -> ChunkSectionLayer.TRIPWIRE;
-        };
+    public static net.vulkanmod.render.vertex.TerrainRenderType get(java.lang.String name) {
+        switch (name) {
+            case "solid":
+                return SOLID;
+            case "cutout":
+                return CUTOUT;
+            case "translucent":
+                return TRANSLUCENT;
+            case "tripwire":
+                return TRIPWIRE;
+            default:
+                return null;
+        }
+    }
+
+    /* JADX INFO: Thrown type has an unknown type hierarchy: java.lang.MatchException */
+    public static net.minecraft.client.renderer.chunk.ChunkSectionLayer getLayer(net.vulkanmod.render.vertex.TerrainRenderType renderType) throws java.lang.MatchException {
+        switch (renderType) {
+            case SOLID:
+                return net.minecraft.client.renderer.chunk.ChunkSectionLayer.SOLID;
+            case CUTOUT:
+                return net.minecraft.client.renderer.chunk.ChunkSectionLayer.CUTOUT;
+            case TRANSLUCENT:
+                return net.minecraft.client.renderer.chunk.ChunkSectionLayer.TRANSLUCENT;
+            case TRIPWIRE:
+                return net.minecraft.client.renderer.chunk.ChunkSectionLayer.TRIPWIRE;
+            default:
+                throw new java.lang.MatchException((java.lang.String) null, (java.lang.Throwable) null);
+        }
     }
 
     public static void updateMapping() {
-        if (Initializer.CONFIG.uniqueOpaqueLayer) {
-            remapper = (renderType) -> switch (renderType) {
-                case SOLID, CUTOUT, CUTOUT_MIPPED -> TerrainRenderType.CUTOUT_MIPPED;
-                case TRANSLUCENT, TRIPWIRE -> TerrainRenderType.TRANSLUCENT;
+        if (net.vulkanmod.Initializer.CONFIG.uniqueOpaqueLayer) {
+            remapper = renderType -> {
+                switch (renderType) {
+                    case SOLID:
+                    case CUTOUT:
+                        return CUTOUT;
+                    case TRANSLUCENT:
+                    case TRIPWIRE:
+                        return TRANSLUCENT;
+                    default:
+                        throw new java.lang.MatchException((java.lang.String) null, (java.lang.Throwable) null);
+                }
             };
         } else {
-            remapper = (renderType) -> switch (renderType) {
-                case SOLID, CUTOUT_MIPPED -> TerrainRenderType.CUTOUT_MIPPED;
-                case CUTOUT -> TerrainRenderType.CUTOUT;
-                case TRANSLUCENT, TRIPWIRE -> TerrainRenderType.TRANSLUCENT;
+            remapper = renderType2 -> {
+                switch (renderType2) {
+                    case SOLID:
+                        return SOLID;
+                    case CUTOUT:
+                        return CUTOUT;
+                    case TRANSLUCENT:
+                    case TRIPWIRE:
+                        return TRANSLUCENT;
+                    default:
+                        throw new java.lang.MatchException((java.lang.String) null, (java.lang.Throwable) null);
+                }
             };
         }
     }
 
-    public static TerrainRenderType getRemapped(TerrainRenderType renderType) {
+    public static net.vulkanmod.render.vertex.TerrainRenderType getRemapped(net.vulkanmod.render.vertex.TerrainRenderType renderType) {
         return remapper.apply(renderType);
     }
 }

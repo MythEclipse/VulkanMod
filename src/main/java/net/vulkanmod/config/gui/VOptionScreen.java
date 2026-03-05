@@ -1,123 +1,66 @@
 package net.vulkanmod.config.gui;
 
-import com.google.common.collect.Lists;
-import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.network.chat.CommonComponents;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
-import net.vulkanmod.Initializer;
-import net.vulkanmod.config.UpdateChecker;
-import net.vulkanmod.config.gui.render.GuiRenderer;
-import net.vulkanmod.config.gui.widget.VAbstractWidget;
-import net.vulkanmod.config.gui.widget.VButtonWidget;
-import net.vulkanmod.config.option.OptionPage;
-import net.vulkanmod.config.option.Options;
-import net.vulkanmod.vulkan.VRenderSystem;
-import net.vulkanmod.vulkan.util.ColorUtil;
-
-import java.util.ArrayList;
-import java.util.List;
-
-public class VOptionScreen extends Screen {
-    public final static int MARGIN = 20;
-    public final static int RED = ColorUtil.ARGB.pack(0.3f, 0.0f, 0.0f, 0.8f);
-    final ResourceLocation ICON = ResourceLocation.fromNamespaceAndPath("vulkanmod", "vlogo_transparent.png");
-
-    private final Screen parent;
-
-    private final List<OptionPage> optionPages;
-
-    private int currentListIdx = 0;
-
+/* JADX INFO: loaded from: VulkanMod_1.21.11-0.6.0.jar:net/vulkanmod/config/gui/VOptionScreen.class */
+public class VOptionScreen extends net.minecraft.client.gui.screens.Screen {
+    public static final int MARGIN = 20;
+    public static final int RED = net.vulkanmod.vulkan.util.ColorUtil.ARGB.pack(0.3f, 0.0f, 0.0f, 0.8f);
+    final net.minecraft.resources.Identifier ICON;
+    private final net.minecraft.client.gui.screens.Screen parent;
+    private final java.util.List<net.vulkanmod.config.option.OptionPage> optionPages;
+    private int currentListIdx;
     private int tooltipX;
     private int tooltipY;
     private int tooltipWidth;
+    private net.vulkanmod.config.gui.widget.VButtonWidget supportButton;
+    private net.vulkanmod.config.gui.widget.VButtonWidget doneButton;
+    private net.vulkanmod.config.gui.widget.VButtonWidget applyButton;
+    private final java.util.List<net.vulkanmod.config.gui.widget.VButtonWidget> pageButtons;
+    private final java.util.List<net.vulkanmod.config.gui.widget.VButtonWidget> buttons;
 
-    private VButtonWidget supportButton;
-
-    private VButtonWidget doneButton;
-    private VButtonWidget applyButton;
-
-    private final List<VButtonWidget> pageButtons = Lists.newArrayList();
-    private final List<VButtonWidget> buttons = Lists.newArrayList();
-
-    public VOptionScreen(Component title, Screen parent) {
+    public VOptionScreen(net.minecraft.network.chat.Component title, net.minecraft.client.gui.screens.Screen parent) {
         super(title);
+        this.ICON = net.minecraft.resources.Identifier.fromNamespaceAndPath("vulkanmod", "vlogo_transparent.png");
+        this.currentListIdx = 0;
+        this.pageButtons = com.google.common.collect.Lists.newArrayList();
+        this.buttons = com.google.common.collect.Lists.newArrayList();
         this.parent = parent;
-
-        this.optionPages = new ArrayList<>();
+        this.optionPages = new java.util.ArrayList();
     }
 
     private void addPages() {
         this.optionPages.clear();
-
-        OptionPage page = new OptionPage(
-                Component.translatable("vulkanmod.options.pages.video").getString(),
-                Options.getVideoOpts()
-        );
+        net.vulkanmod.config.option.OptionPage page = new net.vulkanmod.config.option.OptionPage(net.minecraft.network.chat.Component.translatable("vulkanmod.options.pages.video").getString(), net.vulkanmod.config.option.Options.getVideoOpts());
         this.optionPages.add(page);
-
-        page = new OptionPage(
-                Component.translatable("vulkanmod.options.pages.graphics").getString(),
-                Options.getGraphicsOpts()
-        );
-        this.optionPages.add(page);
-
-        page = new OptionPage(
-                Component.translatable("vulkanmod.options.pages.optimizations").getString(),
-                Options.getOptimizationOpts()
-        );
-        this.optionPages.add(page);
-
-        page = new OptionPage(
-                Component.translatable("vulkanmod.options.pages.other").getString(),
-                Options.getOtherOpts()
-        );
-        this.optionPages.add(page);
+        net.vulkanmod.config.option.OptionPage page2 = new net.vulkanmod.config.option.OptionPage(net.minecraft.network.chat.Component.translatable("vulkanmod.options.pages.graphics").getString(), net.vulkanmod.config.option.Options.getGraphicsOpts());
+        this.optionPages.add(page2);
+        net.vulkanmod.config.option.OptionPage page3 = new net.vulkanmod.config.option.OptionPage(net.minecraft.network.chat.Component.translatable("vulkanmod.options.pages.optimizations").getString(), net.vulkanmod.config.option.Options.getOptimizationOpts());
+        this.optionPages.add(page3);
+        net.vulkanmod.config.option.OptionPage page4 = new net.vulkanmod.config.option.OptionPage(net.minecraft.network.chat.Component.translatable("vulkanmod.options.pages.other").getString(), net.vulkanmod.config.option.Options.getOtherOpts());
+        this.optionPages.add(page4);
     }
 
-    @Override
     protected void init() {
-        this.addPages();
-
-        int top = 40;
-        int bottom = 60;
-        int itemHeight = 20;
-
-        int leftMargin = MARGIN + 90;
-        int listWidth = Math.min(this.width - leftMargin - MARGIN, 420);
-        int listHeight = this.height - top - bottom;
-
-        this.buildLists(leftMargin, top, listWidth, listHeight, itemHeight);
-
-        int x = leftMargin + listWidth + 10;
-        int width = this.width - x - 10;
+        addPages();
+        int listWidth = java.lang.Math.min((this.width - org.lwjgl.vulkan.VK10.VK_FORMAT_R64_UINT) - 20, 420);
+        int listHeight = (this.height - 40) - 60;
+        buildLists(org.lwjgl.vulkan.VK10.VK_FORMAT_R64_UINT, 40, listWidth, listHeight, 20);
+        int x = org.lwjgl.vulkan.VK10.VK_FORMAT_R64_UINT + listWidth + 10;
+        int width = (this.width - x) - 10;
         int y = 50;
-
         if (width < 200) {
             x = 100;
             width = listWidth;
-            y = this.height - bottom + 10;
+            y = (this.height - 60) + 10;
         }
-
         this.tooltipX = x;
         this.tooltipY = y;
         this.tooltipWidth = width;
-
         buildPage();
-
         this.applyButton.active = false;
     }
 
     private void buildLists(int left, int top, int listWidth, int listHeight, int itemHeight) {
-        for (OptionPage page : this.optionPages) {
+        for (net.vulkanmod.config.option.OptionPage page : this.optionPages) {
             page.createList(left, top, listWidth, listHeight, itemHeight);
             page.updateOptionStates();
         }
@@ -126,208 +69,160 @@ public class VOptionScreen extends Screen {
     private void addPageButtons(int x0, int y0, int width, int height, boolean verticalLayout) {
         int x = x0;
         int y = y0;
-        for (int i = 0; i < this.optionPages.size(); ++i) {
-            var page = this.optionPages.get(i);
-            final int finalIdx = i;
-            VButtonWidget widget = new VButtonWidget(x, y, width, height, Component.nullToEmpty(page.name), button -> this.setOptionList(finalIdx));
+        for (int i = 0; i < this.optionPages.size(); i++) {
+            net.vulkanmod.config.option.OptionPage page = this.optionPages.get(i);
+            int finalIdx = i;
+            net.vulkanmod.config.gui.widget.VButtonWidget widget = new net.vulkanmod.config.gui.widget.VButtonWidget(x, y, width, height, net.minecraft.network.chat.Component.nullToEmpty(page.name), button -> {
+                setOptionList(finalIdx);
+            });
             this.buttons.add(widget);
             this.pageButtons.add(widget);
-            this.addWidget(widget);
-
-            if (verticalLayout)
+            addWidget(widget);
+            if (verticalLayout) {
                 y += height + 1;
-            else
+            } else {
                 x += width + 1;
+            }
         }
-
         this.pageButtons.get(this.currentListIdx).setSelected(true);
     }
 
     private void buildPage() {
         this.buttons.clear();
         this.pageButtons.clear();
-        this.clearWidgets();
-
-        this.addPageButtons(MARGIN, 40, 80, 22, true);
-
-        VOptionList currentList = this.optionPages.get(this.currentListIdx).getOptionList();
-        this.addWidget(currentList);
-
-        this.addButtons();
+        clearWidgets();
+        addPageButtons(20, 40, 80, 22, true);
+        net.vulkanmod.config.gui.VOptionList currentList = this.optionPages.get(this.currentListIdx).getOptionList();
+        addWidget(currentList);
+        addButtons();
     }
 
     private void addButtons() {
-        int rightMargin = 20;
-        int buttonHeight = 20;
-        int padding = 10;
-        int buttonMargin = 5;
-        int buttonWidth = minecraft.font.width(CommonComponents.GUI_DONE) + 2 * padding;
-        int x0 = (this.width - buttonWidth - rightMargin);
-        int y0 = this.height - buttonHeight - 7;
-
-        this.doneButton = new VButtonWidget(
-                x0, y0,
-                buttonWidth, buttonHeight,
-                CommonComponents.GUI_DONE,
-                button -> this.minecraft.setScreen(this.parent)
-        );
-
-        buttonWidth = minecraft.font.width(Component.translatable("vulkanmod.options.buttons.apply")) + 2 * padding;
-        x0 -= (buttonWidth + buttonMargin);
-        this.applyButton = new VButtonWidget(
-                x0, y0,
-                buttonWidth, buttonHeight,
-                Component.translatable("vulkanmod.options.buttons.apply"),
-                button -> this.applyOptions()
-        );
-
-        buttonWidth = minecraft.font.width(Component.translatable("vulkanmod.options.buttons.kofi")) + 10;
-        x0 = (this.width - buttonWidth - rightMargin);
-        this.supportButton = new VButtonWidget(
-                x0, 6,
-                buttonWidth, buttonHeight,
-                Component.translatable("vulkanmod.options.buttons.kofi"),
-                button -> Util.getPlatform().openUri("https://ko-fi.com/xcollateral")
-        );
-
+        int buttonWidth = this.minecraft.font.width(net.minecraft.network.chat.CommonComponents.GUI_DONE) + (2 * 10);
+        int x0 = (this.width - buttonWidth) - 20;
+        int y0 = (this.height - 20) - 7;
+        this.doneButton = new net.vulkanmod.config.gui.widget.VButtonWidget(x0, y0, buttonWidth, 20, net.minecraft.network.chat.CommonComponents.GUI_DONE, button -> {
+            this.minecraft.setScreen(this.parent);
+        });
+        int buttonWidth2 = this.minecraft.font.width(net.minecraft.network.chat.Component.translatable("vulkanmod.options.buttons.apply")) + (2 * 10);
+        this.applyButton = new net.vulkanmod.config.gui.widget.VButtonWidget(x0 - (buttonWidth2 + 5), y0, buttonWidth2, 20, net.minecraft.network.chat.Component.translatable("vulkanmod.options.buttons.apply"), button2 -> {
+            applyOptions();
+        });
+        int buttonWidth3 = this.minecraft.font.width(net.minecraft.network.chat.Component.translatable("vulkanmod.options.buttons.kofi")) + 10;
+        int x02 = (this.width - buttonWidth3) - 20;
+        this.supportButton = new net.vulkanmod.config.gui.widget.VButtonWidget(x02, 6, buttonWidth3, 20, net.minecraft.network.chat.Component.translatable("vulkanmod.options.buttons.kofi"), button3 -> {
+            net.minecraft.util.Util.getPlatform().openUri("https://ko-fi.com/xcollateral");
+        });
         this.buttons.add(this.applyButton);
         this.buttons.add(this.doneButton);
         this.buttons.add(this.supportButton);
-
-        this.addWidget(this.applyButton);
-        this.addWidget(this.doneButton);
-        this.addWidget(this.supportButton);
-
-        if (UpdateChecker.isUpdateAvailable()) {
-            buttonWidth = minecraft.font.width(Component.translatable("vulkanmod.options.buttons.update_available")) + 10;
-            var updateButton = new VButtonWidget(
-                    x0 - buttonWidth - buttonMargin, 6,
-                    buttonWidth, buttonHeight,
-                    Component.translatable("vulkanmod.options.buttons.update_available").withStyle(ChatFormatting.UNDERLINE),
-                    button -> Util.getPlatform().openUri("https://modrinth.com/mod/vulkanmod")
-            );
-
+        addWidget(this.applyButton);
+        addWidget(this.doneButton);
+        addWidget(this.supportButton);
+        if (net.vulkanmod.config.UpdateChecker.isUpdateAvailable()) {
+            int buttonWidth4 = this.minecraft.font.width(net.minecraft.network.chat.Component.translatable("vulkanmod.options.buttons.update_available")) + 10;
+            net.vulkanmod.config.gui.widget.VButtonWidget updateButton = new net.vulkanmod.config.gui.widget.VButtonWidget((x02 - buttonWidth4) - 5, 6, buttonWidth4, 20, net.minecraft.network.chat.Component.translatable("vulkanmod.options.buttons.update_available").withStyle(net.minecraft.ChatFormatting.UNDERLINE), button4 -> {
+                net.minecraft.util.Util.getPlatform().openUri("https://modrinth.com/mod/vulkanmod");
+            });
             this.buttons.add(updateButton);
-            this.addWidget(updateButton);
+            addWidget(updateButton);
         }
     }
 
-    @Override
-    public boolean mouseClicked(MouseButtonEvent event, boolean bl) {
-        for (GuiEventListener element : this.children()) {
+    public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean bl) {
+        for (net.minecraft.client.gui.components.events.GuiEventListener element : children()) {
             if (element.mouseClicked(event, bl)) {
-                this.setFocused(element);
+                setFocused(element);
                 if (event.button() == 0) {
-                    this.setDragging(true);
+                    setDragging(true);
                 }
-
-                this.updateState();
+                updateState();
                 return true;
             }
         }
-
         return false;
     }
 
-    @Override
-    public boolean mouseReleased(MouseButtonEvent event) {
-        this.setDragging(false);
-        this.updateState();
-        return this.getChildAt(event.x(), event.y())
-                .filter(guiEventListener -> guiEventListener.mouseReleased(event))
-                .isPresent();
+    public boolean mouseReleased(net.minecraft.client.input.MouseButtonEvent event) {
+        setDragging(false);
+        updateState();
+        return getChildAt(event.x(), event.y()).filter(guiEventListener -> {
+            return guiEventListener.mouseReleased(event);
+        }).isPresent();
     }
 
-    @Override
     public void onClose() {
         this.minecraft.setScreen(this.parent);
     }
 
-    @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
-        GuiRenderer.guiGraphics = guiGraphics;
-        VRenderSystem.enableBlend();
-
-        int size = 36;
-        guiGraphics.blit(RenderPipelines.GUI_TEXTURED, ICON, MARGIN + 40 - 18, 4, 0f, 0f, size, size, size, size);
-
-        VOptionList currentList = this.optionPages.get(this.currentListIdx).getOptionList();
+    public void render(net.minecraft.client.gui.GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
+        net.vulkanmod.config.gui.render.GuiRenderer.guiGraphics = guiGraphics;
+        net.vulkanmod.vulkan.VRenderSystem.enableBlend();
+        guiGraphics.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, this.ICON, 42, 4, 0.0f, 0.0f, 36, 36, 36, 36);
+        net.vulkanmod.config.gui.VOptionList currentList = this.optionPages.get(this.currentListIdx).getOptionList();
         currentList.updateState(mouseX, mouseY);
         currentList.renderWidget(mouseX, mouseY);
         renderButtons(mouseX, mouseY);
-
-        List<FormattedCharSequence> list = getHoveredButtonTooltip(currentList, mouseX, mouseY);
+        java.util.List<net.minecraft.util.FormattedCharSequence> list = getHoveredButtonTooltip(currentList, mouseX, mouseY);
         if (list != null) {
-            this.renderTooltip(list, this.tooltipX, this.tooltipY);
+            renderTooltip(list, this.tooltipX, this.tooltipY);
         }
     }
 
     public void renderButtons(int mouseX, int mouseY) {
-        for (VButtonWidget button : buttons) {
+        for (net.vulkanmod.config.gui.widget.VButtonWidget button : this.buttons) {
             button.render(mouseX, mouseY);
         }
     }
 
-    private void renderTooltip(List<FormattedCharSequence> list, int x, int y) {
-        int padding = 3;
-        int width = GuiRenderer.getMaxTextWidth(this.font, list);
+    private void renderTooltip(java.util.List<net.minecraft.util.FormattedCharSequence> list, int x, int y) {
+        int width = net.vulkanmod.config.gui.render.GuiRenderer.getMaxTextWidth(this.font, list);
         int height = list.size() * 10;
-        float intensity = 0.05f;
-        int color = ColorUtil.ARGB.pack(intensity, intensity, intensity, 0.6f);
-        GuiRenderer.fill(x - padding, y - padding, x + width + padding, y + height + padding, color);
-
-        color = RED;
-        GuiRenderer.renderBorder(x - padding, y - padding, x + width + padding, y + height + padding, 1, color);
-
+        int color = net.vulkanmod.vulkan.util.ColorUtil.ARGB.pack(0.05f, 0.05f, 0.05f, 0.6f);
+        net.vulkanmod.config.gui.render.GuiRenderer.fill(x - 3, y - 3, x + width + 3, y + height + 3, color);
+        int color2 = RED;
+        net.vulkanmod.config.gui.render.GuiRenderer.renderBorder(x - 3, y - 3, x + width + 3, y + height + 3, 1, color2);
         int yOffset = 0;
-        for (var text : list) {
-            GuiRenderer.drawString(this.font, text, x, y + yOffset, 0xffffffff);
+        for (net.minecraft.util.FormattedCharSequence text : list) {
+            net.vulkanmod.config.gui.render.GuiRenderer.drawString(this.font, text, x, y + yOffset, -1);
             yOffset += 10;
         }
     }
 
-    private List<FormattedCharSequence> getHoveredButtonTooltip(VOptionList buttonList, int mouseX, int mouseY) {
-        VAbstractWidget widget = buttonList.getHoveredWidget(mouseX, mouseY);
-        if (widget != null) {
-            var tooltip = widget.getTooltip();
-            if (tooltip == null)
-                return null;
-
-            return this.font.split(tooltip, this.tooltipWidth);
+    private java.util.List<net.minecraft.util.FormattedCharSequence> getHoveredButtonTooltip(net.vulkanmod.config.gui.VOptionList buttonList, int mouseX, int mouseY) {
+        net.minecraft.network.chat.Component tooltip;
+        net.vulkanmod.config.gui.widget.VAbstractWidget widget = buttonList.getHoveredWidget(mouseX, mouseY);
+        if (widget == null || (tooltip = widget.getTooltip()) == null) {
+            return null;
         }
-        return null;
+        return this.font.split(tooltip, this.tooltipWidth);
     }
 
     private void updateState() {
         boolean modified = false;
-        for (var page : this.optionPages) {
+        for (net.vulkanmod.config.option.OptionPage page : this.optionPages) {
             modified |= page.optionChanged();
         }
-
         if (modified) {
-            for (var page : this.optionPages) {
-                page.optionChanged();
+            for (net.vulkanmod.config.option.OptionPage page2 : this.optionPages) {
+                page2.optionChanged();
             }
         }
-
         this.applyButton.active = modified;
     }
 
     private void setOptionList(int i) {
         this.currentListIdx = i;
-
-        this.buildPage();
-
+        buildPage();
         this.pageButtons.get(i).setSelected(true);
     }
 
     private void applyOptions() {
-        List<OptionPage> pages = List.copyOf(this.optionPages);
-        for (var page : pages) {
+        java.util.List<net.vulkanmod.config.option.OptionPage> pages = java.util.List.copyOf(this.optionPages);
+        for (net.vulkanmod.config.option.OptionPage page : pages) {
             page.applyOptionChanges();
             page.updateOptionStates();
         }
-
-        Initializer.CONFIG.write();
+        net.vulkanmod.Initializer.CONFIG.write();
     }
 }

@@ -1,69 +1,52 @@
 package net.vulkanmod.render.engine;
 
-import com.mojang.blaze3d.opengl.GlStateManager;
-import net.minecraft.util.ARGB;
-import net.vulkanmod.gl.VkGlFramebuffer;
-import net.vulkanmod.vulkan.Renderer;
-import net.vulkanmod.vulkan.VRenderSystem;
-import org.lwjgl.opengl.GL33;
-
+/* JADX INFO: loaded from: VulkanMod_1.21.11-0.6.0.jar:net/vulkanmod/render/engine/VkFbo.class */
 public class VkFbo {
-    final int glId;
-    final VkGpuTexture colorAttachment;
-    final VkGpuTexture depthAttachment;
+    final int glId = com.mojang.blaze3d.opengl.GlStateManager.glGenFramebuffers();
+    final net.vulkanmod.render.engine.VkTextureView colorAttachmentView;
+    final net.vulkanmod.render.engine.VkGpuTexture depthAttachment;
 
-    protected VkFbo(VkGpuTexture colorAttachment, VkGpuTexture depthAttachment) {
-        this.glId = GlStateManager.glGenFramebuffers();
-        this.colorAttachment = colorAttachment;
+    protected VkFbo(net.vulkanmod.render.engine.VkTextureView colorAttachmentView, net.vulkanmod.render.engine.VkGpuTexture depthAttachment) {
+        this.colorAttachmentView = colorAttachmentView;
         this.depthAttachment = depthAttachment;
-
-        // Direct access
-        VkGlFramebuffer fbo = VkGlFramebuffer.getFramebuffer(this.glId);
-
-        fbo.setAttachmentTexture(GL33.GL_COLOR_ATTACHMENT0, colorAttachment.id);
+        net.vulkanmod.gl.VkGlFramebuffer fbo = net.vulkanmod.gl.VkGlFramebuffer.getFramebuffer(this.glId);
+        net.vulkanmod.render.engine.VkGpuTexture colorAttachmentTexture = this.colorAttachmentView.texture();
+        fbo.setAttachmentTexture(36064, colorAttachmentTexture.id);
         if (depthAttachment != null) {
-            fbo.setAttachmentTexture(GL33.GL_DEPTH_ATTACHMENT, depthAttachment.id);
+            fbo.setAttachmentTexture(36096, depthAttachment.id);
         }
     }
 
     public void bind() {
-        VkGlFramebuffer.bindFramebuffer(GL33.GL_FRAMEBUFFER, this.glId);
+        net.vulkanmod.gl.VkGlFramebuffer.bindFramebuffer(36160, this.glId);
         clearAttachments();
     }
 
     protected void clearAttachments() {
         int clear = 0;
-        float clearDepth;
-        int clearColor;
-
-        if (colorAttachment.needsClear()) {
-            clear |= 0x4000;
-            clearColor = colorAttachment.clearColor;
-
-            VRenderSystem.setClearColor(ARGB.redFloat(clearColor), ARGB.greenFloat(clearColor), ARGB.blueFloat(clearColor), ARGB.alphaFloat(clearColor));
-
-            colorAttachment.needsClear = false;
+        net.vulkanmod.render.engine.VkGpuTexture colorAttachmentTexture = this.colorAttachmentView.texture();
+        if (colorAttachmentTexture.needsClear()) {
+            clear = 0 | 16384;
+            int clearColor = colorAttachmentTexture.clearColor;
+            net.vulkanmod.vulkan.VRenderSystem.setClearColor(net.minecraft.util.ARGB.redFloat(clearColor), net.minecraft.util.ARGB.greenFloat(clearColor), net.minecraft.util.ARGB.blueFloat(clearColor), net.minecraft.util.ARGB.alphaFloat(clearColor));
+            colorAttachmentTexture.needsClear = false;
         }
-
-        if (depthAttachment != null && depthAttachment.needsClear()) {
-            clear |= 0x100;
-            clearDepth = depthAttachment.depthClearValue;
-
-            VRenderSystem.clearDepth(clearDepth);
-
-            depthAttachment.needsClear = false;
+        if (this.depthAttachment != null && this.depthAttachment.needsClear()) {
+            clear |= 256;
+            float clearDepth = this.depthAttachment.depthClearValue;
+            net.vulkanmod.vulkan.VRenderSystem.clearDepth(clearDepth);
+            this.depthAttachment.needsClear = false;
         }
-
         if (clear != 0) {
-            Renderer.clearAttachments(clear);
+            net.vulkanmod.vulkan.Renderer.clearAttachments(clear);
         }
     }
 
     protected void close() {
-        VkGlFramebuffer.deleteFramebuffer(this.glId);
+        net.vulkanmod.gl.VkGlFramebuffer.deleteFramebuffer(this.glId);
     }
 
     public boolean needsClear() {
-        return this.colorAttachment.needsClear() || (this.depthAttachment != null && this.depthAttachment.needsClear());
+        return this.colorAttachmentView.texture().needsClear() || (this.depthAttachment != null && this.depthAttachment.needsClear());
     }
 }

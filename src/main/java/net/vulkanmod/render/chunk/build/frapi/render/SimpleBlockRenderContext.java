@@ -1,119 +1,80 @@
 package net.vulkanmod.render.chunk.build.frapi.render;
-/*
- * Copyright (c) 2016, 2017, 2018, 2019 FabricMC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.fabricmc.fabric.api.renderer.v1.render.BlockVertexConsumerProvider;
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
-import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.block.model.BlockStateModel;
-import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
-import net.minecraft.core.BlockPos;
-import net.minecraft.util.ARGB;
-import net.minecraft.util.Mth;
-import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.BlockAndTintGetter;
-import net.minecraft.world.level.block.state.BlockState;
-import net.vulkanmod.render.chunk.build.frapi.helper.ColorHelper;
-import net.vulkanmod.render.chunk.build.frapi.mesh.MutableQuadViewImpl;
-import org.jetbrains.annotations.Nullable;
-
-public class SimpleBlockRenderContext extends AbstractRenderContext {
-    public static final ThreadLocal<SimpleBlockRenderContext> POOL = ThreadLocal.withInitial(SimpleBlockRenderContext::new);
-
-    private final RandomSource random = RandomSource.create();
-
-    private BlockVertexConsumerProvider vertexConsumers;
-    private ChunkSectionLayer defaultRenderLayer;
+/* JADX INFO: loaded from: VulkanMod_1.21.11-0.6.0.jar:net/vulkanmod/render/chunk/build/frapi/render/SimpleBlockRenderContext.class */
+public class SimpleBlockRenderContext extends net.vulkanmod.render.chunk.build.frapi.render.AbstractRenderContext {
+    public static final java.lang.ThreadLocal<net.vulkanmod.render.chunk.build.frapi.render.SimpleBlockRenderContext> POOL = java.lang.ThreadLocal.withInitial(net.vulkanmod.render.chunk.build.frapi.render.SimpleBlockRenderContext::new);
+    private final net.minecraft.util.RandomSource random = net.minecraft.util.RandomSource.create();
+    private net.fabricmc.fabric.api.renderer.v1.render.BlockVertexConsumerProvider vertexConsumers;
+    private net.minecraft.client.renderer.chunk.ChunkSectionLayer defaultRenderLayer;
     private float red;
     private float green;
     private float blue;
     private int light;
 
-    @Nullable
-    private ChunkSectionLayer lastRenderLayer;
-    @Nullable
-    private VertexConsumer lastVertexConsumer;
+    @org.jetbrains.annotations.Nullable
+    private net.minecraft.client.renderer.chunk.ChunkSectionLayer lastRenderLayer;
 
-    @Override
-    protected void bufferQuad(MutableQuadViewImpl quad) {
-        final ChunkSectionLayer quadRenderLayer = quad.renderLayer();
-        final ChunkSectionLayer renderLayer = quadRenderLayer == null ? defaultRenderLayer : quadRenderLayer;
-        final VertexConsumer vertexConsumer;
+    @org.jetbrains.annotations.Nullable
+    private com.mojang.blaze3d.vertex.VertexConsumer lastVertexConsumer;
 
-        if (renderLayer == lastRenderLayer) {
-            vertexConsumer = lastVertexConsumer;
+    @Override // net.vulkanmod.render.chunk.build.frapi.render.AbstractRenderContext
+    protected void bufferQuad(net.vulkanmod.render.chunk.build.frapi.mesh.MutableQuadViewImpl quad) {
+        com.mojang.blaze3d.vertex.VertexConsumer vertexConsumer;
+        net.minecraft.client.renderer.chunk.ChunkSectionLayer quadRenderLayer = quad.renderLayer();
+        net.minecraft.client.renderer.chunk.ChunkSectionLayer renderLayer = quadRenderLayer == null ? this.defaultRenderLayer : quadRenderLayer;
+        if (renderLayer == this.lastRenderLayer) {
+            vertexConsumer = this.lastVertexConsumer;
         } else {
-            lastVertexConsumer = vertexConsumer = vertexConsumers.getBuffer(renderLayer);
-            lastRenderLayer = renderLayer;
+            com.mojang.blaze3d.vertex.VertexConsumer buffer = this.vertexConsumers.getBuffer(renderLayer);
+            vertexConsumer = buffer;
+            this.lastVertexConsumer = buffer;
+            this.lastRenderLayer = renderLayer;
         }
-
         tintQuad(quad);
         shadeQuad(quad, quad.emissive());
         bufferQuad(quad, vertexConsumer);
     }
 
-    private void tintQuad(MutableQuadViewImpl quad) {
+    private void tintQuad(net.vulkanmod.render.chunk.build.frapi.mesh.MutableQuadViewImpl quad) {
         if (quad.tintIndex() != -1) {
-            final float red = this.red;
-            final float green = this.green;
-            final float blue = this.blue;
-
+            float red = this.red;
+            float green = this.green;
+            float blue = this.blue;
             for (int i = 0; i < 4; i++) {
-                quad.color(i, ARGB.scaleRGB(quad.color(i), red, green, blue));
+                quad.color(i, net.minecraft.util.ARGB.scaleRGB(quad.color(i), red, green, blue));
             }
         }
     }
 
-    private void shadeQuad(MutableQuadViewImpl quad, boolean emissive) {
+    private void shadeQuad(net.vulkanmod.render.chunk.build.frapi.mesh.MutableQuadViewImpl quad, boolean emissive) {
         if (emissive) {
             for (int i = 0; i < 4; i++) {
-                quad.lightmap(i, LightTexture.FULL_BRIGHT);
+                quad.lightmap(i, 15728880);
             }
-        } else {
-            final int light = this.light;
-
-            for (int i = 0; i < 4; i++) {
-                quad.lightmap(i, ColorHelper.maxLight(quad.lightmap(i), light));
-            }
+            return;
+        }
+        int light = this.light;
+        for (int i2 = 0; i2 < 4; i2++) {
+            quad.lightmap(i2, net.vulkanmod.render.chunk.build.frapi.helper.ColorHelper.maxLight(quad.lightmap(i2), light));
         }
     }
 
-    public void bufferModel(PoseStack.Pose entry, BlockVertexConsumerProvider vertexConsumers, BlockStateModel model, float red, float green, float blue, int light, int overlay, BlockAndTintGetter blockView, BlockPos pos, BlockState state) {
-        matrices = entry;
+    public void bufferModel(com.mojang.blaze3d.vertex.PoseStack.Pose entry, net.fabricmc.fabric.api.renderer.v1.render.BlockVertexConsumerProvider vertexConsumers, net.minecraft.client.renderer.block.model.BlockStateModel model, float red, float green, float blue, int light, int overlay, net.minecraft.world.level.BlockAndTintGetter blockView, net.minecraft.core.BlockPos pos, net.minecraft.world.level.block.state.BlockState state) {
+        this.matrices = entry;
         this.overlay = overlay;
-
         this.vertexConsumers = vertexConsumers;
-        this.defaultRenderLayer = ItemBlockRenderTypes.getChunkRenderType(state);
-        this.red = Mth.clamp(red, 0, 1);
-        this.green = Mth.clamp(green, 0, 1);
-        this.blue = Mth.clamp(blue, 0, 1);
+        this.defaultRenderLayer = net.minecraft.client.renderer.ItemBlockRenderTypes.getChunkRenderType(state);
+        this.red = net.minecraft.util.Mth.clamp(red, 0.0f, 1.0f);
+        this.green = net.minecraft.util.Mth.clamp(green, 0.0f, 1.0f);
+        this.blue = net.minecraft.util.Mth.clamp(blue, 0.0f, 1.0f);
         this.light = light;
-
-        random.setSeed(42L);
-
-        model.emitQuads(getEmitter(), blockView, pos, state, random, cullFace -> false);
-
-        matrices = null;
+        this.random.setSeed(42L);
+        model.emitQuads(getEmitter(), blockView, pos, state, this.random, cullFace -> {
+            return false;
+        });
+        this.matrices = null;
         this.vertexConsumers = null;
-        lastRenderLayer = null;
-        lastVertexConsumer = null;
+        this.lastRenderLayer = null;
+        this.lastVertexConsumer = null;
     }
 }
-

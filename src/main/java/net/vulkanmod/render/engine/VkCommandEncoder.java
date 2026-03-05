@@ -1,909 +1,730 @@
 package net.vulkanmod.render.engine;
 
-import com.mojang.blaze3d.buffers.GpuBuffer;
-import com.mojang.blaze3d.buffers.GpuBufferSlice;
-import com.mojang.blaze3d.buffers.GpuFence;
-import com.mojang.blaze3d.opengl.*;
-import com.mojang.blaze3d.pipeline.BlendFunction;
-import com.mojang.blaze3d.pipeline.RenderPipeline;
-import com.mojang.blaze3d.platform.DepthTestFunction;
-import com.mojang.blaze3d.platform.NativeImage;
-import com.mojang.blaze3d.systems.CommandEncoder;
-import com.mojang.blaze3d.systems.RenderPass;
-import com.mojang.blaze3d.textures.GpuTexture;
-import com.mojang.blaze3d.textures.GpuTextureView;
-import com.mojang.blaze3d.vertex.VertexFormat;
-import com.mojang.logging.LogUtils;
-import net.minecraft.client.Minecraft;
-import net.minecraft.util.ARGB;
-import net.vulkanmod.gl.VkGlFramebuffer;
-import net.vulkanmod.gl.VkGlTexture;
-import net.vulkanmod.interfaces.shader.ExtendedRenderPipeline;
-import net.vulkanmod.vulkan.Renderer;
-import net.vulkanmod.vulkan.Synchronization;
-import net.vulkanmod.vulkan.VRenderSystem;
-import net.vulkanmod.vulkan.Vulkan;
-import net.vulkanmod.vulkan.device.DeviceManager;
-import net.vulkanmod.vulkan.framebuffer.Framebuffer;
-import net.vulkanmod.vulkan.memory.buffer.StagingBuffer;
-import net.vulkanmod.vulkan.queue.GraphicsQueue;
-import net.vulkanmod.vulkan.shader.GraphicsPipeline;
-import net.vulkanmod.vulkan.shader.Pipeline;
-import net.vulkanmod.vulkan.shader.descriptor.ImageDescriptor;
-import net.vulkanmod.vulkan.shader.descriptor.UBO;
-import net.vulkanmod.vulkan.texture.ImageUtil;
-import net.vulkanmod.vulkan.texture.VTextureSelector;
-import org.jetbrains.annotations.Nullable;
-import org.lwjgl.opengl.*;
-import org.lwjgl.system.MemoryStack;
-import org.lwjgl.system.MemoryUtil;
-import org.lwjgl.vulkan.*;
-import org.slf4j.Logger;
+/* JADX INFO: loaded from: VulkanMod_1.21.11-0.6.0.jar:net/vulkanmod/render/engine/VkCommandEncoder.class */
+public class VkCommandEncoder implements com.mojang.blaze3d.systems.CommandEncoder {
+    private static final org.slf4j.Logger LOGGER;
+    private final net.vulkanmod.render.engine.VkGpuDevice device;
 
-import java.nio.ByteBuffer;
-import java.util.*;
-import java.util.function.BiConsumer;
-import java.util.function.Supplier;
-
-import static org.lwjgl.system.MemoryStack.stackPush;
-import static org.lwjgl.vulkan.VK10.*;
-
-public class VkCommandEncoder implements CommandEncoder {
-    private static final Logger LOGGER = LogUtils.getLogger();
-    private final VkGpuDevice device;
-
-    @Nullable
-    private RenderPipeline lastPipeline;
+    @org.jetbrains.annotations.Nullable
+    private com.mojang.blaze3d.pipeline.RenderPipeline lastPipeline;
     private boolean inRenderPass;
 
-    @Nullable
-    private EGlProgram lastProgram;
+    @org.jetbrains.annotations.Nullable
+    private net.vulkanmod.render.engine.EGlProgram lastProgram;
+    private int framebufferId = net.vulkanmod.gl.VkGlFramebuffer.genFramebufferId();
+    static final /* synthetic */ boolean $assertionsDisabled;
 
-    private int framebufferId = VkGlFramebuffer.genFramebufferId();
+    static {
+        $assertionsDisabled = !net.vulkanmod.render.engine.VkCommandEncoder.class.desiredAssertionStatus();
+        LOGGER = com.mojang.logging.LogUtils.getLogger();
+    }
 
-    protected VkCommandEncoder(VkGpuDevice glDevice) {
+    protected VkCommandEncoder(net.vulkanmod.render.engine.VkGpuDevice glDevice) {
         this.device = glDevice;
     }
 
-    @Override
-    public RenderPass createRenderPass(Supplier<String> supplier, GpuTextureView gpuTexture, OptionalInt optionalInt) {
-        return this.createRenderPass(supplier, gpuTexture, optionalInt, null, OptionalDouble.empty());
+    public com.mojang.blaze3d.systems.RenderPass createRenderPass(java.util.function.Supplier<java.lang.String> supplier, com.mojang.blaze3d.textures.GpuTextureView colorAttachmentView, java.util.OptionalInt optionalInt) {
+        return createRenderPass(supplier, colorAttachmentView, optionalInt, null, java.util.OptionalDouble.empty());
     }
 
-    @Override
-    public RenderPass createRenderPass(Supplier<String> supplier, GpuTextureView colorTexture, OptionalInt optionalInt, @Nullable GpuTextureView depthTexture, OptionalDouble optionalDouble) {
+    public com.mojang.blaze3d.systems.RenderPass createRenderPass(java.util.function.Supplier<java.lang.String> supplier, com.mojang.blaze3d.textures.GpuTextureView colorAttachmentView, java.util.OptionalInt optionalInt, @org.jetbrains.annotations.Nullable com.mojang.blaze3d.textures.GpuTextureView depthTexture, java.util.OptionalDouble optionalDouble) {
         if (this.inRenderPass) {
-            throw new IllegalStateException("Close the existing render pass before creating a new one!");
-        } else {
-            if (optionalDouble.isPresent() && depthTexture == null) {
-                LOGGER.warn("Depth clear value was provided but no depth texture is being used");
-            }
-
-            if (Minecraft.getInstance().getMainRenderTarget().getColorTexture() == colorTexture.texture()) {
-                Renderer.getInstance().getMainPass().rebindMainTarget();
-
-                int j = 0;
-                if (optionalInt.isPresent()) {
-                    int k = optionalInt.getAsInt();
-                    GL11.glClearColor(ARGB.redFloat(k), ARGB.greenFloat(k), ARGB.blueFloat(k), ARGB.alphaFloat(k));
-                    j |= 16384;
-                }
-
-                if (depthTexture != null && optionalDouble.isPresent()) {
-                    GL11.glClearDepth(optionalDouble.getAsDouble());
-                    j |= 256;
-                }
-
-                if (j != 0) {
-                    GlStateManager._disableScissorTest();
-                    GlStateManager._depthMask(true);
-                    GlStateManager._colorMask(true, true, true, true);
-                    GlStateManager._clear(j);
-                }
-
-                return new VkRenderPass(this, depthTexture != null);
-            }
-
-            if (colorTexture.isClosed()) {
-                throw new IllegalStateException("Color texture is closed");
-            } else if (depthTexture != null && depthTexture.isClosed()) {
-                throw new IllegalStateException("Depth texture is closed");
-            } else {
-                this.inRenderPass = true;
-                GpuTexture depthTexture1 = depthTexture != null ? depthTexture.texture() : null;
-                VkFbo fbo = ((VkGpuTexture)colorTexture.texture()).getFbo(depthTexture1);
-                fbo.bind();
-
-                int j = 0;
-                if (optionalInt.isPresent()) {
-                    int k = optionalInt.getAsInt();
-                    GL11.glClearColor(ARGB.redFloat(k), ARGB.greenFloat(k), ARGB.blueFloat(k), ARGB.alphaFloat(k));
-                    j |= 16384;
-                }
-
-                if (depthTexture != null && optionalDouble.isPresent()) {
-                    GL11.glClearDepth(optionalDouble.getAsDouble());
-                    j |= 256;
-                }
-
-                if (j != 0) {
-                    GlStateManager._disableScissorTest();
-                    GlStateManager._depthMask(true);
-                    GlStateManager._colorMask(true, true, true, true);
-                    GlStateManager._clear(j);
-                }
-
-                GlStateManager._viewport(0, 0, colorTexture.getWidth(0), colorTexture.getHeight(0));
-                this.lastPipeline = null;
-                return new VkRenderPass(this, depthTexture != null);
-            }
+            throw new java.lang.IllegalStateException("Close the existing render pass before creating a new one!");
         }
-
+        if (optionalDouble.isPresent() && depthTexture == null) {
+            LOGGER.warn("Depth clear value was provided but no depth texture is being used");
+        }
+        if (net.minecraft.client.Minecraft.getInstance().getMainRenderTarget().getColorTexture() == colorAttachmentView.texture()) {
+            net.vulkanmod.vulkan.Renderer.getInstance().getMainPass().rebindMainTarget();
+            int j = 0;
+            if (optionalInt.isPresent()) {
+                int k = optionalInt.getAsInt();
+                org.lwjgl.opengl.GL11.glClearColor(net.minecraft.util.ARGB.redFloat(k), net.minecraft.util.ARGB.greenFloat(k), net.minecraft.util.ARGB.blueFloat(k), net.minecraft.util.ARGB.alphaFloat(k));
+                j = 0 | 16384;
+            }
+            if (depthTexture != null && optionalDouble.isPresent()) {
+                org.lwjgl.opengl.GL11.glClearDepth(optionalDouble.getAsDouble());
+                j |= 256;
+            }
+            if (j != 0) {
+                com.mojang.blaze3d.opengl.GlStateManager._disableScissorTest();
+                com.mojang.blaze3d.opengl.GlStateManager._depthMask(true);
+                com.mojang.blaze3d.opengl.GlStateManager._colorMask(true, true, true, true);
+                com.mojang.blaze3d.opengl.GlStateManager._clear(j);
+            }
+            return new net.vulkanmod.render.engine.VkRenderPass(this, depthTexture != null, true);
+        }
+        if (colorAttachmentView.isClosed()) {
+            throw new java.lang.IllegalStateException("Color texture is closed");
+        }
+        if (depthTexture != null && depthTexture.isClosed()) {
+            throw new java.lang.IllegalStateException("Depth texture is closed");
+        }
+        this.inRenderPass = true;
+        com.mojang.blaze3d.textures.GpuTexture depthTexture1 = depthTexture != null ? depthTexture.texture() : null;
+        net.vulkanmod.render.engine.VkFbo fbo = ((net.vulkanmod.render.engine.VkTextureView) colorAttachmentView).getFbo(depthTexture1);
+        fbo.bind();
+        int j2 = 0;
+        if (optionalInt.isPresent()) {
+            int k2 = optionalInt.getAsInt();
+            org.lwjgl.opengl.GL11.glClearColor(net.minecraft.util.ARGB.redFloat(k2), net.minecraft.util.ARGB.greenFloat(k2), net.minecraft.util.ARGB.blueFloat(k2), net.minecraft.util.ARGB.alphaFloat(k2));
+            j2 = 0 | 16384;
+        }
+        if (depthTexture != null && optionalDouble.isPresent()) {
+            org.lwjgl.opengl.GL11.glClearDepth(optionalDouble.getAsDouble());
+            j2 |= 256;
+        }
+        if (j2 != 0) {
+            com.mojang.blaze3d.opengl.GlStateManager._disableScissorTest();
+            com.mojang.blaze3d.opengl.GlStateManager._depthMask(true);
+            com.mojang.blaze3d.opengl.GlStateManager._colorMask(true, true, true, true);
+            com.mojang.blaze3d.opengl.GlStateManager._clear(j2);
+        }
+        com.mojang.blaze3d.opengl.GlStateManager._viewport(0, 0, colorAttachmentView.getWidth(0), colorAttachmentView.getHeight(0));
+        this.lastPipeline = null;
+        return new net.vulkanmod.render.engine.VkRenderPass(this, depthTexture != null, true);
     }
 
-    @Override
-    public void clearColorTexture(GpuTexture colorAttachment, int clearColor) {
+    public void clearColorTexture(com.mojang.blaze3d.textures.GpuTexture colorAttachment, int clearColor) {
         if (this.inRenderPass) {
-            throw new IllegalStateException("Close the existing render pass before creating a new one!");
+            throw new java.lang.IllegalStateException("Close the existing render pass before creating a new one!");
         }
-        else if (Renderer.isRecording()) {
-            if (Minecraft.getInstance().getMainRenderTarget().getColorTexture() == colorAttachment) {
-                Renderer.getInstance().getMainPass().rebindMainTarget();
-
-                VRenderSystem.setClearColor(ARGB.redFloat(clearColor), ARGB.greenFloat(clearColor), ARGB.blueFloat(clearColor), ARGB.alphaFloat(clearColor));
-                Renderer.clearAttachments(0x4000);
+        if (net.vulkanmod.vulkan.Renderer.isRecording()) {
+            if (net.minecraft.client.Minecraft.getInstance().getMainRenderTarget().getColorTexture() == colorAttachment) {
+                net.vulkanmod.vulkan.Renderer.getInstance().getMainPass().rebindMainTarget();
+                net.vulkanmod.vulkan.VRenderSystem.setClearColor(net.minecraft.util.ARGB.redFloat(clearColor), net.minecraft.util.ARGB.greenFloat(clearColor), net.minecraft.util.ARGB.blueFloat(clearColor), net.minecraft.util.ARGB.alphaFloat(clearColor));
+                net.vulkanmod.vulkan.Renderer.clearAttachments(16384);
+                return;
             }
-            else {
-                VkGpuTexture vkGpuTexture = (VkGpuTexture) colorAttachment;
-                VkGlFramebuffer.bindFramebuffer(GL30.GL_FRAMEBUFFER, framebufferId);
-                VkGlFramebuffer.framebufferTexture2D(GL30.GL_FRAMEBUFFER, GL30.GL_COLOR_ATTACHMENT0, GL11.GL_TEXTURE_2D, vkGpuTexture.glId(), 0);
-
-                VkGlFramebuffer.beginRendering(VkGlFramebuffer.getFramebuffer(framebufferId));
-                VRenderSystem.setClearColor(ARGB.redFloat(clearColor), ARGB.greenFloat(clearColor), ARGB.blueFloat(clearColor), ARGB.alphaFloat(clearColor));
-                Renderer.clearAttachments(0x4000);
-                Renderer.getInstance().endRenderPass();
-
-                VkFbo fbo = ((VkGpuTexture)colorAttachment).getFbo(null);
-
-                ((VkGpuTexture) colorAttachment).setClearColor(clearColor);
-
-                Framebuffer boundFramebuffer = Renderer.getInstance().getBoundFramebuffer();
-                if (boundFramebuffer != null && boundFramebuffer.getColorAttachment() == ((VkGpuTexture) colorAttachment).getVulkanImage()) {
-                    fbo.clearAttachments();
-                }
+            net.vulkanmod.render.engine.VkGpuTexture vkGpuTexture = (net.vulkanmod.render.engine.VkGpuTexture) colorAttachment;
+            net.vulkanmod.gl.VkGlFramebuffer.bindFramebuffer(36160, this.framebufferId);
+            net.vulkanmod.gl.VkGlFramebuffer.framebufferTexture2D(36160, 36064, 3553, vkGpuTexture.glId(), 0);
+            net.vulkanmod.gl.VkGlFramebuffer.beginRendering(net.vulkanmod.gl.VkGlFramebuffer.getFramebuffer(this.framebufferId));
+            net.vulkanmod.vulkan.VRenderSystem.setClearColor(net.minecraft.util.ARGB.redFloat(clearColor), net.minecraft.util.ARGB.greenFloat(clearColor), net.minecraft.util.ARGB.blueFloat(clearColor), net.minecraft.util.ARGB.alphaFloat(clearColor));
+            net.vulkanmod.vulkan.Renderer.clearAttachments(16384);
+            net.vulkanmod.vulkan.Renderer.getInstance().endRenderPass();
+            net.vulkanmod.render.engine.VkFbo fbo = ((net.vulkanmod.render.engine.VkGpuTexture) colorAttachment).getFbo(null);
+            ((net.vulkanmod.render.engine.VkGpuTexture) colorAttachment).setClearColor(clearColor);
+            net.vulkanmod.vulkan.framebuffer.Framebuffer boundFramebuffer = net.vulkanmod.vulkan.Renderer.getInstance().getBoundFramebuffer();
+            if (boundFramebuffer != null && boundFramebuffer.getColorAttachment() == ((net.vulkanmod.render.engine.VkGpuTexture) colorAttachment).getVulkanImage()) {
+                fbo.clearAttachments();
+                return;
             }
+            return;
         }
-        else {
-            GraphicsQueue graphicsQueue = DeviceManager.getGraphicsQueue();
-            var commandBuffer = graphicsQueue.getCommandBuffer();
-            VkGpuTexture vkGpuTexture = (VkGpuTexture) colorAttachment;
-
-            VkGlFramebuffer glFramebuffer = VkGlFramebuffer.getFramebuffer(this.framebufferId);
-            glFramebuffer.setAttachmentTexture(GL30.GL_COLOR_ATTACHMENT0, vkGpuTexture.glId());
-            glFramebuffer.create();
-
-            Framebuffer framebuffer = glFramebuffer.getFramebuffer();
-            var renderPass = glFramebuffer.getRenderPass();
-            try (MemoryStack stack = stackPush()) {
-                framebuffer.beginRenderPass(commandBuffer.handle, renderPass, stack);
+        net.vulkanmod.vulkan.queue.GraphicsQueue graphicsQueue = net.vulkanmod.vulkan.device.DeviceManager.getGraphicsQueue();
+        net.vulkanmod.vulkan.queue.CommandPool.CommandBuffer commandBuffer = graphicsQueue.getCommandBuffer();
+        net.vulkanmod.render.engine.VkGpuTexture vkGpuTexture2 = (net.vulkanmod.render.engine.VkGpuTexture) colorAttachment;
+        net.vulkanmod.gl.VkGlFramebuffer glFramebuffer = net.vulkanmod.gl.VkGlFramebuffer.getFramebuffer(this.framebufferId);
+        glFramebuffer.setAttachmentTexture(36064, vkGpuTexture2.glId());
+        glFramebuffer.create();
+        net.vulkanmod.vulkan.framebuffer.Framebuffer framebuffer = glFramebuffer.getFramebuffer();
+        net.vulkanmod.vulkan.framebuffer.RenderPass renderPass = glFramebuffer.getRenderPass();
+        org.lwjgl.system.MemoryStack stack = org.lwjgl.system.MemoryStack.stackPush();
+        try {
+            framebuffer.beginRenderPass(commandBuffer.handle, renderPass, stack);
+            if (stack != null) {
+                stack.close();
             }
-
-            VRenderSystem.setClearColor(ARGB.redFloat(clearColor), ARGB.greenFloat(clearColor), ARGB.blueFloat(clearColor), ARGB.alphaFloat(clearColor));
-            Renderer.clearAttachments(commandBuffer.handle, 0x4000, 0, 0, framebuffer.getWidth(), framebuffer.getHeight());
+            net.vulkanmod.vulkan.VRenderSystem.setClearColor(net.minecraft.util.ARGB.redFloat(clearColor), net.minecraft.util.ARGB.greenFloat(clearColor), net.minecraft.util.ARGB.blueFloat(clearColor), net.minecraft.util.ARGB.alphaFloat(clearColor));
+            net.vulkanmod.vulkan.Renderer.clearAttachments(commandBuffer.handle, 16384, 0, 0, framebuffer.getWidth(), framebuffer.getHeight());
             renderPass.endRenderPass(commandBuffer.handle);
-
             long fence = graphicsQueue.submitCommands(commandBuffer);
-            Synchronization.waitFence(fence);
-        }
-    }
-
-    @Override
-    public void clearColorAndDepthTextures(GpuTexture colorAttachment, int clearColor, GpuTexture depthAttachment, double clearDepth) {
-        if (this.inRenderPass) {
-            throw new IllegalStateException("Close the existing render pass before creating a new one!");
-        }
-        else {
-            if (Minecraft.getInstance().getMainRenderTarget().getColorTexture() == colorAttachment) {
-                Renderer.getInstance().getMainPass().rebindMainTarget();
-
-                VRenderSystem.clearDepth(clearDepth);
-                VRenderSystem.setClearColor(ARGB.redFloat(clearColor), ARGB.greenFloat(clearColor), ARGB.blueFloat(clearColor), ARGB.alphaFloat(clearColor));
-                Renderer.clearAttachments(0x4100);
-            }
-            else {
-                VkFbo fbo = ((VkGpuTexture)colorAttachment).getFbo(depthAttachment);
-
-                ((VkGpuTexture) colorAttachment).setClearColor(clearColor);
-                ((VkGpuTexture) depthAttachment).setDepthClearValue((float) clearDepth);
-
-                Framebuffer boundFramebuffer = Renderer.getInstance().getBoundFramebuffer();
-                if (boundFramebuffer != null && boundFramebuffer.getColorAttachment() == ((VkGpuTexture) colorAttachment).getVulkanImage()
-                    && boundFramebuffer.getDepthAttachment() == ((VkGpuTexture) depthAttachment).getVulkanImage())
-                {
-                    fbo.clearAttachments();
+            net.vulkanmod.vulkan.Synchronization.waitFence(fence);
+        } catch (java.lang.Throwable th) {
+            if (stack != null) {
+                try {
+                    stack.close();
+                } catch (java.lang.Throwable th2) {
+                    th.addSuppressed(th2);
                 }
             }
+            throw th;
         }
     }
 
-    @Override
-    public void clearColorAndDepthTextures(GpuTexture colorAttachment, int clearColor, GpuTexture depthAttachment, double clearDepth, int x0, int y0, int width, int height) {
+    public void clearColorAndDepthTextures(com.mojang.blaze3d.textures.GpuTexture colorAttachment, int clearColor, com.mojang.blaze3d.textures.GpuTexture depthAttachment, double clearDepth) {
         if (this.inRenderPass) {
-            throw new IllegalStateException("Close the existing render pass before creating a new one!");
+            throw new java.lang.IllegalStateException("Close the existing render pass before creating a new one!");
+        }
+        if (net.minecraft.client.Minecraft.getInstance().getMainRenderTarget().getColorTexture() == colorAttachment) {
+            net.vulkanmod.vulkan.Renderer.getInstance().getMainPass().rebindMainTarget();
+            net.vulkanmod.vulkan.VRenderSystem.clearDepth(clearDepth);
+            net.vulkanmod.vulkan.VRenderSystem.setClearColor(net.minecraft.util.ARGB.redFloat(clearColor), net.minecraft.util.ARGB.greenFloat(clearColor), net.minecraft.util.ARGB.blueFloat(clearColor), net.minecraft.util.ARGB.alphaFloat(clearColor));
+            net.vulkanmod.vulkan.Renderer.clearAttachments(16640);
+            return;
+        }
+        net.vulkanmod.render.engine.VkFbo fbo = ((net.vulkanmod.render.engine.VkGpuTexture) colorAttachment).getFbo(depthAttachment);
+        ((net.vulkanmod.render.engine.VkGpuTexture) colorAttachment).setClearColor(clearColor);
+        ((net.vulkanmod.render.engine.VkGpuTexture) depthAttachment).setDepthClearValue((float) clearDepth);
+        net.vulkanmod.vulkan.framebuffer.Framebuffer boundFramebuffer = net.vulkanmod.vulkan.Renderer.getInstance().getBoundFramebuffer();
+        if (boundFramebuffer != null && boundFramebuffer.getColorAttachment() == ((net.vulkanmod.render.engine.VkGpuTexture) colorAttachment).getVulkanImage() && boundFramebuffer.getDepthAttachment() == ((net.vulkanmod.render.engine.VkGpuTexture) depthAttachment).getVulkanImage()) {
+            fbo.clearAttachments();
+        }
+    }
+
+    public void clearColorAndDepthTextures(com.mojang.blaze3d.textures.GpuTexture colorAttachment, int clearColor, com.mojang.blaze3d.textures.GpuTexture depthAttachment, double clearDepth, int x0, int y0, int width, int height) {
+        if (this.inRenderPass) {
+            throw new java.lang.IllegalStateException("Close the existing render pass before creating a new one!");
+        }
+        net.vulkanmod.vulkan.VRenderSystem.clearDepth(clearDepth);
+        net.vulkanmod.vulkan.VRenderSystem.setClearColor(net.minecraft.util.ARGB.redFloat(clearColor), net.minecraft.util.ARGB.greenFloat(clearColor), net.minecraft.util.ARGB.blueFloat(clearColor), net.minecraft.util.ARGB.alphaFloat(clearColor));
+        int framebufferHeight = colorAttachment.getHeight(0);
+        int y02 = (framebufferHeight - height) - y0;
+        net.vulkanmod.vulkan.framebuffer.Framebuffer boundFramebuffer = net.vulkanmod.vulkan.Renderer.getInstance().getBoundFramebuffer();
+        if (boundFramebuffer != null && boundFramebuffer.getColorAttachment() == ((net.vulkanmod.render.engine.VkGpuTexture) colorAttachment).getVulkanImage() && boundFramebuffer.getDepthAttachment() == ((net.vulkanmod.render.engine.VkGpuTexture) depthAttachment).getVulkanImage()) {
+            net.vulkanmod.vulkan.Renderer.clearAttachments(16640, x0, y02, width, height);
+        }
+    }
+
+    public void clearDepthTexture(com.mojang.blaze3d.textures.GpuTexture depthAttachment, double clearDepth) {
+        if (this.inRenderPass) {
+            throw new java.lang.IllegalStateException("Close the existing render pass before creating a new one!");
+        }
+        net.vulkanmod.vulkan.framebuffer.Framebuffer boundFramebuffer = net.vulkanmod.vulkan.Renderer.getInstance().getBoundFramebuffer();
+        if (boundFramebuffer != null && boundFramebuffer.getDepthAttachment() == ((net.vulkanmod.render.engine.VkGpuTexture) depthAttachment).getVulkanImage()) {
+            net.vulkanmod.vulkan.VRenderSystem.clearDepth(clearDepth);
+            net.vulkanmod.vulkan.Renderer.clearAttachments(256);
         } else {
-            VRenderSystem.clearDepth(clearDepth);
-            VRenderSystem.setClearColor(ARGB.redFloat(clearColor), ARGB.greenFloat(clearColor), ARGB.blueFloat(clearColor), ARGB.alphaFloat(clearColor));
-
-            int framebufferHeight = colorAttachment.getHeight(0);
-            y0 = framebufferHeight - height - y0;
-
-            Framebuffer boundFramebuffer = Renderer.getInstance().getBoundFramebuffer();
-            if (boundFramebuffer != null && boundFramebuffer.getColorAttachment() == ((VkGpuTexture) colorAttachment).getVulkanImage()
-                && boundFramebuffer.getDepthAttachment() == ((VkGpuTexture) depthAttachment).getVulkanImage())
-            {
-                Renderer.clearAttachments(0x4100, x0, y0, width, height);
-            }
-            else {
-                // TODO
-//                throw new IllegalStateException();
-            }
+            ((net.vulkanmod.render.engine.VkGpuTexture) depthAttachment).setDepthClearValue((float) clearDepth);
         }
     }
 
-    @Override
-    public void clearDepthTexture(GpuTexture depthAttachment, double clearDepth) {
+    public void writeToBuffer(com.mojang.blaze3d.buffers.GpuBufferSlice gpuBufferSlice, java.nio.ByteBuffer byteBuffer) {
         if (this.inRenderPass) {
-            throw new IllegalStateException("Close the existing render pass before creating a new one!");
+            throw new java.lang.IllegalStateException("Close the existing render pass before performing additional commands");
         }
-        else {
-            Framebuffer boundFramebuffer = Renderer.getInstance().getBoundFramebuffer();
-            if (boundFramebuffer != null && boundFramebuffer.getDepthAttachment() == ((VkGpuTexture) depthAttachment).getVulkanImage()) {
-                VRenderSystem.clearDepth(clearDepth);
-                Renderer.clearAttachments(0x100);
-            }
-            else {
-                ((VkGpuTexture) depthAttachment).setDepthClearValue((float) clearDepth);
-            }
+        net.vulkanmod.render.engine.VkGpuBuffer vkGpuBuffer = (net.vulkanmod.render.engine.VkGpuBuffer) gpuBufferSlice.buffer();
+        if (vkGpuBuffer.closed) {
+            throw new java.lang.IllegalStateException("Buffer already closed");
         }
-    }
-
-    @Override
-    public void writeToBuffer(GpuBufferSlice gpuBufferSlice, ByteBuffer byteBuffer) {
-        if (this.inRenderPass) {
-            throw new IllegalStateException("Close the existing render pass before performing additional commands");
-        } else {
-            VkGpuBuffer vkGpuBuffer = (VkGpuBuffer) gpuBufferSlice.buffer();
-            if (vkGpuBuffer.closed) {
-                throw new IllegalStateException("Buffer already closed");
+        int size = byteBuffer.remaining();
+        if (((long) size) + gpuBufferSlice.offset() > vkGpuBuffer.size()) {
+            long jOffset = gpuBufferSlice.offset();
+            long sliceSize = gpuBufferSlice.length();
+            throw new java.lang.IllegalArgumentException("Cannot write more data than this buffer can hold (attempting to write " + size + " bytes at offset " + jOffset + " to " + sliceSize + " slice size)");
+        }
+        long dstOffset = gpuBufferSlice.offset();
+        net.vulkanmod.vulkan.queue.CommandPool.CommandBuffer commandBuffer = net.vulkanmod.vulkan.Renderer.getInstance().getTransferCb();
+        net.vulkanmod.vulkan.memory.buffer.StagingBuffer stagingBuffer = net.vulkanmod.vulkan.Vulkan.getStagingBuffer();
+        stagingBuffer.copyBuffer(size, byteBuffer);
+        long srcOffset = stagingBuffer.getOffset();
+        org.lwjgl.system.MemoryStack stack = org.lwjgl.system.MemoryStack.stackPush();
+        try {
+            if (!commandBuffer.isRecording()) {
+                commandBuffer.begin(stack);
             }
-            else {
-                int size = byteBuffer.remaining();
-                if (size + gpuBufferSlice.offset() > vkGpuBuffer.size()) {
-                    throw new IllegalArgumentException(
-                            "Cannot write more data than this buffer can hold (attempting to write " + size + " bytes at offset " + gpuBufferSlice.offset() + " to " + gpuBufferSlice.length() + " slice size)"
-                    );
-                } else {
-                    int dstOffset = gpuBufferSlice.offset();
-
-                    var commandBuffer = Renderer.getInstance().getTransferCb();
-
-                    StagingBuffer stagingBuffer = Vulkan.getStagingBuffer();
-                    stagingBuffer.copyBuffer(size, byteBuffer);
-
-                    long srcOffset = stagingBuffer.getOffset();
-
-                    try (MemoryStack stack = MemoryStack.stackPush()) {
-                        if (!commandBuffer.isRecording()) {
-                            commandBuffer.begin(stack);
-                        }
-
-                        VkBufferCopy.Buffer copyRegion = VkBufferCopy.calloc(1, stack);
-                        copyRegion.size(size);
-                        copyRegion.srcOffset(srcOffset);
-                        copyRegion.dstOffset(dstOffset);
-
-                        vkCmdCopyBuffer(commandBuffer.handle, stagingBuffer.getId(), vkGpuBuffer.buffer.getId(), copyRegion);
-                    }
+            org.lwjgl.vulkan.VkBufferCopy.Buffer copyRegion = org.lwjgl.vulkan.VkBufferCopy.calloc(1, stack);
+            copyRegion.size(size);
+            copyRegion.srcOffset(srcOffset);
+            copyRegion.dstOffset(dstOffset);
+            org.lwjgl.vulkan.VK10.vkCmdCopyBuffer(commandBuffer.handle, stagingBuffer.getId(), vkGpuBuffer.buffer.getId(), copyRegion);
+            if (stack != null) {
+                stack.close();
+            }
+        } catch (java.lang.Throwable th) {
+            if (stack != null) {
+                try {
+                    stack.close();
+                } catch (java.lang.Throwable th2) {
+                    th.addSuppressed(th2);
                 }
             }
+            throw th;
         }
     }
 
-    @Override
-    public GpuBuffer.MappedView mapBuffer(GpuBuffer gpuBuffer, boolean readable, boolean writable) {
-        return this.mapBuffer(gpuBuffer.slice(), readable, writable);
+    public com.mojang.blaze3d.buffers.GpuBuffer.MappedView mapBuffer(com.mojang.blaze3d.buffers.GpuBuffer gpuBuffer, boolean readable, boolean writable) {
+        return mapBuffer(gpuBuffer.slice(), readable, writable);
     }
 
-    @Override
-    public GpuBuffer.MappedView mapBuffer(GpuBufferSlice gpuBufferSlice, boolean readable, boolean writable) {
+    public com.mojang.blaze3d.buffers.GpuBuffer.MappedView mapBuffer(com.mojang.blaze3d.buffers.GpuBufferSlice gpuBufferSlice, boolean readable, boolean writable) {
         if (this.inRenderPass) {
-            throw new IllegalStateException("Close the existing render pass before performing additional commands");
-        } else {
-            VkGpuBuffer gpuBuffer = (VkGpuBuffer)(gpuBufferSlice.buffer());
-            if (gpuBuffer.closed) {
-                throw new IllegalStateException("Buffer already closed");
-            } else if (!readable && !writable) {
-                throw new IllegalArgumentException("At least read or write must be true");
-            } else if (readable && (gpuBuffer.usage() & 1) == 0) {
-                throw new IllegalStateException("Buffer is not readable");
-            } else if (writable && (gpuBuffer.usage() & 2) == 0) {
-                throw new IllegalStateException("Buffer is not writable");
-            } else if (gpuBufferSlice.offset() + gpuBufferSlice.length() > gpuBuffer.size()) {
-                throw new IllegalArgumentException(
-                        "Cannot map more data than this buffer can hold (attempting to map "
-                        + gpuBufferSlice.length()
-                        + " bytes at offset "
-                        + gpuBufferSlice.offset()
-                        + " from "
-                        + gpuBuffer.size()
-                        + " size buffer)"
-                );
-            } else {
-                int i = 0;
-                if (readable) {
-                    i |= 1;
-                }
-
-                if (writable) {
-                    i |= 34;
-                }
-
-                ByteBuffer byteBuffer = MemoryUtil.memByteBuffer(gpuBuffer.getBuffer().getDataPtr() + gpuBufferSlice.offset(), gpuBufferSlice.length());
-                return new VkGpuBuffer.MappedView(0, byteBuffer);
-            }
+            throw new java.lang.IllegalStateException("Close the existing render pass before performing additional commands");
         }
+        net.vulkanmod.render.engine.VkGpuBuffer gpuBuffer = (net.vulkanmod.render.engine.VkGpuBuffer) gpuBufferSlice.buffer();
+        if (gpuBuffer.closed) {
+            throw new java.lang.IllegalStateException("Buffer already closed");
+        }
+        if (!readable && !writable) {
+            throw new java.lang.IllegalArgumentException("At least read or write must be true");
+        }
+        if (readable && (gpuBuffer.usage() & 1) == 0) {
+            throw new java.lang.IllegalStateException("Buffer is not readable");
+        }
+        if (writable && (gpuBuffer.usage() & 2) == 0) {
+            throw new java.lang.IllegalStateException("Buffer is not writable");
+        }
+        if (gpuBufferSlice.offset() + gpuBufferSlice.length() > gpuBuffer.size()) {
+            long length = gpuBufferSlice.length();
+            long jOffset = gpuBufferSlice.offset();
+            long bufSize = gpuBuffer.size();
+            throw new java.lang.IllegalArgumentException("Cannot map more data than this buffer can hold (attempting to map " + length + " bytes at offset " + jOffset + " from " + bufSize + " size buffer)");
+        }
+        int i = 0;
+        if (readable) {
+            i = 0 | 1;
+        }
+        if (writable) {
+            int i2 = i | 34;
+        }
+        java.nio.ByteBuffer byteBuffer = org.lwjgl.system.MemoryUtil.memByteBuffer(gpuBuffer.getBuffer().getDataPtr() + gpuBufferSlice.offset(), (int) gpuBufferSlice.length());
+        return new net.vulkanmod.render.engine.VkGpuBuffer.MappedView(0, byteBuffer);
     }
 
-    public void copyToBuffer(GpuBufferSlice gpuBufferSlice, GpuBufferSlice gpuBufferSlice2) {
+    public void copyToBuffer(com.mojang.blaze3d.buffers.GpuBufferSlice gpuBufferSlice, com.mojang.blaze3d.buffers.GpuBufferSlice gpuBufferSlice2) {
         if (this.inRenderPass) {
-            throw new IllegalStateException("Close the existing render pass before performing additional commands");
-        } else {
-            VkGpuBuffer vkGpuBuffer = (VkGpuBuffer) gpuBufferSlice.buffer();
-            if (vkGpuBuffer.closed) {
-                throw new IllegalStateException("Source buffer already closed");
-            } else if ((vkGpuBuffer.usage() & 8) == 0) {
-                throw new IllegalStateException("Source buffer needs USAGE_COPY_DST to be a destination for a copy");
-            } else {
-                VkGpuBuffer vkGpuBuffer2 = (VkGpuBuffer) gpuBufferSlice2.buffer();
-                if (vkGpuBuffer2.closed) {
-                    throw new IllegalStateException("Target buffer already closed");
-                } else if ((vkGpuBuffer2.usage() & 8) == 0) {
-                    throw new IllegalStateException("Target buffer needs USAGE_COPY_DST to be a destination for a copy");
-                } else if (gpuBufferSlice.length() != gpuBufferSlice2.length()) {
-                    int var6 = gpuBufferSlice.length();
-                    throw new IllegalArgumentException("Cannot copy from slice of size " + var6 + " to slice of size " + gpuBufferSlice2.length() + ", they must be equal");
-                } else if (gpuBufferSlice.offset() + gpuBufferSlice.length() > vkGpuBuffer.size()) {
-                    int var5 = gpuBufferSlice.length();
-                    throw new IllegalArgumentException("Cannot copy more data than the source buffer holds (attempting to copy " + var5 + " bytes at offset " + gpuBufferSlice.offset() + " from " + vkGpuBuffer.size() + " size buffer)");
-                } else if (gpuBufferSlice2.offset() + gpuBufferSlice2.length() > vkGpuBuffer2.size()) {
-                    int var10002 = gpuBufferSlice2.length();
-                    throw new IllegalArgumentException("Cannot copy more data than the target buffer can hold (attempting to copy " + var10002 + " bytes at offset " + gpuBufferSlice2.offset() + " to " + vkGpuBuffer2.size() + " size buffer)");
-                } else {
-//                    this.device.directStateAccess().copyBufferSubData(vkGpuBuffer.handle, vkGpuBuffer2.handle, gpuBufferSlice.offset(), gpuBufferSlice2.offset(), gpuBufferSlice.length());
-//                    vkGpuBuffer.buffer.copyBuffer(byteBuffer, byteBuffer.remaining(), gpuBufferSlice.offset());
-
-                    // TODO
-                    throw new UnsupportedOperationException();
-                }
-            }
+            throw new java.lang.IllegalStateException("Close the existing render pass before performing additional commands");
         }
+        net.vulkanmod.render.engine.VkGpuBuffer vkGpuBuffer = (net.vulkanmod.render.engine.VkGpuBuffer) gpuBufferSlice.buffer();
+        if (vkGpuBuffer.closed) {
+            throw new java.lang.IllegalStateException("Source buffer already closed");
+        }
+        if ((vkGpuBuffer.usage() & 8) == 0) {
+            throw new java.lang.IllegalStateException("Source buffer needs USAGE_COPY_DST to be a destination for a copy");
+        }
+        net.vulkanmod.render.engine.VkGpuBuffer vkGpuBuffer2 = (net.vulkanmod.render.engine.VkGpuBuffer) gpuBufferSlice2.buffer();
+        if (vkGpuBuffer2.closed) {
+            throw new java.lang.IllegalStateException("Target buffer already closed");
+        }
+        if ((vkGpuBuffer2.usage() & 8) == 0) {
+            throw new java.lang.IllegalStateException("Target buffer needs USAGE_COPY_DST to be a destination for a copy");
+        }
+        if (gpuBufferSlice.length() != gpuBufferSlice2.length()) {
+            long var6 = gpuBufferSlice.length();
+            long len2 = gpuBufferSlice2.length();
+            throw new java.lang.IllegalArgumentException("Cannot copy from slice of size " + var6 + " to slice of size " + len2 + ", they must be equal");
+        }
+        if (gpuBufferSlice.offset() + gpuBufferSlice.length() > vkGpuBuffer.size()) {
+            long var5 = gpuBufferSlice.length();
+            long jOffset = gpuBufferSlice.offset();
+            long srcBufSize = vkGpuBuffer.size();
+            throw new java.lang.IllegalArgumentException("Cannot copy more data than the source buffer holds (attempting to copy " + var5 + " bytes at offset " + jOffset + " from " + srcBufSize + " size buffer)");
+        }
+        if (gpuBufferSlice2.offset() + gpuBufferSlice2.length() > vkGpuBuffer2.size()) {
+            long var10002 = gpuBufferSlice2.length();
+            long jOffset2 = gpuBufferSlice2.offset();
+            long dstBufSize = vkGpuBuffer2.size();
+            throw new java.lang.IllegalArgumentException("Cannot copy more data than the target buffer can hold (attempting to copy " + var10002 + " bytes at offset " + jOffset2 + " to " + dstBufSize + " size buffer)");
+        }
+        throw new java.lang.UnsupportedOperationException();
     }
 
-    @Override
-    public void writeToTexture(GpuTexture gpuTexture, NativeImage nativeImage) {
+    public void writeToTexture(com.mojang.blaze3d.textures.GpuTexture gpuTexture, com.mojang.blaze3d.platform.NativeImage nativeImage) {
         int i = gpuTexture.getWidth(0);
         int j = gpuTexture.getHeight(0);
         if (nativeImage.getWidth() != i || nativeImage.getHeight() != j) {
-            throw new IllegalArgumentException(
-                    "Cannot replace texture of size " + i + "x" + j + " with image of size " + nativeImage.getWidth() + "x" + nativeImage.getHeight()
-            );
-        } else if (gpuTexture.isClosed()) {
-            throw new IllegalStateException("Destination texture is closed");
-        } else {
-            this.writeToTexture(gpuTexture, nativeImage, 0, 0, 0, 0, i, j, 0, 0);
+            throw new java.lang.IllegalArgumentException("Cannot replace texture of size " + i + "x" + j + " with image of size " + nativeImage.getWidth() + "x" + nativeImage.getHeight());
         }
+        if (gpuTexture.isClosed()) {
+            throw new java.lang.IllegalStateException("Destination texture is closed");
+        }
+        writeToTexture(gpuTexture, nativeImage, 0, 0, 0, 0, i, j, 0, 0);
     }
 
-    @Override
-    public void writeToTexture(GpuTexture gpuTexture, NativeImage nativeImage, int level, int arrayLayer, int xOffset, int yOffset, int width, int height, int unpackSkipPixels, int unpackSkipRows) {
+    public void writeToTexture(com.mojang.blaze3d.textures.GpuTexture gpuTexture, com.mojang.blaze3d.platform.NativeImage nativeImage, int level, int arrayLayer, int xOffset, int yOffset, int width, int height, int unpackSkipPixels, int unpackSkipRows) {
         if (this.inRenderPass) {
-            throw new IllegalStateException("Close the existing render pass before performing additional commands");
-        } else if (level >= 0 && level < gpuTexture.getMipLevels()) {
+            throw new java.lang.IllegalStateException("Close the existing render pass before performing additional commands");
+        }
+        if (level >= 0 && level < gpuTexture.getMipLevels()) {
             if (unpackSkipPixels + width > nativeImage.getWidth() || unpackSkipRows + height > nativeImage.getHeight()) {
-                throw new IllegalArgumentException(
-                        "Copy source ("
-                        + nativeImage.getWidth()
-                        + "x"
-                        + nativeImage.getHeight()
-                        + ") is not large enough to read a rectangle of "
-                        + width
-                        + "x"
-                        + height
-                        + " from "
-                        + unpackSkipPixels
-                        + "x"
-                        + unpackSkipRows
-                );
-            } else if (xOffset + width > gpuTexture.getWidth(level) || yOffset + height > gpuTexture.getHeight(level)) {
-                throw new IllegalArgumentException(
-                        "Dest texture (" + width + "x" + height + ") is not large enough to write a rectangle of " + width + "x" + height + " at " + xOffset + "x" + yOffset + " (at mip level " + level + ")"
-                );
-            } else if (gpuTexture.isClosed()) {
-                throw new IllegalStateException("Destination texture is closed");
-            } else {
-                VTextureSelector.setActiveTexture(0);
-                var glTexture = VkGlTexture.getTexture(((GlTexture) gpuTexture).glId());
-//                VTextureSelector.bindTexture(((VkGpuTexture) gpuTexture).getVulkanImage());
-                VTextureSelector.bindTexture(glTexture.getVulkanImage());
-                VTextureSelector.uploadSubTexture(level, arrayLayer, width, height, xOffset, yOffset, unpackSkipRows, unpackSkipPixels, nativeImage.getWidth(), nativeImage.getPointer());
+                throw new java.lang.IllegalArgumentException("Copy source (" + nativeImage.getWidth() + "x" + nativeImage.getHeight() + ") is not large enough to read a rectangle of " + width + "x" + height + " from " + unpackSkipPixels + "x" + unpackSkipRows);
             }
-        } else {
-            throw new IllegalArgumentException("Invalid mipLevel " + level + ", must be >= 0 and < " + gpuTexture.getMipLevels());
+            if (xOffset + width > gpuTexture.getWidth(level) || yOffset + height > gpuTexture.getHeight(level)) {
+                throw new java.lang.IllegalArgumentException("Dest texture (" + width + "x" + height + ") is not large enough to write a rectangle of " + width + "x" + height + " at " + xOffset + "x" + yOffset + " (at mip level " + level + ")");
+            }
+            if (gpuTexture.isClosed()) {
+                throw new java.lang.IllegalStateException("Destination texture is closed");
+            }
+            net.vulkanmod.vulkan.texture.VTextureSelector.setActiveTexture(0);
+            net.vulkanmod.gl.VkGlTexture glTexture = net.vulkanmod.gl.VkGlTexture.getTexture(((com.mojang.blaze3d.opengl.GlTexture) gpuTexture).glId());
+            net.vulkanmod.vulkan.texture.VTextureSelector.bindTexture(glTexture.getVulkanImage());
+            net.vulkanmod.vulkan.texture.VTextureSelector.uploadSubTexture(level, arrayLayer, width, height, xOffset, yOffset, unpackSkipRows, unpackSkipPixels, nativeImage.getWidth(), nativeImage.getPointer());
+            return;
         }
+        throw new java.lang.IllegalArgumentException("Invalid mipLevel " + level + ", must be >= 0 and < " + gpuTexture.getMipLevels());
     }
 
-    @Override
-    public void writeToTexture(GpuTexture gpuTexture, ByteBuffer byteBuffer, NativeImage.Format format, int level, int j, int xOffset, int yOffset, int width, int height) {
+    public void writeToTexture(com.mojang.blaze3d.textures.GpuTexture gpuTexture, java.nio.ByteBuffer byteBuffer, com.mojang.blaze3d.platform.NativeImage.Format format, int level, int j, int xOffset, int yOffset, int width, int height) {
         if (this.inRenderPass) {
-            throw new IllegalStateException("Close the existing render pass before performing additional commands");
-        } else if (level >= 0 && level < gpuTexture.getMipLevels()) {
+            throw new java.lang.IllegalStateException("Close the existing render pass before performing additional commands");
+        }
+        if (level >= 0 && level < gpuTexture.getMipLevels()) {
             if (width * height * format.components() > byteBuffer.remaining()) {
-                throw new IllegalArgumentException(
-                        "Copy would overrun the source buffer (remaining length of " + byteBuffer.remaining() + ", but copy is " + width + "x" + height + " of format " + format + ")"
-                );
-            } else if (xOffset + width > gpuTexture.getWidth(level) || yOffset + height > gpuTexture.getHeight(level)) {
-                throw new IllegalArgumentException(
-                        "Dest texture ("
-                        + gpuTexture.getWidth(level)
-                        + "x"
-                        + gpuTexture.getHeight(level)
-                        + ") is not large enough to write a rectangle of "
-                        + width
-                        + "x"
-                        + height
-                        + " at "
-                        + xOffset
-                        + "x"
-                        + yOffset
-                );
-            } else if (gpuTexture.isClosed()) {
-                throw new IllegalStateException("Destination texture is closed");
-            } else if ((gpuTexture.usage() & 1) == 0) {
-                throw new IllegalStateException("Color texture must have USAGE_COPY_DST to be a destination for a write");
-            } else if (j >= gpuTexture.getDepthOrLayers()) {
-                throw new UnsupportedOperationException("Depth or layer is out of range, must be >= 0 and < " + gpuTexture.getDepthOrLayers());
+                throw new java.lang.IllegalArgumentException("Copy would overrun the source buffer (remaining length of " + byteBuffer.remaining() + ", but copy is " + width + "x" + height + " of format " + java.lang.String.valueOf(format) + ")");
             }
-            else {
-                GlStateManager._bindTexture(((VkGpuTexture)gpuTexture).id);
-
-                GlStateManager._pixelStore(3314, width);
-                GlStateManager._pixelStore(3316, 0);
-                GlStateManager._pixelStore(3315, 0);
-                GlStateManager._pixelStore(3317, format.components());
-                GlStateManager._texSubImage2D(3553, level, xOffset, yOffset, width, height, GlConst.toGl(format), 5121, byteBuffer);
+            if (xOffset + width > gpuTexture.getWidth(level) || yOffset + height > gpuTexture.getHeight(level)) {
+                throw new java.lang.IllegalArgumentException("Dest texture (" + gpuTexture.getWidth(level) + "x" + gpuTexture.getHeight(level) + ") is not large enough to write a rectangle of " + width + "x" + height + " at " + xOffset + "x" + yOffset);
             }
-        } else {
-            throw new IllegalArgumentException("Invalid mipLevel, must be >= 0 and < " + gpuTexture.getMipLevels());
+            if (gpuTexture.isClosed()) {
+                throw new java.lang.IllegalStateException("Destination texture is closed");
+            }
+            if ((gpuTexture.usage() & 1) == 0) {
+                throw new java.lang.IllegalStateException("Color texture must have USAGE_COPY_DST to be a destination for a write");
+            }
+            if (j >= gpuTexture.getDepthOrLayers()) {
+                throw new java.lang.UnsupportedOperationException("Depth or layer is out of range, must be >= 0 and < " + gpuTexture.getDepthOrLayers());
+            }
+            com.mojang.blaze3d.opengl.GlStateManager._bindTexture(((net.vulkanmod.render.engine.VkGpuTexture) gpuTexture).id);
+            com.mojang.blaze3d.opengl.GlStateManager._pixelStore(3314, width);
+            com.mojang.blaze3d.opengl.GlStateManager._pixelStore(3316, 0);
+            com.mojang.blaze3d.opengl.GlStateManager._pixelStore(3315, 0);
+            com.mojang.blaze3d.opengl.GlStateManager._pixelStore(3317, format.components());
+            com.mojang.blaze3d.opengl.GlStateManager._texSubImage2D(3553, level, xOffset, yOffset, width, height, com.mojang.blaze3d.opengl.GlConst.toGl(format), 5121, byteBuffer);
+            return;
         }
+        throw new java.lang.IllegalArgumentException("Invalid mipLevel, must be >= 0 and < " + gpuTexture.getMipLevels());
     }
 
-    @Override
-    public void copyTextureToBuffer(GpuTexture gpuTexture, GpuBuffer gpuBuffer, int i, Runnable runnable, int j) {
+    public void copyTextureToBuffer(com.mojang.blaze3d.textures.GpuTexture gpuTexture, com.mojang.blaze3d.buffers.GpuBuffer gpuBuffer, long i, java.lang.Runnable runnable, int j) {
         if (this.inRenderPass) {
-            throw new IllegalStateException("Close the existing render pass before performing additional commands");
-        } else {
-            this.copyTextureToBuffer(gpuTexture, gpuBuffer, i, runnable, j, 0, 0, gpuTexture.getWidth(j), gpuTexture.getHeight(j));
+            throw new java.lang.IllegalStateException("Close the existing render pass before performing additional commands");
         }
+        copyTextureToBuffer(gpuTexture, gpuBuffer, i, runnable, j, 0, 0, gpuTexture.getWidth(j), gpuTexture.getHeight(j));
     }
 
-    @Override
-    public void copyTextureToBuffer(GpuTexture gpuTexture, GpuBuffer gpuBuffer, int dstOffset, Runnable runnable, int mipLevel, int xOffset, int yOffset, int width, int height) {
-        VkGpuBuffer vkGpuBuffer = (VkGpuBuffer) gpuBuffer;
-        VkGpuTexture vkGpuTexture = (VkGpuTexture) gpuTexture;
-
+    public void copyTextureToBuffer(com.mojang.blaze3d.textures.GpuTexture gpuTexture, com.mojang.blaze3d.buffers.GpuBuffer gpuBuffer, long dstOffset, java.lang.Runnable runnable, int mipLevel, int xOffset, int yOffset, int width, int height) {
+        net.vulkanmod.render.engine.VkGpuBuffer vkGpuBuffer = (net.vulkanmod.render.engine.VkGpuBuffer) gpuBuffer;
+        net.vulkanmod.render.engine.VkGpuTexture vkGpuTexture = (net.vulkanmod.render.engine.VkGpuTexture) gpuTexture;
         if (this.inRenderPass) {
-            throw new IllegalStateException("Close the existing render pass before performing additional commands");
-        } else if (mipLevel >= 0 && mipLevel < gpuTexture.getMipLevels()) {
-            if (gpuTexture.getWidth(mipLevel) * gpuTexture.getHeight(mipLevel) * vkGpuTexture.getVulkanImage().formatSize + dstOffset > gpuBuffer.size()) {
-                throw new IllegalArgumentException(
-                        "Buffer of size "
-                        + gpuBuffer.size()
-                        + " is not large enough to hold "
-                        + width
-                        + "x"
-                        + height
-                        + " pixels ("
-                        + vkGpuTexture.getVulkanImage().formatSize
-                        + " bytes each) starting from offset "
-                        + dstOffset
-                );
-            }
-            else if (xOffset + width > gpuTexture.getWidth(mipLevel) || yOffset + height > gpuTexture.getHeight(mipLevel)) {
-                throw new IllegalArgumentException(
-                        "Copy source texture ("
-                        + gpuTexture.getWidth(mipLevel)
-                        + "x"
-                        + gpuTexture.getHeight(mipLevel)
-                        + ") is not large enough to read a rectangle of "
-                        + width
-                        + "x"
-                        + height
-                        + " from "
-                        + xOffset
-                        + ","
-                        + yOffset
-                );
-            } else if (gpuTexture.isClosed()) {
-                throw new IllegalStateException("Source texture is closed");
-            } else if (gpuBuffer.isClosed()) {
-                throw new IllegalStateException("Destination buffer is closed");
-            } else {
-                ImageUtil.copyImageToBuffer(vkGpuTexture.getVulkanImage(), vkGpuBuffer.getBuffer(), mipLevel, width, height, xOffset, yOffset, dstOffset, width, height);
-
-                runnable.run();
-            }
-        } else {
-            throw new IllegalArgumentException("Invalid mipLevel " + mipLevel + ", must be >= 0 and < " + gpuTexture.getMipLevels());
+            throw new java.lang.IllegalStateException("Close the existing render pass before performing additional commands");
         }
+        if (mipLevel < 0 || mipLevel >= gpuTexture.getMipLevels()) {
+            throw new java.lang.IllegalArgumentException("Invalid mipLevel " + mipLevel + ", must be >= 0 and < " + gpuTexture.getMipLevels());
+        }
+        if (((long) (gpuTexture.getWidth(mipLevel) * gpuTexture.getHeight(mipLevel) * vkGpuTexture.getVulkanImage().formatSize)) + dstOffset > gpuBuffer.size()) {
+            throw new java.lang.IllegalArgumentException("Buffer of size " + gpuBuffer.size() + " is not large enough to hold " + gpuTexture.getWidth(mipLevel) + "x" + width + " pixels (" + height + " bytes each) starting from offset " + vkGpuTexture.getVulkanImage().formatSize);
+        }
+        if (xOffset + width > gpuTexture.getWidth(mipLevel) || yOffset + height > gpuTexture.getHeight(mipLevel)) {
+            throw new java.lang.IllegalArgumentException("Copy source texture (" + gpuTexture.getWidth(mipLevel) + "x" + gpuTexture.getHeight(mipLevel) + ") is not large enough to read a rectangle of " + width + "x" + height + " from " + xOffset + "," + yOffset);
+        }
+        if (gpuTexture.isClosed()) {
+            throw new java.lang.IllegalStateException("Source texture is closed");
+        }
+        if (gpuBuffer.isClosed()) {
+            throw new java.lang.IllegalStateException("Destination buffer is closed");
+        }
+        net.vulkanmod.vulkan.texture.ImageUtil.copyImageToBuffer(vkGpuTexture.getVulkanImage(), vkGpuBuffer.getBuffer(), mipLevel, width, height, xOffset, yOffset, (int) dstOffset, width, height);
+        runnable.run();
     }
 
-    @Override
-    public void copyTextureToTexture(GpuTexture gpuTexture, GpuTexture gpuTexture2, int mipLevel, int j, int k, int l, int m, int n, int o) {
+    public void copyTextureToTexture(com.mojang.blaze3d.textures.GpuTexture gpuTexture, com.mojang.blaze3d.textures.GpuTexture gpuTexture2, int mipLevel, int j, int k, int l, int m, int n, int o) {
         if (this.inRenderPass) {
-            throw new IllegalStateException("Close the existing render pass before performing additional commands");
-        } else if (mipLevel >= 0 && mipLevel < gpuTexture.getMipLevels() && mipLevel < gpuTexture2.getMipLevels()) {
+            throw new java.lang.IllegalStateException("Close the existing render pass before performing additional commands");
+        }
+        if (mipLevel >= 0 && mipLevel < gpuTexture.getMipLevels() && mipLevel < gpuTexture2.getMipLevels()) {
             if (j + n > gpuTexture2.getWidth(mipLevel) || k + o > gpuTexture2.getHeight(mipLevel)) {
-                throw new IllegalArgumentException(
-                        "Dest texture ("
-                        + gpuTexture2.getWidth(mipLevel)
-                        + "x"
-                        + gpuTexture2.getHeight(mipLevel)
-                        + ") is not large enough to write a rectangle of "
-                        + n
-                        + "x"
-                        + o
-                        + " at "
-                        + j
-                        + "x"
-                        + k
-                );
-            } else if (l + n > gpuTexture.getWidth(mipLevel) || m + o > gpuTexture.getHeight(mipLevel)) {
-                throw new IllegalArgumentException(
-                        "Source texture ("
-                        + gpuTexture.getWidth(mipLevel)
-                        + "x"
-                        + gpuTexture.getHeight(mipLevel)
-                        + ") is not large enough to read a rectangle of "
-                        + n
-                        + "x"
-                        + o
-                        + " at "
-                        + l
-                        + "x"
-                        + m
-                );
-            } else if (gpuTexture.isClosed()) {
-                throw new IllegalStateException("Source texture is closed");
-            } else if (gpuTexture2.isClosed()) {
-                throw new IllegalStateException("Destination texture is closed");
-            } else {
-                // TODO implement
+                throw new java.lang.IllegalArgumentException("Dest texture (" + gpuTexture2.getWidth(mipLevel) + "x" + gpuTexture2.getHeight(mipLevel) + ") is not large enough to write a rectangle of " + n + "x" + o + " at " + j + "x" + k);
             }
-        } else {
-            throw new IllegalArgumentException("Invalid mipLevel " + mipLevel + ", must be >= 0 and < " + gpuTexture.getMipLevels() + " and < " + gpuTexture2.getMipLevels());
+            if (l + n > gpuTexture.getWidth(mipLevel) || m + o > gpuTexture.getHeight(mipLevel)) {
+                throw new java.lang.IllegalArgumentException("Source texture (" + gpuTexture.getWidth(mipLevel) + "x" + gpuTexture.getHeight(mipLevel) + ") is not large enough to read a rectangle of " + n + "x" + o + " at " + l + "x" + m);
+            }
+            if (gpuTexture.isClosed()) {
+                throw new java.lang.IllegalStateException("Source texture is closed");
+            }
+            if (gpuTexture2.isClosed()) {
+                throw new java.lang.IllegalStateException("Destination texture is closed");
+            }
+            return;
         }
+        throw new java.lang.IllegalArgumentException("Invalid mipLevel " + mipLevel + ", must be >= 0 and < " + gpuTexture.getMipLevels() + " and < " + gpuTexture2.getMipLevels());
     }
 
-    @Override
-    public GpuFence createFence() {
+    public com.mojang.blaze3d.buffers.GpuFence createFence() {
         if (this.inRenderPass) {
-            throw new IllegalStateException("Close the existing render pass before performing additional commands");
-        } else {
-//            throw new UnsupportedOperationException();
-            // TODO
-            return new GpuFence() {
-                @Override
-                public void close() {
-
-                }
-
-                @Override
-                public boolean awaitCompletion(long l) {
-                    return true;
-                }
-            };
+            throw new java.lang.IllegalStateException("Close the existing render pass before performing additional commands");
         }
-    }
-
-    @Override
-    public void presentTexture(GpuTextureView gpuTexture) {
-        throw new UnsupportedOperationException();
-    }
-
-    protected <T> void executeDrawMultiple(
-            VkRenderPass renderPass,
-            Collection<RenderPass.Draw<T>> collection,
-            @Nullable GpuBuffer gpuBuffer,
-            @Nullable VertexFormat.IndexType indexType,
-            Collection<String> collection2,
-            T object
-    ) {
-        if (this.trySetup(renderPass)) {
-            if (indexType == null) {
-                indexType = VertexFormat.IndexType.SHORT;
+        return new com.mojang.blaze3d.buffers.GpuFence() { // from class: net.vulkanmod.render.engine.VkCommandEncoder.1
+            public void close() {
             }
 
-            Pipeline pipeline = ExtendedRenderPipeline.of(renderPass.getPipeline()).getPipeline();
+            public boolean awaitCompletion(long l) {
+                return true;
+            }
+        };
+    }
 
-            for (RenderPass.Draw draw : collection) {
-                VertexFormat.IndexType indexType2 = draw.indexType() == null ? indexType : draw.indexType();
-                renderPass.setIndexBuffer(draw.indexBuffer() == null ? gpuBuffer : draw.indexBuffer(), indexType2);
-                renderPass.setVertexBuffer(draw.slot(), draw.vertexBuffer());
+    public com.mojang.blaze3d.systems.GpuQuery timerQueryBegin() {
+        return null;
+    }
 
-                if (GlRenderPass.VALIDATION) {
+    public void timerQueryEnd(com.mojang.blaze3d.systems.GpuQuery gpuQuery) {
+    }
+
+    public void presentTexture(com.mojang.blaze3d.textures.GpuTextureView gpuTexture) {
+        throw new java.lang.UnsupportedOperationException();
+    }
+
+    protected <T> void executeDrawMultiple(net.vulkanmod.render.engine.VkRenderPass renderPass, java.util.Collection<com.mojang.blaze3d.systems.RenderPass.Draw<T>> collection, @org.jetbrains.annotations.Nullable com.mojang.blaze3d.buffers.GpuBuffer gpuBuffer, @org.jetbrains.annotations.Nullable com.mojang.blaze3d.vertex.VertexFormat.IndexType indexType, java.util.Collection<java.lang.String> collection2, T object) {
+        if (trySetup(renderPass)) {
+            if (indexType == null) {
+                indexType = com.mojang.blaze3d.vertex.VertexFormat.IndexType.SHORT;
+            }
+            net.vulkanmod.vulkan.shader.Pipeline pipeline = net.vulkanmod.interfaces.shader.ExtendedRenderPipeline.of(renderPass.getPipeline()).getPipeline();
+            for (com.mojang.blaze3d.systems.RenderPass.Draw<T> class_10884Var : collection) {
+                com.mojang.blaze3d.vertex.VertexFormat.IndexType indexType2 = class_10884Var.indexType() == null ? indexType : class_10884Var.indexType();
+                renderPass.setIndexBuffer(class_10884Var.indexBuffer() == null ? gpuBuffer : class_10884Var.indexBuffer(), indexType2);
+                renderPass.setVertexBuffer(class_10884Var.slot(), class_10884Var.vertexBuffer());
+                if (com.mojang.blaze3d.opengl.GlRenderPass.VALIDATION) {
                     if (renderPass.indexBuffer == null) {
-                        throw new IllegalStateException("Missing index buffer");
+                        throw new java.lang.IllegalStateException("Missing index buffer");
                     }
-
                     if (renderPass.indexBuffer.isClosed()) {
-                        throw new IllegalStateException("Index buffer has been closed!");
+                        throw new java.lang.IllegalStateException("Index buffer has been closed!");
                     }
-
                     if (renderPass.vertexBuffers[0] == null) {
-                        throw new IllegalStateException("Missing vertex buffer at slot 0");
+                        throw new java.lang.IllegalStateException("Missing vertex buffer at slot 0");
                     }
-
                     if (renderPass.vertexBuffers[0].isClosed()) {
-                        throw new IllegalStateException("Vertex buffer at slot 0 has been closed!");
+                        throw new java.lang.IllegalStateException("Vertex buffer at slot 0 has been closed!");
                     }
                 }
-
-                BiConsumer<T, RenderPass.UniformUploader> biConsumer = draw.uniformUploaderConsumer();
+                java.util.function.BiConsumer<T, com.mojang.blaze3d.systems.RenderPass.UniformUploader> biConsumer = class_10884Var.uniformUploaderConsumer();
                 if (biConsumer != null) {
                     biConsumer.accept(object, (string, gpuBufferSlice) -> {
-                        EGlProgram glProgram = ExtendedRenderPipeline.of(renderPass.pipeline).getProgram();
-                        if (glProgram.getUniform(string) instanceof Uniform.Ubo ubo) {
-
-                            int blockBinding;
+                        net.vulkanmod.render.engine.EGlProgram glProgram = net.vulkanmod.interfaces.shader.ExtendedRenderPipeline.of(renderPass.pipeline).getProgram();
+                        com.mojang.blaze3d.opengl.Uniform uniform = glProgram.getUniform(string);
+                        if (uniform instanceof com.mojang.blaze3d.opengl.Uniform.Ubo) {
+                            com.mojang.blaze3d.opengl.Uniform.Ubo ubo = (com.mojang.blaze3d.opengl.Uniform.Ubo) uniform;
                             try {
-                                blockBinding = ubo.blockBinding();
-                            } catch (Throwable var7) {
-                                throw new MatchException(var7.toString(), var7);
+                                ubo.blockBinding();
+                            } catch (java.lang.Throwable var7) {
+                                throw new java.lang.MatchException(var7.toString(), var7);
                             }
-
-                            // TODO
-//                            GL32.glBindBufferRange(35345, blockBinding, ((GlBuffer)gpuBufferSlice.buffer()).handle, (long)gpuBufferSlice.offset(), (long)gpuBufferSlice.length());
                         }
                     });
-
-                    Renderer.getInstance().uploadAndBindUBOs(pipeline);
+                    net.vulkanmod.vulkan.Renderer.getInstance().uploadAndBindUBOs(pipeline);
                 }
-
-                this.drawFromBuffers(renderPass, 0, draw.firstIndex(), draw.indexCount(), indexType2, renderPass.pipeline, 1);
+                drawFromBuffers(renderPass, 0, class_10884Var.firstIndex(), class_10884Var.indexCount(), indexType2, renderPass.pipeline, 1);
             }
         }
     }
 
-    protected void executeDraw(VkRenderPass renderPass, int i, int j, int k, @Nullable VertexFormat.IndexType indexType, int l) {
-        if (this.trySetup(renderPass)) {
-            if (GlRenderPass.VALIDATION) {
+    protected void executeDraw(net.vulkanmod.render.engine.VkRenderPass renderPass, int vertexOffset, int firstIndex, int vertexCount, @org.jetbrains.annotations.Nullable com.mojang.blaze3d.vertex.VertexFormat.IndexType indexType, int instanceCount) {
+        if (trySetup(renderPass)) {
+            if (com.mojang.blaze3d.opengl.GlRenderPass.VALIDATION) {
                 if (indexType != null) {
                     if (renderPass.indexBuffer == null) {
-                        throw new IllegalStateException("Missing index buffer");
+                        throw new java.lang.IllegalStateException("Missing index buffer");
                     }
-
                     if (renderPass.indexBuffer.isClosed()) {
-                        throw new IllegalStateException("Index buffer has been closed!");
+                        throw new java.lang.IllegalStateException("Index buffer has been closed!");
                     }
                 }
-
                 if (renderPass.vertexBuffers[0] == null) {
-                    throw new IllegalStateException("Missing vertex buffer at slot 0");
+                    throw new java.lang.IllegalStateException("Missing vertex buffer at slot 0");
                 }
-
                 if (renderPass.vertexBuffers[0].isClosed()) {
-                    throw new IllegalStateException("Vertex buffer at slot 0 has been closed!");
+                    throw new java.lang.IllegalStateException("Vertex buffer at slot 0 has been closed!");
                 }
             }
-
-            this.drawFromBuffers(renderPass, i, j, k, indexType, renderPass.pipeline, l);
+            drawFromBuffers(renderPass, vertexOffset, firstIndex, vertexCount, indexType, renderPass.pipeline, instanceCount);
         }
     }
 
-    public void drawFromBuffers(VkRenderPass renderPass, int vertexOffset, int firstIndex, int vertexCount,
-                                @Nullable VertexFormat.IndexType indexType, RenderPipeline renderPipeline, int instanceCount)
-    {
+    public void drawFromBuffers(net.vulkanmod.render.engine.VkRenderPass renderPass, int vertexOffset, int firstIndex, int vertexCount, @org.jetbrains.annotations.Nullable com.mojang.blaze3d.vertex.VertexFormat.IndexType indexType, com.mojang.blaze3d.pipeline.RenderPipeline renderPipeline, int instanceCount) {
+        int i;
         if (instanceCount < 1) {
             instanceCount = 1;
         }
         if (vertexOffset < 0) {
             vertexOffset = 0;
         }
-
-        VkCommandBuffer vkCommandBuffer = Renderer.getCommandBuffer();
-        VkGpuBuffer vertexBuffer = (VkGpuBuffer)renderPass.vertexBuffers[0];
-        try (MemoryStack stack = stackPush()) {
-            if (vertexBuffer != null) {
-                VK11.vkCmdBindVertexBuffers(vkCommandBuffer, 0, stack.longs(vertexBuffer.buffer.getId()), stack.longs(0));
-            }
-
-            if (renderPass.indexBuffer != null) {
-                VkGpuBuffer indexBuffer = (VkGpuBuffer)renderPass.indexBuffer;
-
-                int vkIndexType = switch (indexType) {
-                    case SHORT -> VK_INDEX_TYPE_UINT16;
-                    case INT -> VK_INDEX_TYPE_UINT32;
-                };
-
-                VK11.vkCmdBindIndexBuffer(vkCommandBuffer, indexBuffer.buffer.getId(), 0, vkIndexType);
-                VK11.vkCmdDrawIndexed(vkCommandBuffer, vertexCount, instanceCount, firstIndex, vertexOffset, 0);
-            }
-            else {
-                var autoIndexBuffer = Renderer.getDrawer().getAutoIndexBuffer(renderPipeline.getVertexFormatMode(), vertexCount);
-                if (autoIndexBuffer != null) {
-                    int indexCount = autoIndexBuffer.getIndexCount(vertexCount);
-                    VK11.vkCmdBindIndexBuffer(vkCommandBuffer, autoIndexBuffer.getIndexBuffer().getId(), 0, autoIndexBuffer.getIndexBuffer().indexType.value);
-                    VK11.vkCmdDrawIndexed(vkCommandBuffer, indexCount, instanceCount, firstIndex, vertexOffset, 0);
+        org.lwjgl.vulkan.VkCommandBuffer vkCommandBuffer = net.vulkanmod.vulkan.Renderer.getCommandBuffer();
+        net.vulkanmod.render.engine.VkGpuBuffer vertexBuffer = (net.vulkanmod.render.engine.VkGpuBuffer) renderPass.vertexBuffers[0];
+        org.lwjgl.system.MemoryStack stack = org.lwjgl.system.MemoryStack.stackPush();
+        if (vertexBuffer != null) {
+            try {
+                org.lwjgl.vulkan.VK11.vkCmdBindVertexBuffers(vkCommandBuffer, 0, stack.longs(vertexBuffer.buffer.getId()), stack.longs(0L));
+            } catch (java.lang.Throwable th) {
+                if (stack != null) {
+                    try {
+                        stack.close();
+                    } catch (java.lang.Throwable th2) {
+                        th.addSuppressed(th2);
+                    }
                 }
-                else {
-                    VK11.vkCmdDraw(vkCommandBuffer, vertexCount, instanceCount, vertexOffset, 0);
-                }
+                throw th;
             }
+        }
+        if (renderPass.indexBuffer != null) {
+            net.vulkanmod.render.engine.VkGpuBuffer indexBuffer = (net.vulkanmod.render.engine.VkGpuBuffer) renderPass.indexBuffer;
+            switch (net.vulkanmod.render.engine.VkCommandEncoder.AnonymousClass2.$SwitchMap$com$mojang$blaze3d$vertex$VertexFormat$IndexType[indexType.ordinal()]) {
+                case 1:
+                    i = 0;
+                    break;
+                case 2:
+                    i = 1;
+                    break;
+                default:
+                    throw new java.lang.MatchException((java.lang.String) null, (java.lang.Throwable) null);
+            }
+            int vkIndexType = i;
+            org.lwjgl.vulkan.VK11.vkCmdBindIndexBuffer(vkCommandBuffer, indexBuffer.buffer.getId(), 0L, vkIndexType);
+            org.lwjgl.vulkan.VK11.vkCmdDrawIndexed(vkCommandBuffer, vertexCount, instanceCount, firstIndex, vertexOffset, 0);
+        } else {
+            net.vulkanmod.vulkan.memory.buffer.index.AutoIndexBuffer autoIndexBuffer = net.vulkanmod.vulkan.Renderer.getDrawer().getAutoIndexBuffer(renderPipeline.getVertexFormatMode(), vertexCount);
+            if (autoIndexBuffer != null) {
+                int indexCount = autoIndexBuffer.getIndexCount(vertexCount);
+                org.lwjgl.vulkan.VK11.vkCmdBindIndexBuffer(vkCommandBuffer, autoIndexBuffer.getIndexBuffer().getId(), 0L, autoIndexBuffer.getIndexBuffer().indexType.value);
+                org.lwjgl.vulkan.VK11.vkCmdDrawIndexed(vkCommandBuffer, indexCount, instanceCount, firstIndex, vertexOffset, 0);
+            } else {
+                org.lwjgl.vulkan.VK11.vkCmdDraw(vkCommandBuffer, vertexCount, instanceCount, vertexOffset, 0);
+            }
+        }
+        if (stack != null) {
+            stack.close();
         }
     }
 
-    public boolean trySetup(VkRenderPass renderPass) {
-        if (VkRenderPass.VALIDATION) {
+    public boolean trySetup(net.vulkanmod.render.engine.VkRenderPass renderPass) {
+        if (net.vulkanmod.render.engine.VkRenderPass.VALIDATION) {
             if (renderPass.pipeline == null) {
-                throw new IllegalStateException("Can't draw without a render pipeline");
+                throw new java.lang.IllegalStateException("Can't draw without a render pipeline");
             }
-
-            for (RenderPipeline.UniformDescription uniformDescription : renderPass.pipeline.getUniforms()) {
-                Object object = renderPass.uniforms.get(uniformDescription.name());
-                if (object == null && !GlProgram.BUILT_IN_UNIFORMS.contains(uniformDescription.name())) {
-                    throw new IllegalStateException("Missing uniform " + uniformDescription.name() + " (should be " + uniformDescription.type() + ")");
+            for (com.mojang.blaze3d.pipeline.RenderPipeline.UniformDescription uniformDescription : renderPass.pipeline.getUniforms()) {
+                java.lang.Object object = renderPass.uniforms.get(uniformDescription.name());
+                if (object == null && !com.mojang.blaze3d.opengl.GlProgram.BUILT_IN_UNIFORMS.contains(uniformDescription.name())) {
+                    throw new java.lang.IllegalStateException("Missing uniform " + uniformDescription.name() + " (should be " + java.lang.String.valueOf(uniformDescription.type()) + ")");
                 }
             }
-
         }
-
         applyPipelineState(renderPass.pipeline);
         setupUniforms(renderPass);
-
         if (renderPass.isScissorEnabled()) {
-            GlStateManager._enableScissorTest();
-            GlStateManager._scissorBox(
-                    renderPass.getScissorX(), renderPass.getScissorY(), renderPass.getScissorWidth(), renderPass.getScissorHeight()
-            );
+            com.mojang.blaze3d.opengl.GlStateManager._enableScissorTest();
+            com.mojang.blaze3d.opengl.GlStateManager._scissorBox(renderPass.getScissorX(), renderPass.getScissorY(), renderPass.getScissorWidth(), renderPass.getScissorHeight());
         } else {
-            GlStateManager._disableScissorTest();
+            com.mojang.blaze3d.opengl.GlStateManager._disableScissorTest();
         }
-
         return bindPipeline(renderPass.pipeline);
     }
 
-    public void setupUniforms(VkRenderPass renderPass) {
-        RenderPipeline renderPipeline = renderPass.pipeline;
-        EGlProgram glProgram = ExtendedRenderPipeline.of(renderPass.pipeline).getProgram();
-        Pipeline pipeline = ExtendedRenderPipeline.of(renderPass.pipeline).getPipeline();
-
-        for (UBO ubo : pipeline.getBuffers()) {
-            String uniformName = ubo.name;
-            Uniform uniform = glProgram.getUniform(uniformName);
-
-            GpuBufferSlice gpuBufferSlice = renderPass.uniforms.get(uniformName);
-
-            // In case uniform buffer is not set, fallback to global buffer
+    public void setupUniforms(net.vulkanmod.render.engine.VkRenderPass renderPass) {
+        com.mojang.blaze3d.pipeline.RenderPipeline renderPipeline = renderPass.pipeline;
+        net.vulkanmod.render.engine.EGlProgram glProgram = net.vulkanmod.interfaces.shader.ExtendedRenderPipeline.of(renderPass.pipeline).getProgram();
+        net.vulkanmod.vulkan.shader.Pipeline pipeline = net.vulkanmod.interfaces.shader.ExtendedRenderPipeline.of(renderPass.pipeline).getPipeline();
+        for (net.vulkanmod.vulkan.shader.descriptor.UBO ubo : pipeline.getBuffers()) {
+            java.lang.String uniformName = ubo.name;
+            glProgram.getUniform(uniformName);
+            com.mojang.blaze3d.buffers.GpuBufferSlice gpuBufferSlice = renderPass.uniforms.get(uniformName);
             if (gpuBufferSlice == null) {
                 ubo.setUseGlobalBuffer(true);
                 ubo.setUpdate(true);
-                continue;
+            } else {
+                net.vulkanmod.render.engine.VkGpuBuffer gpuBuffer = (net.vulkanmod.render.engine.VkGpuBuffer) gpuBufferSlice.buffer();
+                if (!$assertionsDisabled && ubo == null) {
+                    throw new java.lang.AssertionError();
+                }
+                ubo.setUseGlobalBuffer(false);
+                ubo.getBufferSlice().set(gpuBuffer.buffer, (int) gpuBufferSlice.offset(), (int) gpuBufferSlice.length());
             }
-
-            VkGpuBuffer gpuBuffer = (VkGpuBuffer) gpuBufferSlice.buffer();
-
-            assert ubo != null;
-            ubo.setUseGlobalBuffer(false);
-            ubo.getBufferSlice().set(gpuBuffer.buffer, gpuBufferSlice.offset(), gpuBufferSlice.length());
         }
-
-        for (ImageDescriptor imageDescriptor : pipeline.getImageDescriptors()) {
-            String uniformName = imageDescriptor.name;
+        for (net.vulkanmod.vulkan.shader.descriptor.ImageDescriptor imageDescriptor : pipeline.getImageDescriptors()) {
+            java.lang.String uniformName2 = imageDescriptor.name;
             int samplerIndex = imageDescriptor.imageIdx;
-
-            VkTextureView textureView = (VkTextureView) renderPass.samplers.get(uniformName);
-            if (textureView == null) {
-                continue;
+            net.vulkanmod.render.engine.VkRenderPass.TextureViewAndSampler textureSampler = renderPass.samplers.get(uniformName2);
+            if (textureSampler != null) {
+                net.vulkanmod.render.engine.VkTextureView textureView = textureSampler.view();
+                net.vulkanmod.render.engine.VkGpuTexture gpuTexture = textureView.texture();
+                if (!gpuTexture.isClosed()) {
+                    com.mojang.blaze3d.opengl.GlStateManager._activeTexture(33984 + samplerIndex);
+                    com.mojang.blaze3d.opengl.GlStateManager._bindTexture(gpuTexture.id);
+                    gpuTexture.getVulkanImage().setSampler(textureSampler.sampler().getId());
+                }
             }
-
-            VkGpuTexture gpuTexture = textureView.texture();
-            if (gpuTexture.isClosed()) {
-                continue;
-            }
-
-            GlStateManager._activeTexture(33984 + samplerIndex);
-            GlStateManager._bindTexture(gpuTexture.id);
-
-            GlStateManager._texParameter(GL11.GL_TEXTURE_2D, 33084, textureView.baseMipLevel());
-            GlStateManager._texParameter(GL11.GL_TEXTURE_2D, 33085, textureView.baseMipLevel() + textureView.mipLevels() - 1);
-            gpuTexture.flushModeChanges();
         }
-
     }
 
-    public boolean bindPipeline(RenderPipeline renderPipeline) {
-        Pipeline pipeline = ExtendedRenderPipeline.of(renderPipeline).getPipeline();
-
+    public boolean bindPipeline(com.mojang.blaze3d.pipeline.RenderPipeline renderPipeline) {
+        net.vulkanmod.vulkan.shader.Pipeline pipeline = net.vulkanmod.interfaces.shader.ExtendedRenderPipeline.of(renderPipeline).getPipeline();
         if (pipeline == null) {
             return false;
         }
-
-        Renderer renderer = Renderer.getInstance();
-        renderer.bindGraphicsPipeline((GraphicsPipeline) pipeline);
-//        VTextureSelector.bindShaderTextures(pipeline);
-
+        net.vulkanmod.vulkan.Renderer renderer = net.vulkanmod.vulkan.Renderer.getInstance();
+        renderer.bindGraphicsPipeline((net.vulkanmod.vulkan.shader.GraphicsPipeline) pipeline);
         renderer.uploadAndBindUBOs(pipeline);
-
         return true;
     }
 
-    public void applyPipelineState(RenderPipeline renderPipeline) {
+    public void applyPipelineState(com.mojang.blaze3d.pipeline.RenderPipeline renderPipeline) {
         if (this.lastPipeline != renderPipeline) {
             this.lastPipeline = renderPipeline;
-            if (renderPipeline.getDepthTestFunction() != DepthTestFunction.NO_DEPTH_TEST) {
-                GlStateManager._enableDepthTest();
-                GlStateManager._depthFunc(GlConst.toGl(renderPipeline.getDepthTestFunction()));
+            if (renderPipeline.getDepthTestFunction() != com.mojang.blaze3d.platform.DepthTestFunction.NO_DEPTH_TEST) {
+                com.mojang.blaze3d.opengl.GlStateManager._enableDepthTest();
+                com.mojang.blaze3d.opengl.GlStateManager._depthFunc(com.mojang.blaze3d.opengl.GlConst.toGl(renderPipeline.getDepthTestFunction()));
             } else {
-                GlStateManager._disableDepthTest();
+                com.mojang.blaze3d.opengl.GlStateManager._disableDepthTest();
             }
-
             if (renderPipeline.isCull()) {
-                GlStateManager._enableCull();
+                com.mojang.blaze3d.opengl.GlStateManager._enableCull();
             } else {
-                GlStateManager._disableCull();
+                com.mojang.blaze3d.opengl.GlStateManager._disableCull();
             }
-
             if (renderPipeline.getBlendFunction().isPresent()) {
-                GlStateManager._enableBlend();
-                BlendFunction blendFunction = renderPipeline.getBlendFunction().get();
-                GlStateManager._blendFuncSeparate(
-                        GlConst.toGl(blendFunction.sourceColor()),
-                        GlConst.toGl(blendFunction.destColor()),
-                        GlConst.toGl(blendFunction.sourceAlpha()),
-                        GlConst.toGl(blendFunction.destAlpha())
-                );
+                com.mojang.blaze3d.opengl.GlStateManager._enableBlend();
+                com.mojang.blaze3d.pipeline.BlendFunction blendFunction = (com.mojang.blaze3d.pipeline.BlendFunction) renderPipeline.getBlendFunction().get();
+                com.mojang.blaze3d.opengl.GlStateManager._blendFuncSeparate(com.mojang.blaze3d.opengl.GlConst.toGl(blendFunction.sourceColor()), com.mojang.blaze3d.opengl.GlConst.toGl(blendFunction.destColor()), com.mojang.blaze3d.opengl.GlConst.toGl(blendFunction.sourceAlpha()), com.mojang.blaze3d.opengl.GlConst.toGl(blendFunction.destAlpha()));
             } else {
-                GlStateManager._disableBlend();
+                com.mojang.blaze3d.opengl.GlStateManager._disableBlend();
             }
-
-            GlStateManager._polygonMode(1032, GlConst.toGl(renderPipeline.getPolygonMode()));
-            GlStateManager._depthMask(renderPipeline.isWriteDepth());
-            GlStateManager._colorMask(renderPipeline.isWriteColor(), renderPipeline.isWriteColor(), renderPipeline.isWriteColor(), renderPipeline.isWriteAlpha());
-            if (renderPipeline.getDepthBiasConstant() == 0.0F && renderPipeline.getDepthBiasScaleFactor() == 0.0F) {
-                GlStateManager._disablePolygonOffset();
+            com.mojang.blaze3d.opengl.GlStateManager._polygonMode(1032, com.mojang.blaze3d.opengl.GlConst.toGl(renderPipeline.getPolygonMode()));
+            com.mojang.blaze3d.opengl.GlStateManager._depthMask(renderPipeline.isWriteDepth());
+            com.mojang.blaze3d.opengl.GlStateManager._colorMask(renderPipeline.isWriteColor(), renderPipeline.isWriteColor(), renderPipeline.isWriteColor(), renderPipeline.isWriteAlpha());
+            if (renderPipeline.getDepthBiasConstant() == 0.0f && renderPipeline.getDepthBiasScaleFactor() == 0.0f) {
+                com.mojang.blaze3d.opengl.GlStateManager._disablePolygonOffset();
             } else {
-                GlStateManager._polygonOffset(renderPipeline.getDepthBiasScaleFactor(), renderPipeline.getDepthBiasConstant());
-                GlStateManager._enablePolygonOffset();
+                com.mojang.blaze3d.opengl.GlStateManager._polygonOffset(renderPipeline.getDepthBiasScaleFactor(), renderPipeline.getDepthBiasConstant());
+                com.mojang.blaze3d.opengl.GlStateManager._enablePolygonOffset();
             }
-
-            switch (renderPipeline.getColorLogic()) {
-                case NONE:
-                    GlStateManager._disableColorLogicOp();
+            switch (net.vulkanmod.render.engine.VkCommandEncoder.AnonymousClass2.$SwitchMap$com$mojang$blaze3d$platform$LogicOp[renderPipeline.getColorLogic().ordinal()]) {
+                case 1:
+                    com.mojang.blaze3d.opengl.GlStateManager._disableColorLogicOp();
                     break;
-                case OR_REVERSE:
-                    GlStateManager._enableColorLogicOp();
-                    GlStateManager._logicOp(5387);
+                case 2:
+                    com.mojang.blaze3d.opengl.GlStateManager._enableColorLogicOp();
+                    com.mojang.blaze3d.opengl.GlStateManager._logicOp(5387);
+                    break;
             }
-
-            VRenderSystem.setPrimitiveTopologyGL(GlConst.toGl(renderPipeline.getVertexFormatMode()));
+            net.vulkanmod.vulkan.VRenderSystem.setPrimitiveTopologyGL(com.mojang.blaze3d.opengl.GlConst.toGl(renderPipeline.getVertexFormatMode()));
         }
     }
 
-    public void finishRenderPass() {
+    /* JADX INFO: renamed from: net.vulkanmod.render.engine.VkCommandEncoder$2, reason: invalid class name */
+    /* JADX INFO: loaded from: VulkanMod_1.21.11-0.6.0.jar:net/vulkanmod/render/engine/VkCommandEncoder$2.class */
+    static /* synthetic */ class AnonymousClass2 {
+        static final /* synthetic */ int[] $SwitchMap$com$mojang$blaze3d$vertex$VertexFormat$IndexType;
+        static final /* synthetic */ int[] $SwitchMap$com$mojang$blaze3d$platform$LogicOp = new int[com.mojang.blaze3d.platform.LogicOp.values().length];
+
+        static {
+            try {
+                $SwitchMap$com$mojang$blaze3d$platform$LogicOp[com.mojang.blaze3d.platform.LogicOp.NONE.ordinal()] = 1;
+            } catch (java.lang.NoSuchFieldError e) {
+            }
+            try {
+                $SwitchMap$com$mojang$blaze3d$platform$LogicOp[com.mojang.blaze3d.platform.LogicOp.OR_REVERSE.ordinal()] = 2;
+            } catch (java.lang.NoSuchFieldError e2) {
+            }
+            $SwitchMap$com$mojang$blaze3d$vertex$VertexFormat$IndexType = new int[com.mojang.blaze3d.vertex.VertexFormat.IndexType.values().length];
+            try {
+                $SwitchMap$com$mojang$blaze3d$vertex$VertexFormat$IndexType[com.mojang.blaze3d.vertex.VertexFormat.IndexType.SHORT.ordinal()] = 1;
+            } catch (java.lang.NoSuchFieldError e3) {
+            }
+            try {
+                $SwitchMap$com$mojang$blaze3d$vertex$VertexFormat$IndexType[com.mojang.blaze3d.vertex.VertexFormat.IndexType.INT.ordinal()] = 2;
+            } catch (java.lang.NoSuchFieldError e4) {
+            }
+        }
+    }
+
+    public void finishRenderPass(boolean forceEnd) {
+        if (forceEnd) {
+            net.vulkanmod.vulkan.Renderer.getInstance().endRenderPass();
+        }
         this.inRenderPass = false;
     }
 
-    protected VkGpuDevice getDevice() {
+    protected net.vulkanmod.render.engine.VkGpuDevice getDevice() {
         return this.device;
     }
 }

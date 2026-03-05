@@ -1,349 +1,249 @@
-/*
- * Copyright (c) 2016, 2017, 2018, 2019 FabricMC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package net.vulkanmod.render.chunk.build.frapi.mesh;
 
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.fabricmc.fabric.api.renderer.v1.mesh.ShadeMode;
-import net.fabricmc.fabric.api.util.TriState;
-import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
-import net.minecraft.client.renderer.item.ItemStackRenderState;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.vulkanmod.render.model.quad.ModelQuadView;
-import org.jetbrains.annotations.Nullable;
-import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
-import net.fabricmc.fabric.api.renderer.v1.mesh.QuadTransform;
-import net.fabricmc.fabric.api.renderer.v1.mesh.QuadView;
-import net.vulkanmod.render.chunk.build.frapi.helper.ColorHelper;
-import net.vulkanmod.render.chunk.build.frapi.helper.NormalHelper;
-import net.vulkanmod.render.chunk.build.frapi.helper.TextureHelper;
-import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.core.Direction;
+/* JADX INFO: loaded from: VulkanMod_1.21.11-0.6.0.jar:net/vulkanmod/render/chunk/build/frapi/mesh/MutableQuadViewImpl.class */
+public abstract class MutableQuadViewImpl extends net.vulkanmod.render.chunk.build.frapi.mesh.QuadViewImpl implements net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter {
+    private static final net.fabricmc.fabric.api.renderer.v1.mesh.QuadTransform NO_TRANSFORM = q -> {
+        return true;
+    };
+    private static final int[] DEFAULT_QUAD_DATA = new int[net.vulkanmod.render.chunk.build.frapi.mesh.EncodingFormat.TOTAL_STRIDE];
+    private net.fabricmc.fabric.api.renderer.v1.mesh.QuadTransform activeTransform = NO_TRANSFORM;
+    private final it.unimi.dsi.fastutil.objects.ObjectArrayList<net.fabricmc.fabric.api.renderer.v1.mesh.QuadTransform> transformStack = new it.unimi.dsi.fastutil.objects.ObjectArrayList<>();
+    private final net.fabricmc.fabric.api.renderer.v1.mesh.QuadTransform stackTransform = q -> {
+        int i = this.transformStack.size() - 1;
+        while (i >= 0) {
+            int i2 = i;
+            i--;
+            if (!((net.fabricmc.fabric.api.renderer.v1.mesh.QuadTransform) this.transformStack.get(i2)).transform(q)) {
+                return false;
+            }
+        }
+        return true;
+    };
 
-import java.util.Objects;
+    protected abstract void emitDirectly();
 
-import static net.vulkanmod.render.chunk.build.frapi.mesh.EncodingFormat.*;
+    static {
+        net.vulkanmod.render.chunk.build.frapi.mesh.MutableQuadViewImpl quad = new net.vulkanmod.render.chunk.build.frapi.mesh.MutableQuadViewImpl() {
+            @Override
+            protected void emitDirectly() {
+            }
+        };
+        quad.data = DEFAULT_QUAD_DATA;
+        quad.color(-1, -1, -1, -1);
+        quad.cullFace((net.minecraft.core.Direction) null);
+        quad.renderLayer((net.minecraft.client.renderer.chunk.ChunkSectionLayer) null);
+        quad.diffuseShade(true);
+        quad.ambientOcclusion(net.fabricmc.fabric.api.util.TriState.DEFAULT);
+        quad.glint((net.minecraft.client.renderer.item.ItemStackRenderState.FoilType) null);
+        quad.tintIndex(-1);
+    }
 
-/**
- * Almost-concrete implementation of a mutable quad. The only missing part is {@link #emitDirectly()},
- * because that depends on where/how it is used. (Mesh encoding vs. render-time transformation).
- *
- * <p>In many cases an instance of this class is used as an "editor quad". The editor quad's
- * {@link #emitDirectly()} method calls some other internal method that transforms the quad
- * data and then buffers it. Transformations should be the same as they would be in a vanilla
- * render - the editor is serving mainly as a way to access vertex data without magical
- * numbers. It also allows for a consistent interface for those transformations.
- */
-public abstract class MutableQuadViewImpl extends QuadViewImpl implements QuadEmitter {
-	private static final QuadTransform NO_TRANSFORM = q -> true;
+    public final void clear() {
+        java.lang.System.arraycopy(DEFAULT_QUAD_DATA, 0, this.data, this.baseIndex, net.vulkanmod.render.chunk.build.frapi.mesh.EncodingFormat.TOTAL_STRIDE);
+        this.isGeometryInvalid = true;
+        this.nominalFace = null;
+    }
 
-	private static final int[] DEFAULT_QUAD_DATA = new int[EncodingFormat.TOTAL_STRIDE];
+    @Override // net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter, net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView
+    public final net.vulkanmod.render.chunk.build.frapi.mesh.MutableQuadViewImpl pos(int vertexIndex, float x, float y, float z) {
+        int index = this.baseIndex + (vertexIndex * net.vulkanmod.render.chunk.build.frapi.mesh.EncodingFormat.VERTEX_STRIDE) + net.vulkanmod.render.chunk.build.frapi.mesh.EncodingFormat.VERTEX_X;
+        this.data[index] = java.lang.Float.floatToRawIntBits(x);
+        this.data[index + 1] = java.lang.Float.floatToRawIntBits(y);
+        this.data[index + 2] = java.lang.Float.floatToRawIntBits(z);
+        this.isGeometryInvalid = true;
+        return this;
+    }
 
-	static {
-		MutableQuadViewImpl quad = new MutableQuadViewImpl() {
-			@Override
-			protected void emitDirectly() {
-				// This quad won't be emitted. It's only used to configure the default quad data.
-			}
-		};
+    @Override // net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter, net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView
+    public final net.vulkanmod.render.chunk.build.frapi.mesh.MutableQuadViewImpl color(int vertexIndex, int color) {
+        this.data[this.baseIndex + (vertexIndex * net.vulkanmod.render.chunk.build.frapi.mesh.EncodingFormat.VERTEX_STRIDE) + net.vulkanmod.render.chunk.build.frapi.mesh.EncodingFormat.VERTEX_COLOR] = color;
+        return this;
+    }
 
-		// Start with all zeroes
-		quad.data = DEFAULT_QUAD_DATA;
-		// Apply non-zero defaults
-		quad.color(-1, -1, -1, -1);
-		quad.cullFace(null);
-		quad.renderLayer(null);
-		quad.diffuseShade(true);
-		quad.ambientOcclusion(TriState.DEFAULT);
-		quad.glint(null);
-		quad.tintIndex(-1);
-		quad.tintIndex(-1);
-	}
+    @Override // net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter, net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView
+    public final net.vulkanmod.render.chunk.build.frapi.mesh.MutableQuadViewImpl uv(int vertexIndex, float u, float v) {
+        int i = this.baseIndex + (vertexIndex * net.vulkanmod.render.chunk.build.frapi.mesh.EncodingFormat.VERTEX_STRIDE) + net.vulkanmod.render.chunk.build.frapi.mesh.EncodingFormat.VERTEX_U;
+        this.data[i] = java.lang.Float.floatToRawIntBits(u);
+        this.data[i + 1] = java.lang.Float.floatToRawIntBits(v);
+        return this;
+    }
 
-	protected boolean hasTransform = false;
-	private QuadTransform activeTransform = NO_TRANSFORM;
-	private final ObjectArrayList<QuadTransform> transformStack = new ObjectArrayList<>();
-	private final QuadTransform stackTransform = q -> {
-		int i = transformStack.size() - 1;
+    @Override // net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter, net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView
+    public final net.vulkanmod.render.chunk.build.frapi.mesh.MutableQuadViewImpl lightmap(int vertexIndex, int lightmap) {
+        this.data[this.baseIndex + (vertexIndex * net.vulkanmod.render.chunk.build.frapi.mesh.EncodingFormat.VERTEX_STRIDE) + net.vulkanmod.render.chunk.build.frapi.mesh.EncodingFormat.VERTEX_LIGHTMAP] = lightmap;
+        return this;
+    }
 
-		while (i >= 0) {
-			if (!transformStack.get(i--).transform(q)) {
-				return false;
-			}
-		}
+    protected final void normalFlags(int flags) {
+        this.data[this.baseIndex + 0] = net.vulkanmod.render.chunk.build.frapi.mesh.EncodingFormat.normalFlags(this.data[this.baseIndex + 0], flags);
+    }
 
-		return true;
-	};
+    @Override // net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter, net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView
+    public final net.vulkanmod.render.chunk.build.frapi.mesh.MutableQuadViewImpl normal(int vertexIndex, float x, float y, float z) {
+        normalFlags(normalFlags() | (1 << vertexIndex));
+        this.data[this.baseIndex + (vertexIndex * net.vulkanmod.render.chunk.build.frapi.mesh.EncodingFormat.VERTEX_STRIDE) + net.vulkanmod.render.chunk.build.frapi.mesh.EncodingFormat.VERTEX_NORMAL] = net.vulkanmod.render.chunk.build.frapi.helper.NormalHelper.packNormal(x, y, z);
+        return this;
+    }
 
-	public final void clear() {
-		System.arraycopy(DEFAULT_QUAD_DATA, 0, data, baseIndex, EncodingFormat.TOTAL_STRIDE);
-		isGeometryInvalid = true;
-		nominalFace = null;
-	}
+    public final void populateMissingNormals() {
+        int normalFlags = normalFlags();
+        if (normalFlags == 15) {
+            return;
+        }
+        int packedFaceNormal = packedFaceNormal();
+        for (int v = 0; v < 4; v++) {
+            if ((normalFlags & (1 << v)) == 0) {
+                this.data[this.baseIndex + (v * net.vulkanmod.render.chunk.build.frapi.mesh.EncodingFormat.VERTEX_STRIDE) + net.vulkanmod.render.chunk.build.frapi.mesh.EncodingFormat.VERTEX_NORMAL] = packedFaceNormal;
+            }
+        }
+        normalFlags(15);
+    }
 
-	@Override
-	public MutableQuadViewImpl pos(int vertexIndex, float x, float y, float z) {
-		final int index = baseIndex + vertexIndex * VERTEX_STRIDE + VERTEX_X;
-		data[index] = Float.floatToRawIntBits(x);
-		data[index + 1] = Float.floatToRawIntBits(y);
-		data[index + 2] = Float.floatToRawIntBits(z);
-		isGeometryInvalid = true;
-		return this;
-	}
+    @Override // net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter, net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView
+    public final net.vulkanmod.render.chunk.build.frapi.mesh.MutableQuadViewImpl nominalFace(net.minecraft.core.Direction face) {
+        this.nominalFace = face;
+        return this;
+    }
 
-	@Override
-	public MutableQuadViewImpl color(int vertexIndex, int color) {
-		data[baseIndex + vertexIndex * VERTEX_STRIDE + VERTEX_COLOR] = color;
-		return this;
-	}
+    @Override // net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter, net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView
+    public final net.vulkanmod.render.chunk.build.frapi.mesh.MutableQuadViewImpl cullFace(net.minecraft.core.Direction face) {
+        this.data[this.baseIndex + 0] = net.vulkanmod.render.chunk.build.frapi.mesh.EncodingFormat.cullFace(this.data[this.baseIndex + 0], face);
+        nominalFace(face);
+        return this;
+    }
 
-	@Override
-	public MutableQuadViewImpl uv(int vertexIndex, float u, float v) {
-		final int i = baseIndex + vertexIndex * VERTEX_STRIDE + VERTEX_U;
-		data[i] = Float.floatToRawIntBits(u);
-		data[i + 1] = Float.floatToRawIntBits(v);
-		return this;
-	}
+    @Override // net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter, net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView
+    public net.vulkanmod.render.chunk.build.frapi.mesh.MutableQuadViewImpl renderLayer(net.minecraft.client.renderer.chunk.ChunkSectionLayer renderLayer) {
+        this.data[this.baseIndex + 0] = net.vulkanmod.render.chunk.build.frapi.mesh.EncodingFormat.renderLayer(this.data[this.baseIndex + 0], renderLayer);
+        return this;
+    }
 
-	@Override
-	public MutableQuadViewImpl spriteBake(TextureAtlasSprite sprite, int bakeFlags) {
-		TextureHelper.bakeSprite(this, sprite, bakeFlags);
-		return this;
-	}
+    @Override // net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter, net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView
+    public net.vulkanmod.render.chunk.build.frapi.mesh.MutableQuadViewImpl emissive(boolean emissive) {
+        this.data[this.baseIndex + 0] = net.vulkanmod.render.chunk.build.frapi.mesh.EncodingFormat.emissive(this.data[this.baseIndex + 0], emissive);
+        return this;
+    }
 
-	@Override
-	public MutableQuadViewImpl lightmap(int vertexIndex, int lightmap) {
-		data[baseIndex + vertexIndex * VERTEX_STRIDE + VERTEX_LIGHTMAP] = lightmap;
-		return this;
-	}
+    @Override // net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter, net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView
+    public net.vulkanmod.render.chunk.build.frapi.mesh.MutableQuadViewImpl diffuseShade(boolean shade) {
+        this.data[this.baseIndex + 0] = net.vulkanmod.render.chunk.build.frapi.mesh.EncodingFormat.diffuseShade(this.data[this.baseIndex + 0], shade);
+        return this;
+    }
 
-	protected void normalFlags(int flags) {
-		data[baseIndex + HEADER_BITS] = EncodingFormat.normalFlags(data[baseIndex + HEADER_BITS], flags);
-	}
+    @Override // net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter, net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView
+    public net.vulkanmod.render.chunk.build.frapi.mesh.MutableQuadViewImpl ambientOcclusion(net.fabricmc.fabric.api.util.TriState ao) {
+        java.util.Objects.requireNonNull(ao, "ambient occlusion TriState may not be null");
+        this.data[this.baseIndex + 0] = net.vulkanmod.render.chunk.build.frapi.mesh.EncodingFormat.ambientOcclusion(this.data[this.baseIndex + 0], ao);
+        return this;
+    }
 
-	@Override
-	public MutableQuadViewImpl normal(int vertexIndex, float x, float y, float z) {
-		normalFlags(normalFlags() | (1 << vertexIndex));
-		data[baseIndex + vertexIndex * VERTEX_STRIDE + VERTEX_NORMAL] = NormalHelper.packNormal(x, y, z);
-		return this;
-	}
+    @Override // net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter, net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView
+    public net.vulkanmod.render.chunk.build.frapi.mesh.MutableQuadViewImpl glint(net.minecraft.client.renderer.item.ItemStackRenderState.FoilType glint) {
+        this.data[this.baseIndex + 0] = net.vulkanmod.render.chunk.build.frapi.mesh.EncodingFormat.glint(this.data[this.baseIndex + 0], glint);
+        return this;
+    }
 
-	/**
-	 * Internal helper method. Copies face normals to vertex normals lacking one.
-	 */
-	public final void populateMissingNormals() {
-		final int normalFlags = this.normalFlags();
+    @Override // net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter, net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView
+    public net.vulkanmod.render.chunk.build.frapi.mesh.MutableQuadViewImpl shadeMode(net.fabricmc.fabric.api.renderer.v1.mesh.ShadeMode mode) {
+        java.util.Objects.requireNonNull(mode, "ShadeMode may not be null");
+        this.data[this.baseIndex + 0] = net.vulkanmod.render.chunk.build.frapi.mesh.EncodingFormat.shadeMode(this.data[this.baseIndex + 0], mode);
+        return this;
+    }
 
-		if (normalFlags == 0b1111) return;
+    @Override // net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter, net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView
+    public net.vulkanmod.render.chunk.build.frapi.mesh.MutableQuadViewImpl atlas(net.fabricmc.fabric.api.renderer.v1.mesh.QuadAtlas quadAtlas) {
+        this.data[this.baseIndex + 0] = net.vulkanmod.render.chunk.build.frapi.mesh.EncodingFormat.quadAtlas(this.data[this.baseIndex + 0], quadAtlas);
+        return this;
+    }
 
-		final int packedFaceNormal = packedFaceNormal();
+    @Override // net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter, net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView
+    public final net.vulkanmod.render.chunk.build.frapi.mesh.MutableQuadViewImpl tintIndex(int tintIndex) {
+        this.data[this.baseIndex + 2] = tintIndex;
+        return this;
+    }
 
-		for (int v = 0; v < 4; v++) {
-			if ((normalFlags & (1 << v)) == 0) {
-				data[baseIndex + v * VERTEX_STRIDE + VERTEX_NORMAL] = packedFaceNormal;
-			}
-		}
+    @Override // net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter, net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView
+    public final net.vulkanmod.render.chunk.build.frapi.mesh.MutableQuadViewImpl tag(int tag) {
+        this.data[this.baseIndex + 3] = tag;
+        return this;
+    }
 
-		normalFlags(0b1111);
-	}
+    @Override // net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter, net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView
+    public final net.vulkanmod.render.chunk.build.frapi.mesh.MutableQuadViewImpl copyFrom(net.fabricmc.fabric.api.renderer.v1.mesh.QuadView quad) {
+        net.vulkanmod.render.chunk.build.frapi.mesh.QuadViewImpl q = (net.vulkanmod.render.chunk.build.frapi.mesh.QuadViewImpl) quad;
+        java.lang.System.arraycopy(q.data, q.baseIndex, this.data, this.baseIndex, net.vulkanmod.render.chunk.build.frapi.mesh.EncodingFormat.TOTAL_STRIDE);
+        this.nominalFace = q.nominalFace;
+        this.isGeometryInvalid = q.isGeometryInvalid;
+        if (!this.isGeometryInvalid) {
+            this.faceNormal.set(q.faceNormal);
+        }
+        return this;
+    }
 
-	@Override
-	public final MutableQuadViewImpl nominalFace(@Nullable Direction face) {
-		nominalFace = face;
-		return this;
-	}
+    @Override // net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter, net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView
+    public final net.vulkanmod.render.chunk.build.frapi.mesh.MutableQuadViewImpl fromBakedQuad(net.minecraft.client.renderer.block.model.BakedQuad quad) {
+        pos(0, quad.position0());
+        pos(1, quad.position1());
+        pos(2, quad.position2());
+        pos(3, quad.position3());
+        color(-1, -1, -1, -1);
+        long packedUV0 = quad.packedUV0();
+        long packedUV1 = quad.packedUV1();
+        long packedUV2 = quad.packedUV2();
+        long packedUV3 = quad.packedUV3();
+        uv(0, net.minecraft.client.model.geom.builders.UVPair.unpackU(packedUV0), net.minecraft.client.model.geom.builders.UVPair.unpackV(packedUV0));
+        uv(1, net.minecraft.client.model.geom.builders.UVPair.unpackU(packedUV1), net.minecraft.client.model.geom.builders.UVPair.unpackV(packedUV1));
+        uv(2, net.minecraft.client.model.geom.builders.UVPair.unpackU(packedUV2), net.minecraft.client.model.geom.builders.UVPair.unpackV(packedUV2));
+        uv(3, net.minecraft.client.model.geom.builders.UVPair.unpackU(packedUV3), net.minecraft.client.model.geom.builders.UVPair.unpackV(packedUV3));
+        int lightEmission = quad.lightEmission();
+        int lightmap = net.minecraft.client.renderer.LightTexture.pack(lightEmission, lightEmission);
+        lightmap(lightmap, lightmap, lightmap, lightmap);
+        normalFlags(0);
+        nominalFace(quad.direction());
+        emissive(lightEmission == 15);
+        diffuseShade(quad.shade());
+        net.fabricmc.fabric.api.renderer.v1.mesh.QuadAtlas atlas = net.fabricmc.fabric.api.renderer.v1.mesh.QuadAtlas.of(quad.sprite().atlasLocation());
+        if (atlas == null) {
+            atlas = net.fabricmc.fabric.api.renderer.v1.mesh.QuadAtlas.BLOCK;
+        }
+        atlas(atlas);
+        tintIndex(quad.tintIndex());
+        return this;
+    }
 
-	@Override
-	public final MutableQuadViewImpl cullFace(@Nullable Direction face) {
-		data[baseIndex + HEADER_BITS] = EncodingFormat.cullFace(data[baseIndex + HEADER_BITS], face);
-		nominalFace(face);
-		return this;
-	}
+    @Override // net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter
+    public void pushTransform(net.fabricmc.fabric.api.renderer.v1.mesh.QuadTransform transform) {
+        if (transform == null) {
+            throw new java.lang.NullPointerException("QuadTransform cannot be null!");
+        }
+        this.transformStack.push(transform);
+        if (this.transformStack.size() == 1) {
+            this.activeTransform = transform;
+        } else if (this.transformStack.size() == 2) {
+            this.activeTransform = this.stackTransform;
+        }
+    }
 
-	@Override
-	public MutableQuadViewImpl renderLayer(@Nullable ChunkSectionLayer renderLayer) {
-		data[baseIndex + HEADER_BITS] = EncodingFormat.renderLayer(data[baseIndex + HEADER_BITS], renderLayer);
-		return this;
-	}
+    @Override // net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter
+    public void popTransform() {
+        this.transformStack.pop();
+        if (this.transformStack.isEmpty()) {
+            this.activeTransform = NO_TRANSFORM;
+        } else if (this.transformStack.size() == 1) {
+            this.activeTransform = (net.fabricmc.fabric.api.renderer.v1.mesh.QuadTransform) this.transformStack.getFirst();
+        }
+    }
 
-	@Override
-	public MutableQuadViewImpl emissive(boolean emissive) {
-		data[baseIndex + HEADER_BITS] = EncodingFormat.emissive(data[baseIndex + HEADER_BITS], emissive);
-		return this;
-	}
+    public final void transformAndEmit() {
+        if (this.activeTransform.transform(this)) {
+            emitDirectly();
+        }
+    }
 
-	@Override
-	public MutableQuadViewImpl diffuseShade(boolean shade) {
-		data[baseIndex + HEADER_BITS] = EncodingFormat.diffuseShade(data[baseIndex + HEADER_BITS], shade);
-		return this;
-	}
-
-	@Override
-	public MutableQuadViewImpl ambientOcclusion(TriState ao) {
-		Objects.requireNonNull(ao, "ambient occlusion TriState may not be null");
-		data[baseIndex + HEADER_BITS] = EncodingFormat.ambientOcclusion(data[baseIndex + HEADER_BITS], ao);
-		return this;
-	}
-
-	@Override
-	public MutableQuadViewImpl glint(@Nullable ItemStackRenderState.FoilType glint) {
-		data[baseIndex + HEADER_BITS] = EncodingFormat.glint(data[baseIndex + HEADER_BITS], glint);
-		return this;
-	}
-
-	@Override
-	public MutableQuadViewImpl shadeMode(ShadeMode mode) {
-		Objects.requireNonNull(mode, "ShadeMode may not be null");
-		data[baseIndex + HEADER_BITS] = EncodingFormat.shadeMode(data[baseIndex + HEADER_BITS], mode);
-		return this;
-	}
-
-	@Override
-	public final MutableQuadViewImpl tintIndex(int tintIndex) {
-		data[baseIndex + HEADER_TINT_INDEX] = tintIndex;
-		return this;
-	}
-
-	@Override
-	public final MutableQuadViewImpl tag(int tag) {
-		data[baseIndex + HEADER_TAG] = tag;
-		return this;
-	}
-
-	@Override
-	public MutableQuadViewImpl copyFrom(QuadView quad) {
-		final QuadViewImpl q = (QuadViewImpl) quad;
-		System.arraycopy(q.data, q.baseIndex, data, baseIndex, EncodingFormat.TOTAL_STRIDE);
-		nominalFace = q.nominalFace;
-		isGeometryInvalid = q.isGeometryInvalid;
-
-		if (!isGeometryInvalid) {
-			faceNormal.set(q.faceNormal);
-		}
-
-		return this;
-	}
-
-	@Override
-	public final MutableQuadViewImpl fromVanilla(int[] quadData, int startIndex) {
-		System.arraycopy(quadData, startIndex, data, baseIndex + HEADER_STRIDE, VANILLA_QUAD_STRIDE);
-		isGeometryInvalid = true;
-
-		int normalFlags = 0;
-		int colorIndex = baseIndex + VERTEX_COLOR;
-		int normalIndex = baseIndex + VERTEX_NORMAL;
-
-		for (int i = 0; i < 4; i++) {
-			data[colorIndex] = ColorHelper.fromVanillaColor(data[colorIndex]);
-
-			// Set normal flag if normal is not zero, ignoring W component
-			if ((data[normalIndex] & 0xFFFFFF) != 0) {
-				normalFlags |= 1 << i;
-			}
-
-			colorIndex += VERTEX_STRIDE;
-			normalIndex += VERTEX_STRIDE;
-		}
-
-		normalFlags(normalFlags);
-		return this;
-	}
-
-	@Override
-	public final MutableQuadViewImpl fromBakedQuad(BakedQuad quad) {
-		fromVanilla(quad.vertices(), 0);
-//		data[baseIndex + HEADER_BITS] = EncodingFormat.cullFace(0, cullFace);
-		nominalFace(quad.direction());
-		diffuseShade(quad.shade());
-		tintIndex(quad.tintIndex());
-
-//		tag(0);
-
-		// Copy data from BakedQuad instead of calculating properties
-        ModelQuadView quadView = (ModelQuadView) (Object) quad;
-		int normal = quadView.getNormal();
-		data[baseIndex + HEADER_FACE_NORMAL] = normal;
-		NormalHelper.unpackNormalTo(normal, faceNormal);
-
-		Direction lightFace = quadView.lightFace();
-		data[baseIndex + HEADER_BITS] = EncodingFormat.lightFace(data[baseIndex + HEADER_BITS], lightFace);
-		data[baseIndex + HEADER_BITS] = EncodingFormat.geometryFlags(data[baseIndex + HEADER_BITS], quadView.getFlags());
-
-		this.facing = quadView.getQuadFacing();
-		this.isGeometryInvalid = false;
-
-		int lightEmission = quad.lightEmission();
-
-		if (lightEmission > 0) {
-			for (int i = 0; i < 4; i++) {
-				lightmap(i, LightTexture.lightCoordsWithEmission(lightmap(i), lightEmission));
-			}
-		}
-
-		return this;
-	}
-
-	@Override
-	public void pushTransform(QuadTransform transform) {
-		if (transform == null) {
-			throw new NullPointerException("QuadTransform cannot be null!");
-		}
-
-		transformStack.push(transform);
-		hasTransform = true;
-
-		if (transformStack.size() == 1) {
-			activeTransform = transform;
-		} else if (transformStack.size() == 2) {
-			activeTransform = stackTransform;
-		}
-	}
-
-	@Override
-	public void popTransform() {
-		transformStack.pop();
-
-		if (transformStack.size() == 0) {
-			activeTransform = NO_TRANSFORM;
-			hasTransform = false;
-		} else if (transformStack.size() == 1) {
-			activeTransform = transformStack.get(0);
-		}
-	}
-
-	/**
-	 * Emit the quad without applying transforms and without clearing the underlying data.
-	 * Geometry is not guaranteed to be valid when called, but can be computed by calling {@link #computeGeometry()}.
-	 */
-	protected abstract void emitDirectly();
-
-	/**
-	 * Apply transforms and then if transforms return true, emit the quad without clearing the underlying data.
-	 */
-	public final void transformAndEmit() {
-		if (activeTransform.transform(this)) {
-			emitDirectly();
-		}
-	}
-
-	@Override
-	public final MutableQuadViewImpl emit() {
-		transformAndEmit();
-		clear();
-		return this;
-	}
+    @Override // net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter
+    public final net.vulkanmod.render.chunk.build.frapi.mesh.MutableQuadViewImpl emit() {
+        transformAndEmit();
+        clear();
+        return this;
+    }
 }

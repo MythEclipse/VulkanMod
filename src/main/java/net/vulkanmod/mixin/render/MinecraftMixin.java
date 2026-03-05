@@ -1,71 +1,52 @@
 package net.vulkanmod.mixin.render;
 
-import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.systems.TimerQuery;
-import net.minecraft.client.GraphicsStatus;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.Options;
-import net.minecraft.client.main.GameConfig;
-import net.minecraft.util.profiling.ProfilerFiller;
-import net.vulkanmod.Initializer;
-import net.vulkanmod.render.texture.SpriteUpdateUtil;
-import net.vulkanmod.vulkan.Renderer;
-import net.vulkanmod.vulkan.Vulkan;
-import org.objectweb.asm.Opcodes;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-
-import java.util.Optional;
-
-@Mixin(Minecraft.class)
+/* JADX INFO: loaded from: VulkanMod_1.21.11-0.6.0.jar:net/vulkanmod/mixin/render/MinecraftMixin.class */
+@org.spongepowered.asm.mixin.Mixin({net.minecraft.client.Minecraft.class})
 public class MinecraftMixin {
 
-    @Shadow public boolean noRender;
-    @Shadow @Final public Options options;
+    @org.spongepowered.asm.mixin.Shadow
+    public boolean noRender;
 
-    @Inject(method = "<init>", at = @At(value = "RETURN"))
-    private void forceGraphicsMode(GameConfig gameConfig, CallbackInfo ci) {
-        var graphicsModeOption = this.options.graphicsMode();
+    @org.spongepowered.asm.mixin.Shadow
+    @org.spongepowered.asm.mixin.Final
+    public net.minecraft.client.Options options;
 
-        if (graphicsModeOption.get() == GraphicsStatus.FABULOUS) {
-            Initializer.LOGGER.error("Fabulous graphics mode not supported, forcing Fancy");
-            graphicsModeOption.set(GraphicsStatus.FANCY);
+    @org.spongepowered.asm.mixin.injection.Inject(method = {"<init>"}, at = {@org.spongepowered.asm.mixin.injection.At("RETURN")})
+    private void forceGraphicsMode(net.minecraft.client.main.GameConfig gameConfig, org.spongepowered.asm.mixin.injection.callback.CallbackInfo ci) {
+        net.minecraft.client.OptionInstance<net.minecraft.client.GraphicsPreset> graphicsModeOption = this.options.graphicsPreset();
+        if (graphicsModeOption.get() == net.minecraft.client.GraphicsPreset.FABULOUS) {
+            net.vulkanmod.Initializer.LOGGER.error("Fabulous graphics mode not supported, forcing Fancy.");
+            graphicsModeOption.set(net.minecraft.client.GraphicsPreset.FANCY);
+        }
+        if (((java.lang.Boolean) this.options.improvedTransparency().get()).booleanValue()) {
+            net.vulkanmod.Initializer.LOGGER.error("Improved transparency currently not supported, forcing it off.");
+            this.options.improvedTransparency().set(false);
         }
     }
 
-    @Inject(method = "runTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;tick()V"),
-    locals = LocalCapture.CAPTURE_FAILHARD)
-    private void redirectResourceTick(boolean bl, CallbackInfo ci, int i, ProfilerFiller profilerFiller, int j) {
-        int n = Math.min(10, i) - 1;
+    @org.spongepowered.asm.mixin.injection.Inject(method = {"runTick"}, at = {@org.spongepowered.asm.mixin.injection.At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;tick()V")})
+    private void redirectResourceTick(boolean bl, org.spongepowered.asm.mixin.injection.callback.CallbackInfo ci, @com.llamalad7.mixinextras.sugar.Local(ordinal = 0) int i, @com.llamalad7.mixinextras.sugar.Local(ordinal = 1) int j) {
+        int n = java.lang.Math.min(10, i) - 1;
         boolean doUpload = j == n;
-        SpriteUpdateUtil.setDoUpload(doUpload);
+        net.vulkanmod.render.texture.SpriteUpdateUtil.setDoUpload(doUpload);
     }
 
-    @Inject(method = "close", at = @At(value = "HEAD"))
-    public void close(CallbackInfo ci) {
-        Vulkan.waitIdle();
+    @org.spongepowered.asm.mixin.injection.Inject(method = {"close"}, at = {@org.spongepowered.asm.mixin.injection.At("HEAD")})
+    public void close(org.spongepowered.asm.mixin.injection.callback.CallbackInfo ci) {
+        net.vulkanmod.vulkan.Vulkan.waitIdle();
     }
 
-
-    @Inject(method = "close", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/VirtualScreen;close()V"))
-    public void close2(CallbackInfo ci) {
-        Vulkan.cleanUp();
+    @org.spongepowered.asm.mixin.injection.Inject(method = {"close"}, at = {@org.spongepowered.asm.mixin.injection.At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/VirtualScreen;close()V")})
+    public void close2(org.spongepowered.asm.mixin.injection.callback.CallbackInfo ci) {
+        net.vulkanmod.vulkan.Vulkan.cleanUp();
     }
 
-    @Inject(method = "resizeDisplay", at = @At("HEAD"))
-    public void onResolutionChanged(CallbackInfo ci) {
-        Renderer.scheduleSwapChainUpdate();
+    @org.spongepowered.asm.mixin.injection.Inject(method = {"resizeDisplay"}, at = {@org.spongepowered.asm.mixin.injection.At("HEAD")})
+    public void onResolutionChanged(org.spongepowered.asm.mixin.injection.callback.CallbackInfo ci) {
+        net.vulkanmod.vulkan.Renderer.scheduleSwapChainUpdate();
     }
 
-    // Fixes crash when minimizing window before setScreen is called
-    @Redirect(method = "setScreen", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;noRender:Z", opcode = Opcodes.PUTFIELD))
-    private void keepVar(Minecraft instance, boolean value) {}
-
+    @org.spongepowered.asm.mixin.injection.Redirect(method = {"setScreen"}, at = @org.spongepowered.asm.mixin.injection.At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;noRender:Z", opcode = org.lwjgl.vulkan.VK10.VK_FORMAT_ASTC_12x10_UNORM_BLOCK))
+    private void keepVar(net.minecraft.client.Minecraft instance, boolean value) {
+    }
 }

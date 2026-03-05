@@ -1,35 +1,21 @@
 package net.vulkanmod.mixin.texture.update;
 
-import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.client.renderer.texture.Tickable;
-import net.vulkanmod.Initializer;
-import net.vulkanmod.render.texture.SpriteUpdateUtil;
-import net.vulkanmod.vulkan.Renderer;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
-
-import java.util.Set;
-
-@Mixin(TextureManager.class)
+/* JADX INFO: loaded from: VulkanMod_1.21.11-0.6.0.jar:net/vulkanmod/mixin/texture/update/MTextureManager.class */
+@org.spongepowered.asm.mixin.Mixin({net.minecraft.client.renderer.texture.TextureManager.class})
 public abstract class MTextureManager {
 
-    @Shadow @Final private Set<Tickable> tickableTextures;
+    @org.spongepowered.asm.mixin.Shadow
+    @org.spongepowered.asm.mixin.Final
+    private java.util.Set<net.minecraft.client.renderer.texture.TickableTexture> tickableTextures;
 
-    /**
-     * @author
-     */
-    @Overwrite
+    @org.spongepowered.asm.mixin.Overwrite
     public void tick() {
-        if (Renderer.skipRendering || !Initializer.CONFIG.textureAnimations)
+        if (net.vulkanmod.vulkan.Renderer.skipRendering || !net.vulkanmod.Initializer.CONFIG.textureAnimations) {
             return;
-
-        //Debug D
-        for (Tickable tickable : this.tickableTextures) {
+        }
+        for (net.minecraft.client.renderer.texture.TickableTexture tickable : this.tickableTextures) {
             tickable.tick();
         }
-
-        SpriteUpdateUtil.transitionLayouts();
+        net.vulkanmod.render.texture.SpriteUpdateUtil.transitionLayouts();
     }
 }

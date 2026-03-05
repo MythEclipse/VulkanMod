@@ -17,8 +17,10 @@
 package net.vulkanmod.render.chunk.build.frapi.accessor;
 
 
+import net.fabricmc.fabric.api.renderer.v1.render.ItemRenderTypeGetter;
 import net.vulkanmod.render.chunk.build.frapi.mesh.MutableMeshImpl;
 
 public interface AccessLayerRenderState {
-	MutableMeshImpl getMutableMesh();
+        MutableMeshImpl getMutableMesh();
+        void setRenderTypeGetter(ItemRenderTypeGetter renderTypeGetter);
 }

@@ -1,30 +1,18 @@
 package net.vulkanmod.render.vertex;
 
-import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.vulkanmod.Initializer;
-import net.vulkanmod.render.vertex.format.I32_SNorm;
-import org.apache.logging.log4j.Logger;
-import org.lwjgl.system.MemoryUtil;
-
-import java.nio.ByteBuffer;
-
-public class TerrainBufferBuilder implements VertexConsumer {
-    private static final Logger LOGGER = Initializer.LOGGER;
-    private static final MemoryUtil.MemoryAllocator ALLOCATOR = MemoryUtil.getAllocator(false);
-
+/* JADX INFO: loaded from: VulkanMod_1.21.11-0.6.0.jar:net/vulkanmod/render/vertex/TerrainBufferBuilder.class */
+public class TerrainBufferBuilder implements com.mojang.blaze3d.vertex.VertexConsumer {
+    private static final org.apache.logging.log4j.Logger LOGGER = net.vulkanmod.Initializer.LOGGER;
+    private static final org.lwjgl.system.MemoryUtil.MemoryAllocator ALLOCATOR = org.lwjgl.system.MemoryUtil.getAllocator(false);
     private int capacity;
     private int vertexSize;
-
     protected long bufferPtr;
-
     protected int nextElementByte;
     int vertices;
+    private long elementPtr;
+    private net.vulkanmod.render.vertex.VertexBuilder vertexBuilder;
 
-	private long elementPtr;
-
-    private VertexBuilder vertexBuilder;
-
-    public TerrainBufferBuilder(int size, int vertexSize, VertexBuilder vertexBuilder) {
+    public TerrainBufferBuilder(int size, int vertexSize, net.vulkanmod.render.vertex.VertexBuilder vertexBuilder) {
         this.bufferPtr = ALLOCATOR.malloc(size);
         this.capacity = size;
         this.vertexSize = vertexSize;
@@ -32,36 +20,35 @@ public class TerrainBufferBuilder implements VertexConsumer {
     }
 
     public void ensureCapacity() {
-        this.ensureCapacity(this.vertexSize * 4);
+        ensureCapacity(this.vertexSize * 4);
     }
 
     private void ensureCapacity(int size) {
         if (this.nextElementByte + size > this.capacity) {
             int capacity = this.capacity;
             int newSize = (capacity + size) * 2;
-            this.resize(newSize);
+            resize(newSize);
         }
     }
 
     private void resize(int i) {
         this.bufferPtr = ALLOCATOR.realloc(this.bufferPtr, i);
-        LOGGER.debug("Needed to grow BufferBuilder buffer: Old size {} bytes, new size {} bytes.", this.capacity, i);
-        if (this.bufferPtr == 0L) {
-            throw new OutOfMemoryError("Failed to resize buffer from " + this.capacity + " bytes to " + i + " bytes");
-        } else {
-            this.capacity = i;
+        LOGGER.debug("Needed to grow BufferBuilder buffer: Old size {} bytes, new size {} bytes.", java.lang.Integer.valueOf(this.capacity), java.lang.Integer.valueOf(i));
+        if (this.bufferPtr == 0) {
+            throw new java.lang.OutOfMemoryError("Failed to resize buffer from " + this.capacity + " bytes to " + i + " bytes");
         }
+        this.capacity = i;
     }
 
     public void endVertex() {
         this.nextElementByte += this.vertexSize;
-        ++this.vertices;
+        this.vertices++;
     }
 
     public void vertex(float x, float y, float z, int color, float u, float v, int light, int packedNormal) {
-        final long ptr = this.bufferPtr + this.nextElementByte;
+        long ptr = this.bufferPtr + ((long) this.nextElementByte);
         this.vertexBuilder.vertex(ptr, x, y, z, color, u, v, light, packedNormal);
-        this.endVertex();
+        endVertex();
     }
 
     public void end() {
@@ -76,70 +63,65 @@ public class TerrainBufferBuilder implements VertexConsumer {
         ALLOCATOR.free(this.bufferPtr);
     }
 
-    public ByteBuffer getBuffer() {
-        return MemoryUtil.memByteBuffer(this.bufferPtr, this.vertices * this.vertexSize);
+    public java.nio.ByteBuffer getBuffer() {
+        return org.lwjgl.system.MemoryUtil.memByteBuffer(this.bufferPtr, this.vertices * this.vertexSize);
     }
 
     public long getPtr() {
-        return bufferPtr;
+        return this.bufferPtr;
     }
 
     public int getVertices() {
-        return vertices;
+        return this.vertices;
     }
 
     public int getNextElementByte() {
-        return nextElementByte;
+        return this.nextElementByte;
     }
 
-	@Override
-	public VertexConsumer addVertex(float x, float y, float z) {
-		this.elementPtr = this.bufferPtr + this.nextElementByte;
-		this.endVertex();
+    public com.mojang.blaze3d.vertex.VertexConsumer addVertex(float x, float y, float z) {
+        this.elementPtr = this.bufferPtr + ((long) this.nextElementByte);
+        endVertex();
+        this.vertexBuilder.position(this.elementPtr, x, y, z);
+        return this;
+    }
 
-		this.vertexBuilder.position(this.elementPtr, x, y, z);
+    public com.mojang.blaze3d.vertex.VertexConsumer setColor(int r, int g, int b, int a) {
+        int color = ((a & 255) << 24) | ((b & 255) << 16) | ((g & 255) << 8) | (r & 255);
+        this.vertexBuilder.color(this.elementPtr, color);
+        return this;
+    }
 
-		return this;
-	}
+    public com.mojang.blaze3d.vertex.VertexConsumer setColor(int color) {
+        this.vertexBuilder.color(this.elementPtr, color);
+        return this;
+    }
 
-	@Override
-	public VertexConsumer setColor(int r, int g, int b, int a) {
-		int color = (a & 0xFF) << 24 | (b & 0xFF) << 16 | (g & 0xFF) << 8 | (r & 0xFF);
+    public com.mojang.blaze3d.vertex.VertexConsumer setUv(float u, float v) {
+        this.vertexBuilder.uv(this.elementPtr, u, v);
+        return this;
+    }
 
-		this.vertexBuilder.color(this.elementPtr, color);
+    public com.mojang.blaze3d.vertex.VertexConsumer setLight(int i) {
+        this.vertexBuilder.light(this.elementPtr, i);
+        return this;
+    }
 
-		return this;
-	}
+    public com.mojang.blaze3d.vertex.VertexConsumer setNormal(float f, float g, float h) {
+        int packedNormal = net.vulkanmod.render.vertex.format.I32_SNorm.packNormal(f, g, h);
+        this.vertexBuilder.normal(this.elementPtr, packedNormal);
+        return this;
+    }
 
-	@Override
-	public VertexConsumer setUv(float u, float v) {
-		this.vertexBuilder.uv(this.elementPtr, u, v);
+    public com.mojang.blaze3d.vertex.VertexConsumer setLineWidth(float f) {
+        return this;
+    }
 
-		return this;
-	}
+    public com.mojang.blaze3d.vertex.VertexConsumer setUv1(int i, int j) {
+        return this;
+    }
 
-	public VertexConsumer setLight(int i) {
-		this.vertexBuilder.light(this.elementPtr, i);
-
-		return this;
-	}
-
-	@Override
-	public VertexConsumer setNormal(float f, float g, float h) {
-		int packedNormal = I32_SNorm.packNormal(f, g, h);
-
-		this.vertexBuilder.normal(this.elementPtr, packedNormal);
-
-		return this;
-	}
-
-	@Override
-	public VertexConsumer setUv1(int i, int j) {
-		return this;
-	}
-
-	@Override
-	public VertexConsumer setUv2(int i, int j) {
-		return this;
-	}
+    public com.mojang.blaze3d.vertex.VertexConsumer setUv2(int i, int j) {
+        return this;
+    }
 }

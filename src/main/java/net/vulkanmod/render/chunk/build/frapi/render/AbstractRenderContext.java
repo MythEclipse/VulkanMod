@@ -1,82 +1,49 @@
-/*
- * Copyright (c) 2016, 2017, 2018, 2019 FabricMC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package net.vulkanmod.render.chunk.build.frapi.render;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
-import net.vulkanmod.render.chunk.build.frapi.mesh.EncodingFormat;
-import net.vulkanmod.render.chunk.build.frapi.mesh.MutableQuadViewImpl;
-import org.joml.Matrix3f;
-import org.joml.Matrix4f;
-import org.joml.Vector3f;
-import org.joml.Vector4f;
-
-
+/* JADX INFO: loaded from: VulkanMod_1.21.11-0.6.0.jar:net/vulkanmod/render/chunk/build/frapi/render/AbstractRenderContext.class */
 public abstract class AbstractRenderContext {
-	private final MutableQuadViewImpl editorQuad = new MutableQuadViewImpl() {
-		{
-			data = new int[EncodingFormat.TOTAL_STRIDE];
-			clear();
-		}
+    private final net.vulkanmod.render.chunk.build.frapi.mesh.MutableQuadViewImpl editorQuad = new net.vulkanmod.render.chunk.build.frapi.mesh.MutableQuadViewImpl() { // from class: net.vulkanmod.render.chunk.build.frapi.render.AbstractRenderContext.1
+        {
+            this.data = new int[net.vulkanmod.render.chunk.build.frapi.mesh.EncodingFormat.TOTAL_STRIDE];
+            clear();
+        }
 
-		@Override
-		protected void emitDirectly() {
-			bufferQuad(this);
-		}
-	};
+        @Override // net.vulkanmod.render.chunk.build.frapi.mesh.MutableQuadViewImpl
+        protected void emitDirectly() {
+            net.vulkanmod.render.chunk.build.frapi.render.AbstractRenderContext.this.bufferQuad(this);
+        }
+    };
+    private final org.joml.Vector4f posVec = new org.joml.Vector4f();
+    private final org.joml.Vector3f normalVec = new org.joml.Vector3f();
+    protected com.mojang.blaze3d.vertex.PoseStack.Pose matrices;
+    protected int overlay;
 
-	private final Vector4f posVec = new Vector4f();
-	private final Vector3f normalVec = new Vector3f();
+    protected abstract void bufferQuad(net.vulkanmod.render.chunk.build.frapi.mesh.MutableQuadViewImpl mutableQuadViewImpl);
 
-	protected PoseStack.Pose matrices;
-	protected int overlay;
+    protected net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter getEmitter() {
+        this.editorQuad.clear();
+        return this.editorQuad;
+    }
 
-	protected QuadEmitter getEmitter() {
-		editorQuad.clear();
-		return editorQuad;
-	}
-
-	protected abstract void bufferQuad(MutableQuadViewImpl quadView);
-
-	/** final output step, common to all renders. */
-	protected void bufferQuad(MutableQuadViewImpl quad, VertexConsumer vertexConsumer) {
-		final Vector4f posVec = this.posVec;
-		final Vector3f normalVec = this.normalVec;
-		final PoseStack.Pose matrices = this.matrices;
-		final Matrix4f posMatrix = matrices.pose();
-		final boolean useNormals = quad.hasVertexNormals();
-
-		if (useNormals) {
-			quad.populateMissingNormals();
-		} else {
-			matrices.transformNormal(quad.faceNormal(), normalVec);
-		}
-
-		for (int i = 0; i < 4; i++) {
-			posVec.set(quad.x(i), quad.y(i), quad.z(i), 1.0f);
-			posVec.mul(posMatrix);
-
-			if (useNormals) {
-				quad.copyNormal(i, normalVec);
-				matrices.transformNormal(normalVec, normalVec);
-			}
-
-			vertexConsumer.addVertex(posVec.x(), posVec.y(), posVec.z(), quad.color(i), quad.u(i), quad.v(i), overlay, quad.lightmap(i), normalVec.x(), normalVec.y(), normalVec.z());
-		}
-	}
+    protected void bufferQuad(net.vulkanmod.render.chunk.build.frapi.mesh.MutableQuadViewImpl quad, com.mojang.blaze3d.vertex.VertexConsumer vertexConsumer) {
+        org.joml.Vector4f posVec = this.posVec;
+        org.joml.Vector3f normalVec = this.normalVec;
+        com.mojang.blaze3d.vertex.PoseStack.Pose matrices = this.matrices;
+        org.joml.Matrix4f posMatrix = matrices.pose();
+        boolean useNormals = quad.hasVertexNormals();
+        if (useNormals) {
+            quad.populateMissingNormals();
+        } else {
+            matrices.transformNormal(quad.faceNormal(), normalVec);
+        }
+        for (int i = 0; i < 4; i++) {
+            posVec.set(quad.x(i), quad.y(i), quad.z(i), 1.0f);
+            posVec.mul(posMatrix);
+            if (useNormals) {
+                quad.copyNormal(i, normalVec);
+                matrices.transformNormal(normalVec, normalVec);
+            }
+            vertexConsumer.addVertex(posVec.x(), posVec.y(), posVec.z(), quad.color(i), quad.u(i), quad.v(i), this.overlay, quad.lightmap(i), normalVec.x(), normalVec.y(), normalVec.z());
+        }
+    }
 }

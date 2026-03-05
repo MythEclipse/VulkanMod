@@ -1,25 +1,15 @@
 package net.vulkanmod.mixin.debug;
 
-import net.minecraft.client.gui.components.debug.DebugScreenEntries;
-import net.minecraft.client.gui.components.debug.DebugScreenEntry;
-import net.minecraft.resources.ResourceLocation;
-import net.vulkanmod.render.profiling.DebugEntryMemoryStats;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-@Mixin(DebugScreenEntries.class)
+/* JADX INFO: loaded from: VulkanMod_1.21.11-0.6.0.jar:net/vulkanmod/mixin/debug/DebugScreenEntriesM.class */
+@org.spongepowered.asm.mixin.Mixin({net.minecraft.client.gui.components.debug.DebugScreenEntries.class})
 public abstract class DebugScreenEntriesM {
-
-    @Shadow
-    public static ResourceLocation register(ResourceLocation resourceLocation, DebugScreenEntry debugScreenEntry) {
+    @org.spongepowered.asm.mixin.Shadow
+    public static net.minecraft.resources.Identifier register(net.minecraft.resources.Identifier resourceLocation, net.minecraft.client.gui.components.debug.DebugScreenEntry debugScreenEntry) {
         return null;
     }
 
-    @Inject(method = "<clinit>", at = @At("RETURN"))
-    private static void addEntry(CallbackInfo ci) {
-        register(ResourceLocation.fromNamespaceAndPath("vkmod","stats"), new DebugEntryMemoryStats());
+    @org.spongepowered.asm.mixin.injection.Inject(method = {"<clinit>"}, at = {@org.spongepowered.asm.mixin.injection.At("RETURN")})
+    private static void addEntry(org.spongepowered.asm.mixin.injection.callback.CallbackInfo ci) {
+        register(net.minecraft.resources.Identifier.fromNamespaceAndPath("vkmod", "stats"), new net.vulkanmod.render.profiling.DebugEntryMemoryStats());
     }
 }
