@@ -27,7 +27,7 @@ public abstract class PipelineManager {
     }
 
     private static void createBasicPipelines() {
-        terrainShaderEarlyZ = createPipeline("terrain_earlyZ", terrainVertexFormat);
+        terrainShaderEarlyZ = createPipeline("terrain_earlyz", terrainVertexFormat);
         terrainShader = createPipeline("terrain", terrainVertexFormat);
         fastBlitPipeline = createPipeline("blit", net.vulkanmod.render.vertex.CustomVertexFormat.NONE);
         cloudsPipeline = createPipeline("clouds", com.mojang.blaze3d.vertex.DefaultVertexFormat.POSITION_COLOR);

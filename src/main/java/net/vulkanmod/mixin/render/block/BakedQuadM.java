@@ -92,14 +92,14 @@ public class BakedQuadM implements ModelQuadView {
 
     @Override
     public float getU(int idx) {
-        // U stored in lower 32 bits of packed long
-        return Float.intBitsToFloat((int) getPackedUV(idx));
+        // U stored in upper 32 bits of packed long (UVPair.unpackU: lshr 32, l2i, intBitsToFloat)
+        return Float.intBitsToFloat((int) (getPackedUV(idx) >>> 32));
     }
 
     @Override
     public float getV(int idx) {
-        // V stored in upper 32 bits of packed long
-        return Float.intBitsToFloat((int) (getPackedUV(idx) >>> 32));
+        // V stored in lower 32 bits of packed long (UVPair.unpackV: l2i, intBitsToFloat)
+        return Float.intBitsToFloat((int) getPackedUV(idx));
     }
 
     @Override

@@ -92,7 +92,7 @@ public class SectionGraph {
     private static long initVisibility() {
         long vis = 0;
         for (int dir = 0; dir < 6; dir++) {
-            vis = vis | (1 << (48 + dir)) | (1 << (56 + dir));
+            vis = vis | (1L << (48 + dir)) | (1L << (56 + dir));
         }
         return vis;
     }
@@ -138,8 +138,11 @@ public class SectionGraph {
     private void scheduleRebuilds() {
         for (int i = 0; i < this.rebuildQueue.size(); i++) {
             net.vulkanmod.render.chunk.RenderSection section = this.rebuildQueue.get(i);
-            section.rebuildChunkAsync(this.taskDispatcher, this.renderRegionCache);
-            section.setNotDirty();
+            boolean scheduled = section.rebuildChunkAsync(this.taskDispatcher, this.renderRegionCache);
+            if (scheduled) {
+                section.setNotDirty();
+            }
+            // If not scheduled (chunk not ready), keep dirty so it retries when chunk becomes ready
         }
         this.rebuildQueue.clear();
     }

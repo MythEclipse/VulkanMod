@@ -3,7 +3,7 @@ package net.vulkanmod.vulkan;
 /* JADX INFO: loaded from: VulkanMod_1.21.11-0.6.0.jar:net/vulkanmod/vulkan/VRenderSystem.class */
 public abstract class VRenderSystem {
     private static long window;
-    public static net.minecraft.client.renderer.fog.FogData fogData;
+    public static net.minecraft.client.renderer.fog.FogData fogData = new net.minecraft.client.renderer.fog.FogData();
     private static int currentTime;
     public static boolean depthTest = true;
     public static boolean depthMask = true;
