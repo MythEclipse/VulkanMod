@@ -232,11 +232,12 @@ public class CloudRenderer {
     static class CloudGrid {
         final int width;
         final int[] pixels;
-        final byte[] renderFaces = computeRenderFaces();
+        final byte[] renderFaces;
 
         CloudGrid(int[] pixels, int width) {
             this.pixels = pixels;
             this.width = width;
+            this.renderFaces = computeRenderFaces();
         }
 
         byte[] computeRenderFaces() {

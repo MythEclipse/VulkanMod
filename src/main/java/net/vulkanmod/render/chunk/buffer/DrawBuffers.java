@@ -366,8 +366,10 @@ public class DrawBuffers {
             }
             updateFadeUniform(currentTime, fadeTimeMs, fadeTimeInv);
             net.vulkanmod.vulkan.shader.descriptor.UBO ubo = pipeline.getUBO(2);
-            ubo.setUseGlobalBuffer(false);
-            ubo.getBufferSlice().set(this.sectionDataBuffer, 0, (int) this.sectionDataBuffer.getBufferSize());
+            if (ubo != null) {
+                ubo.setUseGlobalBuffer(false);
+                ubo.getBufferSlice().set(this.sectionDataBuffer, 0, (int) this.sectionDataBuffer.getBufferSize());
+            }
             if (terrainRenderType == net.vulkanmod.render.vertex.TerrainRenderType.TRANSLUCENT && this.indexBuffer != null) {
                 org.lwjgl.vulkan.VK10.vkCmdBindIndexBuffer(commandBuffer, this.indexBuffer.getId(), 0L, 0);
             }
