@@ -382,6 +382,13 @@ public class GraphicsPipeline extends Pipeline {
 
                         offset += 4;
                     }
+                    else if (type == VertexFormatElement.Type.FLOAT && elementCount == 1) {
+                        // LINE_WIDTH element (new in 1.21.11): GENERIC usage, FLOAT type, count 1
+                        posDescription.format(VK_FORMAT_R32_SFLOAT);
+                        posDescription.offset(offset);
+
+                        offset += 4;
+                    }
                     else {
                         throw new RuntimeException(String.format("Unknown format: %s", usage));
                     }
