@@ -39,11 +39,9 @@ public abstract class SamplerManager {
             int maxLod,
             boolean anisotropy,
             int maxAnisotropy) {
-        int addressMode =
-                clamp ? VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE : VK_SAMPLER_ADDRESS_MODE_REPEAT;
+        int addressMode = clamp ? VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE : VK_SAMPLER_ADDRESS_MODE_REPEAT;
         int filter = linearFiltering ? VK_FILTER_LINEAR : VK_FILTER_NEAREST;
-        int mipmapMode =
-                linearFiltering ? VK_SAMPLER_MIPMAP_MODE_LINEAR : VK_SAMPLER_MIPMAP_MODE_NEAREST;
+        int mipmapMode = linearFiltering ? VK_SAMPLER_MIPMAP_MODE_LINEAR : VK_SAMPLER_MIPMAP_MODE_NEAREST;
 
         return getSampler(
                 addressMode,
@@ -67,17 +65,16 @@ public abstract class SamplerManager {
             boolean anisotropy,
             float maxAnisotropy,
             int reductionMode) {
-        SamplerInfo samplerInfo =
-                new SamplerInfo(
-                        addressModeU,
-                        addressModeV,
-                        minFilter,
-                        magFilter,
-                        mipmapMode,
-                        maxLod,
-                        anisotropy,
-                        maxAnisotropy,
-                        reductionMode);
+        SamplerInfo samplerInfo = new SamplerInfo(
+                addressModeU,
+                addressModeV,
+                minFilter,
+                magFilter,
+                mipmapMode,
+                maxLod,
+                anisotropy,
+                maxAnisotropy,
+                reductionMode);
 
         long sampler = SAMPLERS.getOrDefault(samplerInfo, 0L);
 
@@ -94,7 +91,6 @@ public abstract class SamplerManager {
     }
 
     private static long createTextureSampler(SamplerInfo sampler) {
-        int state = sampler.encodedState;
 
         try (MemoryStack stack = stackPush()) {
             VkSamplerCreateInfo samplerInfo = VkSamplerCreateInfo.calloc(stack);
@@ -121,8 +117,7 @@ public abstract class SamplerManager {
 
             // Reduction Mode
             if (sampler.hasReductionMode()) {
-                VkSamplerReductionModeCreateInfo reductionModeInfo =
-                        VkSamplerReductionModeCreateInfo.calloc(stack);
+                VkSamplerReductionModeCreateInfo reductionModeInfo = VkSamplerReductionModeCreateInfo.calloc(stack);
                 reductionModeInfo.sType$Default();
                 reductionModeInfo.reductionMode(sampler.getReductionMode());
                 samplerInfo.pNext(reductionModeInfo.address());
@@ -229,7 +224,8 @@ public abstract class SamplerManager {
 
         @Override
         public boolean equals(Object o) {
-            if (o == null || getClass() != o.getClass()) return false;
+            if (o == null || getClass() != o.getClass())
+                return false;
 
             SamplerInfo samplerInfo = (SamplerInfo) o;
             return maxLod == samplerInfo.maxLod

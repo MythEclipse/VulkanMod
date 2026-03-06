@@ -21,25 +21,30 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
 
 /**
- * Handles most texture-baking use cases for model loaders and model libraries via {@link
- * #bakeSprite(MutableQuadView, TextureAtlasSprite, int)}. Also used by the API itself to implement
+ * Handles most texture-baking use cases for model loaders and model libraries
+ * via {@link
+ * #bakeSprite(MutableQuadView, TextureAtlasSprite, int)}. Also used by the API
+ * itself to implement
  * automatic block-breaking models for enhanced models.
  */
 public class TextureHelper {
-    private TextureHelper() {}
+    private TextureHelper() {
+    }
 
     private static final float NORMALIZER = 1f / 16f;
 
     /**
-     * Bakes textures in the provided vertex data, handling UV locking, rotation, interpolation,
+     * Bakes textures in the provided vertex data, handling UV locking, rotation,
+     * interpolation,
      * etc. Textures must not be already baked.
      */
     public static void bakeSprite(MutableQuadView quad, TextureAtlasSprite sprite, int bakeFlags) {
-        if (quad.nominalFace() != null && (MutableQuadView.BAKE_LOCK_UV & bakeFlags) != 0) {
+        Direction nominalFace = quad.nominalFace();
+        if (nominalFace != null && (MutableQuadView.BAKE_LOCK_UV & bakeFlags) != 0) {
             // Assigns normalized UV coordinates based on vertex positions
-            applyModifier(quad, UVLOCKERS[quad.nominalFace().get3DDataValue()]);
-        } else if ((MutableQuadView.BAKE_NORMALIZED & bakeFlags)
-                == 0) { // flag is NOT set, UVs are assumed to not be normalized yet as is the
+            applyModifier(quad, UVLOCKERS[nominalFace.get3DDataValue()]);
+        } else if ((MutableQuadView.BAKE_NORMALIZED & bakeFlags) == 0) { // flag is NOT set, UVs are assumed to not be
+                                                                         // normalized yet as is the
             // default, normalize through dividing by 16
             // Scales from 0-16 to 0-1
             applyModifier(quad, (q, i) -> q.uv(i, q.u(i) * NORMALIZER, q.v(i) * NORMALIZER));
@@ -54,12 +59,12 @@ public class TextureHelper {
         }
 
         if ((MutableQuadView.BAKE_FLIP_U & bakeFlags) != 0) {
-            // Inverts U coordinates.  Assumes normalized (0-1) values.
+            // Inverts U coordinates. Assumes normalized (0-1) values.
             applyModifier(quad, (q, i) -> q.uv(i, 1 - q.u(i), q.v(i)));
         }
 
         if ((MutableQuadView.BAKE_FLIP_V & bakeFlags) != 0) {
-            // Inverts V coordinates.  Assumes normalized (0-1) values.
+            // Inverts V coordinates. Assumes normalized (0-1) values.
             applyModifier(quad, (q, i) -> q.uv(i, q.u(i), 1 - q.v(i)));
         }
 
@@ -67,8 +72,10 @@ public class TextureHelper {
     }
 
     /**
-     * Faster than sprite method. Sprite computes span and normalizes inputs each call, so we'd have
-     * to denormalize before we called, only to have the sprite renormalize immediately.
+     * Faster than sprite method. Sprite computes span and normalizes inputs each
+     * call, so we'd have
+     * to denormalize before we called, only to have the sprite renormalize
+     * immediately.
      */
     private static void interpolate(MutableQuadView q, TextureAtlasSprite sprite) {
         final float uMin = sprite.getU0();
@@ -92,13 +99,12 @@ public class TextureHelper {
         }
     }
 
-    private static final VertexModifier[] ROTATIONS =
-            new VertexModifier[] {
-                null,
-                (q, i) -> q.uv(i, q.v(i), 1 - q.u(i)), // 90
-                (q, i) -> q.uv(i, 1 - q.u(i), 1 - q.v(i)), // 180
-                (q, i) -> q.uv(i, 1 - q.v(i), q.u(i)) // 270
-            };
+    private static final VertexModifier[] ROTATIONS = new VertexModifier[] {
+            null,
+            (q, i) -> q.uv(i, q.v(i), 1 - q.u(i)), // 90
+            (q, i) -> q.uv(i, 1 - q.u(i), 1 - q.v(i)), // 180
+            (q, i) -> q.uv(i, 1 - q.v(i), q.u(i)) // 270
+    };
 
     private static final VertexModifier[] UVLOCKERS = new VertexModifier[6];
 

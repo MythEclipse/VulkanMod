@@ -19,9 +19,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ModelPart.class)
 public abstract class ModelPartM {
-    @Shadow @Final private List<ModelPart.Cube> cubes;
+    @Shadow
+    @Final
+    private List<ModelPart.Cube> cubes;
 
-    @Unique Vector3f normal = new Vector3f();
+    @Unique
+    Vector3f normal = new Vector3f();
 
     @Inject(method = "compile", at = @At("HEAD"), cancellable = true)
     private void injCompile(
@@ -43,9 +46,7 @@ public abstract class ModelPartM {
 
         ExtendedVertexBuilder vertexBuilder = ExtendedVertexBuilder.of(vertexConsumer);
 
-        boolean useFastFormat = vertexBuilder != null && vertexBuilder.canUseFastVertex();
-
-        if (useFastFormat) {
+        if (vertexBuilder != null && vertexBuilder.canUseFastVertex()) {
             color = ColorUtil.RGBA.fromArgb32(color);
 
             for (ModelPart.Cube cube : this.cubes) {

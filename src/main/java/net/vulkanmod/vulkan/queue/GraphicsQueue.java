@@ -4,10 +4,8 @@ import static org.lwjgl.vulkan.VK10.*;
 
 import net.vulkanmod.vulkan.Synchronization;
 import org.lwjgl.system.MemoryStack;
-import org.lwjgl.vulkan.*;
 
 public class GraphicsQueue extends Queue {
-    public static GraphicsQueue INSTANCE;
 
     private static CommandPool.CommandBuffer currentCmdBuffer;
 
@@ -20,7 +18,7 @@ public class GraphicsQueue extends Queue {
     }
 
     public void endRecordingAndSubmit() {
-        long fence = submitCommands(currentCmdBuffer);
+        submitCommands(currentCmdBuffer);
         Synchronization.INSTANCE.addCommandBuffer(currentCmdBuffer);
 
         currentCmdBuffer = null;

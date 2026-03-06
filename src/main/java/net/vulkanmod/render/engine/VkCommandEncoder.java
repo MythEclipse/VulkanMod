@@ -1,22 +1,22 @@
 package net.vulkanmod.render.engine;
 
+import org.jetbrains.annotations.Nullable;
+
 /* JADX INFO: loaded from: VulkanMod_1.21.11-0.6.0.jar:net/vulkanmod/render/engine/VkCommandEncoder.class */
 public class VkCommandEncoder implements com.mojang.blaze3d.systems.CommandEncoder {
     private static final org.slf4j.Logger LOGGER;
     private final net.vulkanmod.render.engine.VkGpuDevice device;
 
-    @org.jetbrains.annotations.Nullable
+    @Nullable
     private com.mojang.blaze3d.pipeline.RenderPipeline lastPipeline;
 
     private boolean inRenderPass;
 
-    @org.jetbrains.annotations.Nullable private net.vulkanmod.render.engine.EGlProgram lastProgram;
     private int framebufferId = net.vulkanmod.gl.VkGlFramebuffer.genFramebufferId();
     static final /* synthetic */ boolean $assertionsDisabled;
 
     static {
-        $assertionsDisabled =
-                !net.vulkanmod.render.engine.VkCommandEncoder.class.desiredAssertionStatus();
+        $assertionsDisabled = !net.vulkanmod.render.engine.VkCommandEncoder.class.desiredAssertionStatus();
         LOGGER = com.mojang.logging.LogUtils.getLogger();
     }
 
@@ -36,8 +36,7 @@ public class VkCommandEncoder implements com.mojang.blaze3d.systems.CommandEncod
             java.util.function.Supplier<java.lang.String> supplier,
             com.mojang.blaze3d.textures.GpuTextureView colorAttachmentView,
             java.util.OptionalInt optionalInt,
-            @org.jetbrains.annotations.Nullable
-                    com.mojang.blaze3d.textures.GpuTextureView depthTexture,
+            @Nullable com.mojang.blaze3d.textures.GpuTextureView depthTexture,
             java.util.OptionalDouble optionalDouble) {
         if (this.inRenderPass) {
             throw new java.lang.IllegalStateException(
@@ -46,8 +45,8 @@ public class VkCommandEncoder implements com.mojang.blaze3d.systems.CommandEncod
         if (optionalDouble.isPresent() && depthTexture == null) {
             LOGGER.warn("Depth clear value was provided but no depth texture is being used");
         }
-        if (net.minecraft.client.Minecraft.getInstance().getMainRenderTarget().getColorTexture()
-                == colorAttachmentView.texture()) {
+        if (net.minecraft.client.Minecraft.getInstance().getMainRenderTarget().getColorTexture() == colorAttachmentView
+                .texture()) {
             net.vulkanmod.vulkan.Renderer.getInstance().getMainPass().rebindMainTarget();
             int j = 0;
             if (optionalInt.isPresent()) {
@@ -78,11 +77,9 @@ public class VkCommandEncoder implements com.mojang.blaze3d.systems.CommandEncod
             throw new java.lang.IllegalStateException("Depth texture is closed");
         }
         this.inRenderPass = true;
-        com.mojang.blaze3d.textures.GpuTexture depthTexture1 =
-                depthTexture != null ? depthTexture.texture() : null;
-        net.vulkanmod.render.engine.VkFbo fbo =
-                ((net.vulkanmod.render.engine.VkTextureView) colorAttachmentView)
-                        .getFbo(depthTexture1);
+        com.mojang.blaze3d.textures.GpuTexture depthTexture1 = depthTexture != null ? depthTexture.texture() : null;
+        net.vulkanmod.render.engine.VkFbo fbo = ((net.vulkanmod.render.engine.VkTextureView) colorAttachmentView)
+                .getFbo(depthTexture1);
         fbo.bind();
         int j2 = 0;
         if (optionalInt.isPresent()) {
@@ -117,8 +114,8 @@ public class VkCommandEncoder implements com.mojang.blaze3d.systems.CommandEncod
                     "Close the existing render pass before creating a new one!");
         }
         if (net.vulkanmod.vulkan.Renderer.isRecording()) {
-            if (net.minecraft.client.Minecraft.getInstance().getMainRenderTarget().getColorTexture()
-                    == colorAttachment) {
+            if (net.minecraft.client.Minecraft.getInstance().getMainRenderTarget()
+                    .getColorTexture() == colorAttachment) {
                 net.vulkanmod.vulkan.Renderer.getInstance().getMainPass().rebindMainTarget();
                 net.vulkanmod.vulkan.VRenderSystem.setClearColor(
                         net.minecraft.util.ARGB.redFloat(clearColor),
@@ -128,8 +125,7 @@ public class VkCommandEncoder implements com.mojang.blaze3d.systems.CommandEncod
                 net.vulkanmod.vulkan.Renderer.clearAttachments(16384);
                 return;
             }
-            net.vulkanmod.render.engine.VkGpuTexture vkGpuTexture =
-                    (net.vulkanmod.render.engine.VkGpuTexture) colorAttachment;
+            net.vulkanmod.render.engine.VkGpuTexture vkGpuTexture = (net.vulkanmod.render.engine.VkGpuTexture) colorAttachment;
             net.vulkanmod.gl.VkGlFramebuffer.bindFramebuffer(36160, this.framebufferId);
             net.vulkanmod.gl.VkGlFramebuffer.framebufferTexture2D(
                     36160, 36064, 3553, vkGpuTexture.glId(), 0);
@@ -142,28 +138,26 @@ public class VkCommandEncoder implements com.mojang.blaze3d.systems.CommandEncod
                     net.minecraft.util.ARGB.alphaFloat(clearColor));
             net.vulkanmod.vulkan.Renderer.clearAttachments(16384);
             net.vulkanmod.vulkan.Renderer.getInstance().endRenderPass();
-            net.vulkanmod.render.engine.VkFbo fbo =
-                    ((net.vulkanmod.render.engine.VkGpuTexture) colorAttachment).getFbo(null);
+            net.vulkanmod.render.engine.VkFbo fbo = ((net.vulkanmod.render.engine.VkGpuTexture) colorAttachment)
+                    .getFbo(null);
             ((net.vulkanmod.render.engine.VkGpuTexture) colorAttachment).setClearColor(clearColor);
-            net.vulkanmod.vulkan.framebuffer.Framebuffer boundFramebuffer =
-                    net.vulkanmod.vulkan.Renderer.getInstance().getBoundFramebuffer();
+            net.vulkanmod.vulkan.framebuffer.Framebuffer boundFramebuffer = net.vulkanmod.vulkan.Renderer.getInstance()
+                    .getBoundFramebuffer();
             if (boundFramebuffer != null
-                    && boundFramebuffer.getColorAttachment()
-                            == ((net.vulkanmod.render.engine.VkGpuTexture) colorAttachment)
+                    && boundFramebuffer
+                            .getColorAttachment() == ((net.vulkanmod.render.engine.VkGpuTexture) colorAttachment)
                                     .getVulkanImage()) {
                 fbo.clearAttachments();
                 return;
             }
             return;
         }
-        net.vulkanmod.vulkan.queue.GraphicsQueue graphicsQueue =
-                net.vulkanmod.vulkan.device.DeviceManager.getGraphicsQueue();
-        net.vulkanmod.vulkan.queue.CommandPool.CommandBuffer commandBuffer =
-                graphicsQueue.getCommandBuffer();
-        net.vulkanmod.render.engine.VkGpuTexture vkGpuTexture2 =
-                (net.vulkanmod.render.engine.VkGpuTexture) colorAttachment;
-        net.vulkanmod.gl.VkGlFramebuffer glFramebuffer =
-                net.vulkanmod.gl.VkGlFramebuffer.getFramebuffer(this.framebufferId);
+        net.vulkanmod.vulkan.queue.GraphicsQueue graphicsQueue = net.vulkanmod.vulkan.device.DeviceManager
+                .getGraphicsQueue();
+        net.vulkanmod.vulkan.queue.CommandPool.CommandBuffer commandBuffer = graphicsQueue.getCommandBuffer();
+        net.vulkanmod.render.engine.VkGpuTexture vkGpuTexture2 = (net.vulkanmod.render.engine.VkGpuTexture) colorAttachment;
+        net.vulkanmod.gl.VkGlFramebuffer glFramebuffer = net.vulkanmod.gl.VkGlFramebuffer
+                .getFramebuffer(this.framebufferId);
         glFramebuffer.setAttachmentTexture(36064, vkGpuTexture2.glId());
         glFramebuffer.create();
         net.vulkanmod.vulkan.framebuffer.Framebuffer framebuffer = glFramebuffer.getFramebuffer();
@@ -210,8 +204,7 @@ public class VkCommandEncoder implements com.mojang.blaze3d.systems.CommandEncod
             throw new java.lang.IllegalStateException(
                     "Close the existing render pass before creating a new one!");
         }
-        if (net.minecraft.client.Minecraft.getInstance().getMainRenderTarget().getColorTexture()
-                == colorAttachment) {
+        if (net.minecraft.client.Minecraft.getInstance().getMainRenderTarget().getColorTexture() == colorAttachment) {
             net.vulkanmod.vulkan.Renderer.getInstance().getMainPass().rebindMainTarget();
             net.vulkanmod.vulkan.VRenderSystem.clearDepth(clearDepth);
             net.vulkanmod.vulkan.VRenderSystem.setClearColor(
@@ -222,21 +215,18 @@ public class VkCommandEncoder implements com.mojang.blaze3d.systems.CommandEncod
             net.vulkanmod.vulkan.Renderer.clearAttachments(16640);
             return;
         }
-        net.vulkanmod.render.engine.VkFbo fbo =
-                ((net.vulkanmod.render.engine.VkGpuTexture) colorAttachment)
-                        .getFbo(depthAttachment);
+        net.vulkanmod.render.engine.VkFbo fbo = ((net.vulkanmod.render.engine.VkGpuTexture) colorAttachment)
+                .getFbo(depthAttachment);
         ((net.vulkanmod.render.engine.VkGpuTexture) colorAttachment).setClearColor(clearColor);
         ((net.vulkanmod.render.engine.VkGpuTexture) depthAttachment)
                 .setDepthClearValue((float) clearDepth);
-        net.vulkanmod.vulkan.framebuffer.Framebuffer boundFramebuffer =
-                net.vulkanmod.vulkan.Renderer.getInstance().getBoundFramebuffer();
+        net.vulkanmod.vulkan.framebuffer.Framebuffer boundFramebuffer = net.vulkanmod.vulkan.Renderer.getInstance()
+                .getBoundFramebuffer();
         if (boundFramebuffer != null
-                && boundFramebuffer.getColorAttachment()
-                        == ((net.vulkanmod.render.engine.VkGpuTexture) colorAttachment)
-                                .getVulkanImage()
-                && boundFramebuffer.getDepthAttachment()
-                        == ((net.vulkanmod.render.engine.VkGpuTexture) depthAttachment)
-                                .getVulkanImage()) {
+                && boundFramebuffer.getColorAttachment() == ((net.vulkanmod.render.engine.VkGpuTexture) colorAttachment)
+                        .getVulkanImage()
+                && boundFramebuffer.getDepthAttachment() == ((net.vulkanmod.render.engine.VkGpuTexture) depthAttachment)
+                        .getVulkanImage()) {
             fbo.clearAttachments();
         }
     }
@@ -262,15 +252,13 @@ public class VkCommandEncoder implements com.mojang.blaze3d.systems.CommandEncod
                 net.minecraft.util.ARGB.alphaFloat(clearColor));
         int framebufferHeight = colorAttachment.getHeight(0);
         int y02 = (framebufferHeight - height) - y0;
-        net.vulkanmod.vulkan.framebuffer.Framebuffer boundFramebuffer =
-                net.vulkanmod.vulkan.Renderer.getInstance().getBoundFramebuffer();
+        net.vulkanmod.vulkan.framebuffer.Framebuffer boundFramebuffer = net.vulkanmod.vulkan.Renderer.getInstance()
+                .getBoundFramebuffer();
         if (boundFramebuffer != null
-                && boundFramebuffer.getColorAttachment()
-                        == ((net.vulkanmod.render.engine.VkGpuTexture) colorAttachment)
-                                .getVulkanImage()
-                && boundFramebuffer.getDepthAttachment()
-                        == ((net.vulkanmod.render.engine.VkGpuTexture) depthAttachment)
-                                .getVulkanImage()) {
+                && boundFramebuffer.getColorAttachment() == ((net.vulkanmod.render.engine.VkGpuTexture) colorAttachment)
+                        .getVulkanImage()
+                && boundFramebuffer.getDepthAttachment() == ((net.vulkanmod.render.engine.VkGpuTexture) depthAttachment)
+                        .getVulkanImage()) {
             net.vulkanmod.vulkan.Renderer.clearAttachments(16640, x0, y02, width, height);
         }
     }
@@ -281,12 +269,11 @@ public class VkCommandEncoder implements com.mojang.blaze3d.systems.CommandEncod
             throw new java.lang.IllegalStateException(
                     "Close the existing render pass before creating a new one!");
         }
-        net.vulkanmod.vulkan.framebuffer.Framebuffer boundFramebuffer =
-                net.vulkanmod.vulkan.Renderer.getInstance().getBoundFramebuffer();
+        net.vulkanmod.vulkan.framebuffer.Framebuffer boundFramebuffer = net.vulkanmod.vulkan.Renderer.getInstance()
+                .getBoundFramebuffer();
         if (boundFramebuffer != null
-                && boundFramebuffer.getDepthAttachment()
-                        == ((net.vulkanmod.render.engine.VkGpuTexture) depthAttachment)
-                                .getVulkanImage()) {
+                && boundFramebuffer.getDepthAttachment() == ((net.vulkanmod.render.engine.VkGpuTexture) depthAttachment)
+                        .getVulkanImage()) {
             net.vulkanmod.vulkan.VRenderSystem.clearDepth(clearDepth);
             net.vulkanmod.vulkan.Renderer.clearAttachments(256);
         } else {
@@ -302,8 +289,8 @@ public class VkCommandEncoder implements com.mojang.blaze3d.systems.CommandEncod
             throw new java.lang.IllegalStateException(
                     "Close the existing render pass before performing additional commands");
         }
-        net.vulkanmod.render.engine.VkGpuBuffer vkGpuBuffer =
-                (net.vulkanmod.render.engine.VkGpuBuffer) gpuBufferSlice.buffer();
+        net.vulkanmod.render.engine.VkGpuBuffer vkGpuBuffer = (net.vulkanmod.render.engine.VkGpuBuffer) gpuBufferSlice
+                .buffer();
         if (vkGpuBuffer.closed) {
             throw new java.lang.IllegalStateException("Buffer already closed");
         }
@@ -321,10 +308,9 @@ public class VkCommandEncoder implements com.mojang.blaze3d.systems.CommandEncod
                             + " slice size)");
         }
         long dstOffset = gpuBufferSlice.offset();
-        net.vulkanmod.vulkan.queue.CommandPool.CommandBuffer commandBuffer =
-                net.vulkanmod.vulkan.Renderer.getInstance().getTransferCb();
-        net.vulkanmod.vulkan.memory.buffer.StagingBuffer stagingBuffer =
-                net.vulkanmod.vulkan.Vulkan.getStagingBuffer();
+        net.vulkanmod.vulkan.queue.CommandPool.CommandBuffer commandBuffer = net.vulkanmod.vulkan.Renderer.getInstance()
+                .getTransferCb();
+        net.vulkanmod.vulkan.memory.buffer.StagingBuffer stagingBuffer = net.vulkanmod.vulkan.Vulkan.getStagingBuffer();
         stagingBuffer.copyBuffer(size, byteBuffer);
         long srcOffset = stagingBuffer.getOffset();
         org.lwjgl.system.MemoryStack stack = org.lwjgl.system.MemoryStack.stackPush();
@@ -332,8 +318,7 @@ public class VkCommandEncoder implements com.mojang.blaze3d.systems.CommandEncod
             if (!commandBuffer.isRecording()) {
                 commandBuffer.begin(stack);
             }
-            org.lwjgl.vulkan.VkBufferCopy.Buffer copyRegion =
-                    org.lwjgl.vulkan.VkBufferCopy.calloc(1, stack);
+            org.lwjgl.vulkan.VkBufferCopy.Buffer copyRegion = org.lwjgl.vulkan.VkBufferCopy.calloc(1, stack);
             copyRegion.size(size);
             copyRegion.srcOffset(srcOffset);
             copyRegion.dstOffset(dstOffset);
@@ -370,8 +355,8 @@ public class VkCommandEncoder implements com.mojang.blaze3d.systems.CommandEncod
             throw new java.lang.IllegalStateException(
                     "Close the existing render pass before performing additional commands");
         }
-        net.vulkanmod.render.engine.VkGpuBuffer gpuBuffer =
-                (net.vulkanmod.render.engine.VkGpuBuffer) gpuBufferSlice.buffer();
+        net.vulkanmod.render.engine.VkGpuBuffer gpuBuffer = (net.vulkanmod.render.engine.VkGpuBuffer) gpuBufferSlice
+                .buffer();
         if (gpuBuffer.closed) {
             throw new java.lang.IllegalStateException("Buffer already closed");
         }
@@ -397,17 +382,10 @@ public class VkCommandEncoder implements com.mojang.blaze3d.systems.CommandEncod
                             + bufSize
                             + " size buffer)");
         }
-        int i = 0;
-        if (readable) {
-            i = 0 | 1;
-        }
-        if (writable) {
-            int i2 = i | 34;
-        }
-        java.nio.ByteBuffer byteBuffer =
-                org.lwjgl.system.MemoryUtil.memByteBuffer(
-                        gpuBuffer.getBuffer().getDataPtr() + gpuBufferSlice.offset(),
-                        (int) gpuBufferSlice.length());
+
+        java.nio.ByteBuffer byteBuffer = org.lwjgl.system.MemoryUtil.memByteBuffer(
+                gpuBuffer.getBuffer().getDataPtr() + gpuBufferSlice.offset(),
+                (int) gpuBufferSlice.length());
         return new net.vulkanmod.render.engine.VkGpuBuffer.MappedView(0, byteBuffer);
     }
 
@@ -418,8 +396,8 @@ public class VkCommandEncoder implements com.mojang.blaze3d.systems.CommandEncod
             throw new java.lang.IllegalStateException(
                     "Close the existing render pass before performing additional commands");
         }
-        net.vulkanmod.render.engine.VkGpuBuffer vkGpuBuffer =
-                (net.vulkanmod.render.engine.VkGpuBuffer) gpuBufferSlice.buffer();
+        net.vulkanmod.render.engine.VkGpuBuffer vkGpuBuffer = (net.vulkanmod.render.engine.VkGpuBuffer) gpuBufferSlice
+                .buffer();
         if (vkGpuBuffer.closed) {
             throw new java.lang.IllegalStateException("Source buffer already closed");
         }
@@ -427,8 +405,8 @@ public class VkCommandEncoder implements com.mojang.blaze3d.systems.CommandEncod
             throw new java.lang.IllegalStateException(
                     "Source buffer needs USAGE_COPY_DST to be a destination for a copy");
         }
-        net.vulkanmod.render.engine.VkGpuBuffer vkGpuBuffer2 =
-                (net.vulkanmod.render.engine.VkGpuBuffer) gpuBufferSlice2.buffer();
+        net.vulkanmod.render.engine.VkGpuBuffer vkGpuBuffer2 = (net.vulkanmod.render.engine.VkGpuBuffer) gpuBufferSlice2
+                .buffer();
         if (vkGpuBuffer2.closed) {
             throw new java.lang.IllegalStateException("Target buffer already closed");
         }
@@ -552,9 +530,8 @@ public class VkCommandEncoder implements com.mojang.blaze3d.systems.CommandEncod
                 throw new java.lang.IllegalStateException("Destination texture is closed");
             }
             net.vulkanmod.vulkan.texture.VTextureSelector.setActiveTexture(0);
-            net.vulkanmod.gl.VkGlTexture glTexture =
-                    net.vulkanmod.gl.VkGlTexture.getTexture(
-                            ((com.mojang.blaze3d.opengl.GlTexture) gpuTexture).glId());
+            net.vulkanmod.gl.VkGlTexture glTexture = net.vulkanmod.gl.VkGlTexture.getTexture(
+                    ((com.mojang.blaze3d.opengl.GlTexture) gpuTexture).glId());
             net.vulkanmod.vulkan.texture.VTextureSelector.bindTexture(glTexture.getVulkanImage());
             net.vulkanmod.vulkan.texture.VTextureSelector.uploadSubTexture(
                     level,
@@ -682,10 +659,8 @@ public class VkCommandEncoder implements com.mojang.blaze3d.systems.CommandEncod
             int yOffset,
             int width,
             int height) {
-        net.vulkanmod.render.engine.VkGpuBuffer vkGpuBuffer =
-                (net.vulkanmod.render.engine.VkGpuBuffer) gpuBuffer;
-        net.vulkanmod.render.engine.VkGpuTexture vkGpuTexture =
-                (net.vulkanmod.render.engine.VkGpuTexture) gpuTexture;
+        net.vulkanmod.render.engine.VkGpuBuffer vkGpuBuffer = (net.vulkanmod.render.engine.VkGpuBuffer) gpuBuffer;
+        net.vulkanmod.render.engine.VkGpuTexture vkGpuTexture = (net.vulkanmod.render.engine.VkGpuTexture) gpuTexture;
         if (this.inRenderPass) {
             throw new java.lang.IllegalStateException(
                     "Close the existing render pass before performing additional commands");
@@ -697,12 +672,10 @@ public class VkCommandEncoder implements com.mojang.blaze3d.systems.CommandEncod
                             + ", must be >= 0 and < "
                             + gpuTexture.getMipLevels());
         }
-        if (((long)
-                                (gpuTexture.getWidth(mipLevel)
-                                        * gpuTexture.getHeight(mipLevel)
-                                        * vkGpuTexture.getVulkanImage().formatSize))
-                        + dstOffset
-                > gpuBuffer.size()) {
+        if (((long) (gpuTexture.getWidth(mipLevel)
+                * gpuTexture.getHeight(mipLevel)
+                * vkGpuTexture.getVulkanImage().formatSize))
+                + dstOffset > gpuBuffer.size()) {
             throw new java.lang.IllegalArgumentException(
                     "Buffer of size "
                             + gpuBuffer.size()
@@ -820,9 +793,9 @@ public class VkCommandEncoder implements com.mojang.blaze3d.systems.CommandEncod
             throw new java.lang.IllegalStateException(
                     "Close the existing render pass before performing additional commands");
         }
-        return new com.mojang.blaze3d.buffers
-                .GpuFence() { // from class: net.vulkanmod.render.engine.VkCommandEncoder.1
-            public void close() {}
+        return new com.mojang.blaze3d.buffers.GpuFence() { // from class: net.vulkanmod.render.engine.VkCommandEncoder.1
+            public void close() {
+            }
 
             public boolean awaitCompletion(long l) {
                 return true;
@@ -834,7 +807,8 @@ public class VkCommandEncoder implements com.mojang.blaze3d.systems.CommandEncod
         return null;
     }
 
-    public void timerQueryEnd(com.mojang.blaze3d.systems.GpuQuery gpuQuery) {}
+    public void timerQueryEnd(com.mojang.blaze3d.systems.GpuQuery gpuQuery) {
+    }
 
     public void presentTexture(com.mojang.blaze3d.textures.GpuTextureView gpuTexture) {
         throw new java.lang.UnsupportedOperationException();
@@ -844,21 +818,20 @@ public class VkCommandEncoder implements com.mojang.blaze3d.systems.CommandEncod
             net.vulkanmod.render.engine.VkRenderPass renderPass,
             java.util.Collection<com.mojang.blaze3d.systems.RenderPass.Draw<T>> collection,
             @org.jetbrains.annotations.Nullable com.mojang.blaze3d.buffers.GpuBuffer gpuBuffer,
-            @org.jetbrains.annotations.Nullable
-                    com.mojang.blaze3d.vertex.VertexFormat.IndexType indexType,
+            @org.jetbrains.annotations.Nullable com.mojang.blaze3d.vertex.VertexFormat.IndexType indexType,
             java.util.Collection<java.lang.String> collection2,
             T object) {
         if (trySetup(renderPass)) {
             if (indexType == null) {
                 indexType = com.mojang.blaze3d.vertex.VertexFormat.IndexType.SHORT;
             }
-            net.vulkanmod.vulkan.shader.Pipeline pipeline =
-                    net.vulkanmod.interfaces.shader.ExtendedRenderPipeline.of(
-                                    renderPass.getPipeline())
-                            .getPipeline();
+            net.vulkanmod.vulkan.shader.Pipeline pipeline = net.vulkanmod.interfaces.shader.ExtendedRenderPipeline.of(
+                    renderPass.getPipeline())
+                    .getPipeline();
             for (com.mojang.blaze3d.systems.RenderPass.Draw<T> class_10884Var : collection) {
-                com.mojang.blaze3d.vertex.VertexFormat.IndexType indexType2 =
-                        class_10884Var.indexType() == null ? indexType : class_10884Var.indexType();
+                com.mojang.blaze3d.vertex.VertexFormat.IndexType indexType2 = class_10884Var.indexType() == null
+                        ? indexType
+                        : class_10884Var.indexType();
                 renderPass.setIndexBuffer(
                         class_10884Var.indexBuffer() == null
                                 ? gpuBuffer
@@ -881,22 +854,19 @@ public class VkCommandEncoder implements com.mojang.blaze3d.systems.CommandEncod
                                 "Vertex buffer at slot 0 has been closed!");
                     }
                 }
-                java.util.function.BiConsumer<
-                                T, com.mojang.blaze3d.systems.RenderPass.UniformUploader>
-                        biConsumer = class_10884Var.uniformUploaderConsumer();
+                java.util.function.BiConsumer<T, com.mojang.blaze3d.systems.RenderPass.UniformUploader> biConsumer = class_10884Var
+                        .uniformUploaderConsumer();
                 if (biConsumer != null) {
                     biConsumer.accept(
                             object,
                             (string, gpuBufferSlice) -> {
-                                net.vulkanmod.render.engine.EGlProgram glProgram =
-                                        net.vulkanmod.interfaces.shader.ExtendedRenderPipeline.of(
-                                                        renderPass.pipeline)
-                                                .getProgram();
-                                com.mojang.blaze3d.opengl.Uniform uniform =
-                                        glProgram.getUniform(string);
+                                net.vulkanmod.render.engine.EGlProgram glProgram = net.vulkanmod.interfaces.shader.ExtendedRenderPipeline
+                                        .of(
+                                                renderPass.pipeline)
+                                        .getProgram();
+                                com.mojang.blaze3d.opengl.Uniform uniform = glProgram.getUniform(string);
                                 if (uniform instanceof com.mojang.blaze3d.opengl.Uniform.Ubo) {
-                                    com.mojang.blaze3d.opengl.Uniform.Ubo ubo =
-                                            (com.mojang.blaze3d.opengl.Uniform.Ubo) uniform;
+                                    com.mojang.blaze3d.opengl.Uniform.Ubo ubo = (com.mojang.blaze3d.opengl.Uniform.Ubo) uniform;
                                     try {
                                         ubo.blockBinding();
                                     } catch (java.lang.Throwable var7) {
@@ -923,8 +893,7 @@ public class VkCommandEncoder implements com.mojang.blaze3d.systems.CommandEncod
             int vertexOffset,
             int firstIndex,
             int vertexCount,
-            @org.jetbrains.annotations.Nullable
-                    com.mojang.blaze3d.vertex.VertexFormat.IndexType indexType,
+            @org.jetbrains.annotations.Nullable com.mojang.blaze3d.vertex.VertexFormat.IndexType indexType,
             int instanceCount) {
         if (trySetup(renderPass)) {
             if (com.mojang.blaze3d.opengl.GlRenderPass.VALIDATION) {
@@ -960,8 +929,7 @@ public class VkCommandEncoder implements com.mojang.blaze3d.systems.CommandEncod
             int vertexOffset,
             int firstIndex,
             int vertexCount,
-            @org.jetbrains.annotations.Nullable
-                    com.mojang.blaze3d.vertex.VertexFormat.IndexType indexType,
+            @org.jetbrains.annotations.Nullable com.mojang.blaze3d.vertex.VertexFormat.IndexType indexType,
             com.mojang.blaze3d.pipeline.RenderPipeline renderPipeline,
             int instanceCount) {
         int i;
@@ -971,10 +939,8 @@ public class VkCommandEncoder implements com.mojang.blaze3d.systems.CommandEncod
         if (vertexOffset < 0) {
             vertexOffset = 0;
         }
-        org.lwjgl.vulkan.VkCommandBuffer vkCommandBuffer =
-                net.vulkanmod.vulkan.Renderer.getCommandBuffer();
-        net.vulkanmod.render.engine.VkGpuBuffer vertexBuffer =
-                (net.vulkanmod.render.engine.VkGpuBuffer) renderPass.vertexBuffers[0];
+        org.lwjgl.vulkan.VkCommandBuffer vkCommandBuffer = net.vulkanmod.vulkan.Renderer.getCommandBuffer();
+        net.vulkanmod.render.engine.VkGpuBuffer vertexBuffer = (net.vulkanmod.render.engine.VkGpuBuffer) renderPass.vertexBuffers[0];
         org.lwjgl.system.MemoryStack stack = org.lwjgl.system.MemoryStack.stackPush();
         if (vertexBuffer != null) {
             try {
@@ -995,11 +961,9 @@ public class VkCommandEncoder implements com.mojang.blaze3d.systems.CommandEncod
             }
         }
         if (renderPass.indexBuffer != null) {
-            net.vulkanmod.render.engine.VkGpuBuffer indexBuffer =
-                    (net.vulkanmod.render.engine.VkGpuBuffer) renderPass.indexBuffer;
-            switch (net.vulkanmod.render.engine.VkCommandEncoder.AnonymousClass2
-                    .$SwitchMap$com$mojang$blaze3d$vertex$VertexFormat$IndexType[
-                    indexType.ordinal()]) {
+            net.vulkanmod.render.engine.VkGpuBuffer indexBuffer = (net.vulkanmod.render.engine.VkGpuBuffer) renderPass.indexBuffer;
+            switch (net.vulkanmod.render.engine.VkCommandEncoder.AnonymousClass2.$SwitchMap$com$mojang$blaze3d$vertex$VertexFormat$IndexType[indexType
+                    .ordinal()]) {
                 case 1:
                     i = 0;
                     break;
@@ -1016,9 +980,9 @@ public class VkCommandEncoder implements com.mojang.blaze3d.systems.CommandEncod
             org.lwjgl.vulkan.VK11.vkCmdDrawIndexed(
                     vkCommandBuffer, vertexCount, instanceCount, firstIndex, vertexOffset, 0);
         } else {
-            net.vulkanmod.vulkan.memory.buffer.index.AutoIndexBuffer autoIndexBuffer =
-                    net.vulkanmod.vulkan.Renderer.getDrawer()
-                            .getAutoIndexBuffer(renderPipeline.getVertexFormatMode(), vertexCount);
+            net.vulkanmod.vulkan.memory.buffer.index.AutoIndexBuffer autoIndexBuffer = net.vulkanmod.vulkan.Renderer
+                    .getDrawer()
+                    .getAutoIndexBuffer(renderPipeline.getVertexFormatMode(), vertexCount);
             if (autoIndexBuffer != null) {
                 int indexCount = autoIndexBuffer.getIndexCount(vertexCount);
                 org.lwjgl.vulkan.VK11.vkCmdBindIndexBuffer(
@@ -1043,8 +1007,8 @@ public class VkCommandEncoder implements com.mojang.blaze3d.systems.CommandEncod
             if (renderPass.pipeline == null) {
                 throw new java.lang.IllegalStateException("Can't draw without a render pipeline");
             }
-            for (com.mojang.blaze3d.pipeline.RenderPipeline.UniformDescription uniformDescription :
-                    renderPass.pipeline.getUniforms()) {
+            for (com.mojang.blaze3d.pipeline.RenderPipeline.UniformDescription uniformDescription : renderPass.pipeline
+                    .getUniforms()) {
                 java.lang.Object object = renderPass.uniforms.get(uniformDescription.name());
                 if (object == null
                         && !com.mojang.blaze3d.opengl.GlProgram.BUILT_IN_UNIFORMS.contains(
@@ -1074,27 +1038,22 @@ public class VkCommandEncoder implements com.mojang.blaze3d.systems.CommandEncod
     }
 
     public void setupUniforms(net.vulkanmod.render.engine.VkRenderPass renderPass) {
-        com.mojang.blaze3d.pipeline.RenderPipeline renderPipeline = renderPass.pipeline;
-        net.vulkanmod.render.engine.EGlProgram glProgram =
-                net.vulkanmod.interfaces.shader.ExtendedRenderPipeline.of(renderPass.pipeline)
-                        .getProgram();
-        net.vulkanmod.vulkan.shader.Pipeline pipeline =
-                net.vulkanmod.interfaces.shader.ExtendedRenderPipeline.of(renderPass.pipeline)
-                        .getPipeline();
+        net.vulkanmod.render.engine.EGlProgram glProgram = net.vulkanmod.interfaces.shader.ExtendedRenderPipeline
+                .of(renderPass.pipeline)
+                .getProgram();
+        net.vulkanmod.vulkan.shader.Pipeline pipeline = net.vulkanmod.interfaces.shader.ExtendedRenderPipeline
+                .of(renderPass.pipeline)
+                .getPipeline();
         for (net.vulkanmod.vulkan.shader.descriptor.UBO ubo : pipeline.getBuffers()) {
             java.lang.String uniformName = ubo.name;
             glProgram.getUniform(uniformName);
-            com.mojang.blaze3d.buffers.GpuBufferSlice gpuBufferSlice =
-                    renderPass.uniforms.get(uniformName);
+            com.mojang.blaze3d.buffers.GpuBufferSlice gpuBufferSlice = renderPass.uniforms.get(uniformName);
             if (gpuBufferSlice == null) {
                 ubo.setUseGlobalBuffer(true);
                 ubo.setUpdate(true);
             } else {
-                net.vulkanmod.render.engine.VkGpuBuffer gpuBuffer =
-                        (net.vulkanmod.render.engine.VkGpuBuffer) gpuBufferSlice.buffer();
-                if (!$assertionsDisabled && ubo == null) {
-                    throw new java.lang.AssertionError();
-                }
+                net.vulkanmod.render.engine.VkGpuBuffer gpuBuffer = (net.vulkanmod.render.engine.VkGpuBuffer) gpuBufferSlice
+                        .buffer();
                 ubo.setUseGlobalBuffer(false);
                 ubo.getBufferSlice()
                         .set(
@@ -1103,12 +1062,11 @@ public class VkCommandEncoder implements com.mojang.blaze3d.systems.CommandEncod
                                 (int) gpuBufferSlice.length());
             }
         }
-        for (net.vulkanmod.vulkan.shader.descriptor.ImageDescriptor imageDescriptor :
-                pipeline.getImageDescriptors()) {
+        for (net.vulkanmod.vulkan.shader.descriptor.ImageDescriptor imageDescriptor : pipeline.getImageDescriptors()) {
             java.lang.String uniformName2 = imageDescriptor.name;
             int samplerIndex = imageDescriptor.imageIdx;
-            net.vulkanmod.render.engine.VkRenderPass.TextureViewAndSampler textureSampler =
-                    renderPass.samplers.get(uniformName2);
+            net.vulkanmod.render.engine.VkRenderPass.TextureViewAndSampler textureSampler = renderPass.samplers
+                    .get(uniformName2);
             if (textureSampler != null) {
                 net.vulkanmod.render.engine.VkTextureView textureView = textureSampler.view();
                 net.vulkanmod.render.engine.VkGpuTexture gpuTexture = textureView.texture();
@@ -1122,9 +1080,9 @@ public class VkCommandEncoder implements com.mojang.blaze3d.systems.CommandEncod
     }
 
     public boolean bindPipeline(com.mojang.blaze3d.pipeline.RenderPipeline renderPipeline) {
-        net.vulkanmod.vulkan.shader.Pipeline pipeline =
-                net.vulkanmod.interfaces.shader.ExtendedRenderPipeline.of(renderPipeline)
-                        .getPipeline();
+        net.vulkanmod.vulkan.shader.Pipeline pipeline = net.vulkanmod.interfaces.shader.ExtendedRenderPipeline
+                .of(renderPipeline)
+                .getPipeline();
         if (pipeline == null) {
             return false;
         }
@@ -1137,8 +1095,7 @@ public class VkCommandEncoder implements com.mojang.blaze3d.systems.CommandEncod
     public void applyPipelineState(com.mojang.blaze3d.pipeline.RenderPipeline renderPipeline) {
         if (this.lastPipeline != renderPipeline) {
             this.lastPipeline = renderPipeline;
-            if (renderPipeline.getDepthTestFunction()
-                    != com.mojang.blaze3d.platform.DepthTestFunction.NO_DEPTH_TEST) {
+            if (renderPipeline.getDepthTestFunction() != com.mojang.blaze3d.platform.DepthTestFunction.NO_DEPTH_TEST) {
                 com.mojang.blaze3d.opengl.GlStateManager._enableDepthTest();
                 com.mojang.blaze3d.opengl.GlStateManager._depthFunc(
                         com.mojang.blaze3d.opengl.GlConst.toGl(
@@ -1153,9 +1110,8 @@ public class VkCommandEncoder implements com.mojang.blaze3d.systems.CommandEncod
             }
             if (renderPipeline.getBlendFunction().isPresent()) {
                 com.mojang.blaze3d.opengl.GlStateManager._enableBlend();
-                com.mojang.blaze3d.pipeline.BlendFunction blendFunction =
-                        (com.mojang.blaze3d.pipeline.BlendFunction)
-                                renderPipeline.getBlendFunction().get();
+                com.mojang.blaze3d.pipeline.BlendFunction blendFunction = (com.mojang.blaze3d.pipeline.BlendFunction) renderPipeline
+                        .getBlendFunction().get();
                 com.mojang.blaze3d.opengl.GlStateManager._blendFuncSeparate(
                         com.mojang.blaze3d.opengl.GlConst.toGl(blendFunction.sourceColor()),
                         com.mojang.blaze3d.opengl.GlConst.toGl(blendFunction.destColor()),
@@ -1181,9 +1137,8 @@ public class VkCommandEncoder implements com.mojang.blaze3d.systems.CommandEncod
                         renderPipeline.getDepthBiasConstant());
                 com.mojang.blaze3d.opengl.GlStateManager._enablePolygonOffset();
             }
-            switch (net.vulkanmod.render.engine.VkCommandEncoder.AnonymousClass2
-                    .$SwitchMap$com$mojang$blaze3d$platform$LogicOp[
-                    renderPipeline.getColorLogic().ordinal()]) {
+            switch (net.vulkanmod.render.engine.VkCommandEncoder.AnonymousClass2.$SwitchMap$com$mojang$blaze3d$platform$LogicOp[renderPipeline
+                    .getColorLogic().ordinal()]) {
                 case 1:
                     com.mojang.blaze3d.opengl.GlStateManager._disableColorLogicOp();
                     break;
@@ -1197,39 +1152,40 @@ public class VkCommandEncoder implements com.mojang.blaze3d.systems.CommandEncod
         }
     }
 
-    /* JADX INFO: renamed from: net.vulkanmod.render.engine.VkCommandEncoder$2, reason: invalid class name */
-    /* JADX INFO: loaded from: VulkanMod_1.21.11-0.6.0.jar:net/vulkanmod/render/engine/VkCommandEncoder$2.class */
+    /*
+     * JADX INFO: renamed from: net.vulkanmod.render.engine.VkCommandEncoder$2,
+     * reason: invalid class name
+     */
+    /*
+     * JADX INFO: loaded from:
+     * VulkanMod_1.21.11-0.6.0.jar:net/vulkanmod/render/engine/VkCommandEncoder$2.
+     * class
+     */
     static /* synthetic */ class AnonymousClass2 {
-        static final /* synthetic */ int[]
-                $SwitchMap$com$mojang$blaze3d$vertex$VertexFormat$IndexType;
-        static final /* synthetic */ int[] $SwitchMap$com$mojang$blaze3d$platform$LogicOp =
-                new int[com.mojang.blaze3d.platform.LogicOp.values().length];
+        static final /* synthetic */ int[] $SwitchMap$com$mojang$blaze3d$vertex$VertexFormat$IndexType;
+        static final /* synthetic */ int[] $SwitchMap$com$mojang$blaze3d$platform$LogicOp = new int[com.mojang.blaze3d.platform.LogicOp
+                .values().length];
 
         static {
             try {
-                $SwitchMap$com$mojang$blaze3d$platform$LogicOp[
-                                com.mojang.blaze3d.platform.LogicOp.NONE.ordinal()] =
-                        1;
+                $SwitchMap$com$mojang$blaze3d$platform$LogicOp[com.mojang.blaze3d.platform.LogicOp.NONE.ordinal()] = 1;
             } catch (java.lang.NoSuchFieldError e) {
             }
             try {
-                $SwitchMap$com$mojang$blaze3d$platform$LogicOp[
-                                com.mojang.blaze3d.platform.LogicOp.OR_REVERSE.ordinal()] =
-                        2;
+                $SwitchMap$com$mojang$blaze3d$platform$LogicOp[com.mojang.blaze3d.platform.LogicOp.OR_REVERSE
+                        .ordinal()] = 2;
             } catch (java.lang.NoSuchFieldError e2) {
             }
-            $SwitchMap$com$mojang$blaze3d$vertex$VertexFormat$IndexType =
-                    new int[com.mojang.blaze3d.vertex.VertexFormat.IndexType.values().length];
+            $SwitchMap$com$mojang$blaze3d$vertex$VertexFormat$IndexType = new int[com.mojang.blaze3d.vertex.VertexFormat.IndexType
+                    .values().length];
             try {
-                $SwitchMap$com$mojang$blaze3d$vertex$VertexFormat$IndexType[
-                                com.mojang.blaze3d.vertex.VertexFormat.IndexType.SHORT.ordinal()] =
-                        1;
+                $SwitchMap$com$mojang$blaze3d$vertex$VertexFormat$IndexType[com.mojang.blaze3d.vertex.VertexFormat.IndexType.SHORT
+                        .ordinal()] = 1;
             } catch (java.lang.NoSuchFieldError e3) {
             }
             try {
-                $SwitchMap$com$mojang$blaze3d$vertex$VertexFormat$IndexType[
-                                com.mojang.blaze3d.vertex.VertexFormat.IndexType.INT.ordinal()] =
-                        2;
+                $SwitchMap$com$mojang$blaze3d$vertex$VertexFormat$IndexType[com.mojang.blaze3d.vertex.VertexFormat.IndexType.INT
+                        .ordinal()] = 2;
             } catch (java.lang.NoSuchFieldError e4) {
             }
         }

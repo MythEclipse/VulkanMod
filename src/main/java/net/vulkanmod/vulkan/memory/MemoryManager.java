@@ -34,10 +34,8 @@ public class MemoryManager {
     private static MemoryManager INSTANCE;
     private static final long ALLOCATOR = Vulkan.getAllocator();
 
-    private static final Long2ReferenceOpenHashMap<Buffer> buffers =
-            new Long2ReferenceOpenHashMap<>();
-    private static final Long2ReferenceOpenHashMap<VulkanImage> images =
-            new Long2ReferenceOpenHashMap<>();
+    private static final Long2ReferenceOpenHashMap<Buffer> buffers = new Long2ReferenceOpenHashMap<>();
+    private static final Long2ReferenceOpenHashMap<VulkanImage> images = new Long2ReferenceOpenHashMap<>();
 
     static int Frames;
 
@@ -46,16 +44,14 @@ public class MemoryManager {
 
     private int currentFrame = 0;
 
-    private final ObjectArrayList<Buffer.BufferInfo>[] freeableBuffers =
-            new ObjectArrayList[Frames];
-    private final ObjectArrayList<VulkanImage>[] freeableImages = new ObjectArrayList[Frames];
+    private final List<ObjectArrayList<Buffer.BufferInfo>> freeableBuffers = new java.util.ArrayList<>(Frames);
+    private final List<ObjectArrayList<VulkanImage>> freeableImages = new java.util.ArrayList<>(Frames);
 
-    private final ObjectArrayList<Runnable>[] frameOps = new ObjectArrayList[Frames];
-    private final ObjectArrayList<Pair<AreaBuffer, Integer>>[] segmentsToFree =
-            new ObjectArrayList[Frames];
+    private final List<ObjectArrayList<Runnable>> frameOps = new java.util.ArrayList<>(Frames);
+    private final List<ObjectArrayList<Pair<AreaBuffer, Integer>>> segmentsToFree = new java.util.ArrayList<>(Frames);
 
     // debug
-    private ObjectArrayList<StackTraceElement[]>[] stackTraces;
+    private List<ObjectArrayList<StackTraceElement[]>> stackTraces;
 
     public static MemoryManager getInstance() {
         return INSTANCE;
@@ -69,17 +65,17 @@ public class MemoryManager {
 
     MemoryManager() {
         for (int i = 0; i < Frames; ++i) {
-            this.freeableBuffers[i] = new ObjectArrayList<>();
-            this.freeableImages[i] = new ObjectArrayList<>();
+            this.freeableBuffers.add(new ObjectArrayList<>());
+            this.freeableImages.add(new ObjectArrayList<>());
 
-            this.frameOps[i] = new ObjectArrayList<>();
-            this.segmentsToFree[i] = new ObjectArrayList<>();
+            this.frameOps.add(new ObjectArrayList<>());
+            this.segmentsToFree.add(new ObjectArrayList<>());
         }
 
         if (DEBUG) {
-            this.stackTraces = new ObjectArrayList[Frames];
+            this.stackTraces = new java.util.ArrayList<>(Frames);
             for (int i = 0; i < Frames; ++i) {
-                this.stackTraces[i] = new ObjectArrayList<>();
+                this.stackTraces.add(new ObjectArrayList<>());
             }
         }
     }
@@ -104,9 +100,9 @@ public class MemoryManager {
             this.doFrameOps(frame);
         }
 
-        //        buffers.values().forEach(buffer -> freeBuffer(buffer.getId(),
+        // buffers.values().forEach(buffer -> freeBuffer(buffer.getId(),
         // buffer.getAllocation()));
-        //        images.values().forEach(image -> image.doFree(this));
+        // images.values().forEach(image -> image.doFree(this));
     }
 
     public void createBuffer(
@@ -121,9 +117,8 @@ public class MemoryManager {
             VmaAllocationCreateInfo allocationInfo = VmaAllocationCreateInfo.calloc(stack);
             allocationInfo.requiredFlags(properties);
 
-            int result =
-                    vmaCreateBuffer(
-                            ALLOCATOR, bufferInfo, allocationInfo, pBuffer, pBufferMemory, null);
+            int result = vmaCreateBuffer(
+                    ALLOCATOR, bufferInfo, allocationInfo, pBuffer, pBufferMemory, null);
             if (result != VK_SUCCESS) {
                 Initializer.LOGGER.info(
                         String.format(
@@ -189,7 +184,7 @@ public class MemoryManager {
             imageInfo.usage(usage);
             imageInfo.samples(VK_SAMPLE_COUNT_1_BIT);
             imageInfo.flags(flags);
-            //            imageInfo.sharingMode(VK_SHARING_MODE_CONCURRENT);
+            // imageInfo.sharingMode(VK_SHARING_MODE_CONCURRENT);
             imageInfo.pQueueFamilyIndices(
                     stack.ints(
                             Queue.getQueueFamilies().graphicsFamily,
@@ -198,14 +193,13 @@ public class MemoryManager {
             VmaAllocationCreateInfo allocationInfo = VmaAllocationCreateInfo.calloc(stack);
             allocationInfo.requiredFlags(memProperties);
 
-            int result =
-                    vmaCreateImage(
-                            ALLOCATOR,
-                            imageInfo,
-                            allocationInfo,
-                            pTextureImage,
-                            pTextureImageMemory,
-                            null);
+            int result = vmaCreateImage(
+                    ALLOCATOR,
+                    imageInfo,
+                    allocationInfo,
+                    pTextureImage,
+                    pTextureImageMemory,
+                    null);
             if (result != VK_SUCCESS) {
                 Initializer.LOGGER.info(
                         String.format("Failed to create image with size: %dx%d", width, height));
@@ -270,29 +264,30 @@ public class MemoryManager {
 
         checkBuffer(bufferInfo);
 
-        freeableBuffers[currentFrame].add(bufferInfo);
+        freeableBuffers.get(currentFrame).add(bufferInfo);
 
-        if (DEBUG) stackTraces[currentFrame].add(new Throwable().getStackTrace());
+        if (DEBUG)
+            stackTraces.get(currentFrame).add(new Throwable().getStackTrace());
     }
 
     public synchronized void addToFreeable(VulkanImage image) {
-        freeableImages[currentFrame].add(image);
+        freeableImages.get(currentFrame).add(image);
     }
 
     public synchronized void addFrameOp(Runnable runnable) {
-        this.frameOps[currentFrame].add(runnable);
+        this.frameOps.get(currentFrame).add(runnable);
     }
 
     public void doFrameOps(int frame) {
-        for (Runnable runnable : this.frameOps[frame]) {
+        for (Runnable runnable : this.frameOps.get(frame)) {
             runnable.run();
         }
 
-        this.frameOps[frame].clear();
+        this.frameOps.get(frame).clear();
     }
 
     private void freeBuffers(int frame) {
-        List<Buffer.BufferInfo> bufferList = freeableBuffers[frame];
+        List<Buffer.BufferInfo> bufferList = freeableBuffers.get(frame);
         for (Buffer.BufferInfo bufferInfo : bufferList) {
 
             freeBuffer(bufferInfo);
@@ -300,11 +295,12 @@ public class MemoryManager {
 
         bufferList.clear();
 
-        if (DEBUG) stackTraces[frame].clear();
+        if (DEBUG)
+            stackTraces.get(frame).clear();
     }
 
     private void freeImages(int frame) {
-        List<VulkanImage> bufferList = freeableImages[frame];
+        List<VulkanImage> bufferList = freeableImages.get(frame);
         for (VulkanImage image : bufferList) {
 
             image.doFree();
@@ -320,7 +316,7 @@ public class MemoryManager {
     }
 
     private void freeSegments(int frame) {
-        var list = this.segmentsToFree[frame];
+        var list = this.segmentsToFree.get(frame);
         for (var pair : list) {
             pair.first.setSegmentFree(pair.second);
         }
@@ -329,7 +325,7 @@ public class MemoryManager {
     }
 
     public void addToFreeSegment(AreaBuffer areaBuffer, int offset) {
-        this.segmentsToFree[this.currentFrame].add(new Pair<>(areaBuffer, offset));
+        this.segmentsToFree.get(this.currentFrame).add(new Pair<>(areaBuffer, offset));
     }
 
     public int getNativeMemoryMB() {
@@ -350,8 +346,7 @@ public class MemoryManager {
 
     public String getHeapStats() {
         try (MemoryStack stack = MemoryStack.stackPush()) {
-            VmaBudget.Buffer vmaBudgets =
-                    VmaBudget.calloc(DeviceManager.memoryProperties.memoryHeapCount(), stack);
+            VmaBudget.Buffer vmaBudgets = VmaBudget.calloc(DeviceManager.memoryProperties.memoryHeapCount(), stack);
 
             vmaGetHeapBudgets(ALLOCATOR, vmaBudgets);
 

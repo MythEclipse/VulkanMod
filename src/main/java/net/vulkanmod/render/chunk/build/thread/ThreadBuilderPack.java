@@ -15,21 +15,16 @@ public class ThreadBuilderPack {
     private static Function<TerrainRenderType, TerrainBuilder> terrainBuilderConstructor;
 
     public static void defaultTerrainBuilderConstructor() {
-        terrainBuilderConstructor =
-                renderType -> {
-                    int size =
-                            TerrainRenderType.getLayer(renderType).bufferSize()
-                                    / DefaultVertexFormat.BLOCK.getVertexSize();
+        terrainBuilderConstructor = renderType -> {
+            int size = TerrainRenderType.getLayer(renderType).bufferSize()
+                    / DefaultVertexFormat.BLOCK.getVertexSize();
 
-                    boolean compressedFormat =
-                            PipelineManager.terrainVertexFormat
-                                    == CustomVertexFormat.COMPRESSED_TERRAIN;
-                    VertexBuilder vertexBuilder =
-                            compressedFormat
-                                    ? new VertexBuilder.CompressedVertexBuilder()
-                                    : new VertexBuilder.DefaultVertexBuilder();
-                    return new TerrainBuilder(size, vertexBuilder);
-                };
+            boolean compressedFormat = PipelineManager.terrainVertexFormat == CustomVertexFormat.COMPRESSED_TERRAIN;
+            VertexBuilder vertexBuilder = compressedFormat
+                    ? new VertexBuilder.CompressedVertexBuilder()
+                    : new VertexBuilder.DefaultVertexBuilder();
+            return new TerrainBuilder(size, vertexBuilder);
+        };
     }
 
     public static void setTerrainBuilderConstructor(
@@ -40,13 +35,12 @@ public class ThreadBuilderPack {
     private final Map<TerrainRenderType, TerrainBuilder> builders;
 
     public ThreadBuilderPack() {
-        var map = new EnumMap<TerrainRenderType, TerrainBuilder>(TerrainRenderType.class);
+        var map = new EnumMap<TerrainRenderType, TerrainBuilder>(TerrainRenderType.SOLID.getDeclaringClass());
         Arrays.stream(TerrainRenderType.values())
                 .forEach(
-                        terrainRenderType ->
-                                map.put(
-                                        terrainRenderType,
-                                        terrainBuilderConstructor.apply(terrainRenderType)));
+                        terrainRenderType -> map.put(
+                                terrainRenderType,
+                                terrainBuilderConstructor.apply(terrainRenderType)));
         builders = map;
     }
 

@@ -1,7 +1,5 @@
 package net.vulkanmod.render.util;
 
-import it.unimi.dsi.fastutil.ints.IntComparator;
-
 public class SortUtil {
 
     public static void mergeSort(int[] a, float[] distances) {
@@ -47,7 +45,7 @@ public class SortUtil {
     public static void quickSort(int[] is, float[] distances, int from, int to) {
         int len = to - from;
         if (len < 16) {
-            //            selectionSort(is, from, to, comp);
+            // selectionSort(is, from, to, comp);
             insertionSort(is, distances, from, to);
         } else {
             int m = from + len / 2;
@@ -89,9 +87,11 @@ public class SortUtil {
 
                 swap(is, d, b);
 
-                if (b - a > 1) quickSort(is, distances, a, b);
+                if (b - a > 1)
+                    quickSort(is, distances, a, b);
 
-                if (d - b > 1) quickSort(is, distances, b, d);
+                if (d - b > 1)
+                    quickSort(is, distances, b, d);
 
                 return;
             }
@@ -124,11 +124,7 @@ public class SortUtil {
         }
     }
 
-    public static void swap(int[] x, int a, int b, int n) {
-        for (int i = 0; i < n; ++b, ++i, ++a) {
-            swap(x, a, b);
-        }
-    }
+
 
     public static void swap(int[] x, int a, int b) {
         int t = x[a];
@@ -136,10 +132,4 @@ public class SortUtil {
         x[b] = t;
     }
 
-    private static int med3(int[] x, int a, int b, int c, IntComparator comp) {
-        int ab = comp.compare(x[a], x[b]);
-        int ac = comp.compare(x[a], x[c]);
-        int bc = comp.compare(x[b], x[c]);
-        return ab < 0 ? (bc < 0 ? b : (ac < 0 ? c : a)) : (bc > 0 ? b : (ac > 0 ? c : a));
-    }
 }

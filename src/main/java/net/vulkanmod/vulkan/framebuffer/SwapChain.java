@@ -28,12 +28,14 @@ import org.lwjgl.system.MemoryStack;
 import org.lwjgl.vulkan.*;
 
 public class SwapChain extends Framebuffer {
-    // Necessary until tearing-control-unstable-v1 is fully implemented on all GPU Drivers for
+    // Necessary until tearing-control-unstable-v1 is fully implemented on all GPU
+    // Drivers for
     // Wayland
-    // (As Immediate Mode (and by extension Screen tearing) doesn't exist on some Wayland
+    // (As Immediate Mode (and by extension Screen tearing) doesn't exist on some
+    // Wayland
     // installations currently)
-    private static final int defUncappedMode =
-            checkPresentMode(VK_PRESENT_MODE_IMMEDIATE_KHR, VK_PRESENT_MODE_MAILBOX_KHR);
+    private static final int defUncappedMode = checkPresentMode(VK_PRESENT_MODE_IMMEDIATE_KHR,
+            VK_PRESENT_MODE_MAILBOX_KHR);
 
     private final Long2ReferenceOpenHashMap<long[]> FBO_map = new Long2ReferenceOpenHashMap<>();
 
@@ -61,9 +63,8 @@ public class SwapChain extends Framebuffer {
 
         if (!DYNAMIC_RENDERING) {
             this.FBO_map.forEach(
-                    (pass, framebuffers) ->
-                            Arrays.stream(framebuffers)
-                                    .forEach(id -> vkDestroyFramebuffer(getVkDevice(), id, null)));
+                    (pass, framebuffers) -> Arrays.stream(framebuffers)
+                            .forEach(id -> vkDestroyFramebuffer(getVkDevice(), id, null)));
             this.FBO_map.clear();
         }
 
@@ -73,8 +74,8 @@ public class SwapChain extends Framebuffer {
     private void createSwapChain() {
         try (MemoryStack stack = stackPush()) {
             VkDevice device = Vulkan.getVkDevice();
-            DeviceManager.SurfaceProperties surfaceProperties =
-                    DeviceManager.querySurfaceProperties(device.getPhysicalDevice(), stack);
+            DeviceManager.SurfaceProperties surfaceProperties = DeviceManager
+                    .querySurfaceProperties(device.getPhysicalDevice(), stack);
 
             VkSurfaceFormatKHR surfaceFormat = getFormat(surfaceProperties.formats);
             int presentMode = getPresentMode(surfaceProperties.presentModes);
@@ -158,21 +159,19 @@ public class SwapChain extends Framebuffer {
 
             for (int i = 0; i < pSwapchainImages.capacity(); i++) {
                 long imageId = pSwapchainImages.get(i);
-                long imageView =
-                        VulkanImage.createImageView(
-                                imageId, this.format, VK_IMAGE_ASPECT_COLOR_BIT, 1, 1);
+                long imageView = VulkanImage.createImageView(
+                        imageId, this.format, VK_IMAGE_ASPECT_COLOR_BIT, 1, 1);
 
-                VulkanImage image =
-                        new VulkanImage(
-                                "Swapchain",
-                                imageId,
-                                this.format,
-                                1,
-                                this.width,
-                                this.height,
-                                4,
-                                0,
-                                imageView);
+                VulkanImage image = new VulkanImage(
+                        "Swapchain",
+                        imageId,
+                        this.format,
+                        1,
+                        this.width,
+                        this.height,
+                        4,
+                        0,
+                        imageView);
                 long samplerId = SamplerManager.getSampler(true, true, 0);
                 image.setSampler(samplerId);
                 this.swapChainImages.add(image);
@@ -189,10 +188,9 @@ public class SwapChain extends Framebuffer {
             long[] framebuffers = new long[this.swapChainImages.size()];
 
             for (int i = 0; i < this.swapChainImages.size(); ++i) {
-                LongBuffer attachments =
-                        stack.longs(
-                                this.swapChainImages.get(i).getImageView(),
-                                this.depthAttachment.getImageView());
+                LongBuffer attachments = stack.longs(
+                        this.swapChainImages.get(i).getImageView(),
+                        this.depthAttachment.getImageView());
 
                 LongBuffer pFramebuffer = stack.mallocLong(1);
 
@@ -204,8 +202,7 @@ public class SwapChain extends Framebuffer {
                 framebufferInfo.layers(1);
                 framebufferInfo.pAttachments(attachments);
 
-                if (vkCreateFramebuffer(Vulkan.getVkDevice(), framebufferInfo, null, pFramebuffer)
-                        != VK_SUCCESS) {
+                if (vkCreateFramebuffer(Vulkan.getVkDevice(), framebufferInfo, null, pFramebuffer) != VK_SUCCESS) {
                     throw new RuntimeException("Failed to create framebuffer");
                 }
 
@@ -217,21 +214,19 @@ public class SwapChain extends Framebuffer {
     }
 
     private void createDepthResources() {
-        this.depthAttachment =
-                VulkanImage.createDepthImage(
-                        depthFormat,
-                        this.width,
-                        this.height,
-                        VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
-                        false,
-                        false);
+        this.depthAttachment = VulkanImage.createDepthImage(
+                depthFormat,
+                this.width,
+                this.height,
+                VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+                false,
+                false);
     }
 
     @Override
     protected long getFramebufferId(RenderPass renderPass) {
-        long[] framebuffers =
-                this.FBO_map.computeIfAbsent(
-                        renderPass.id, renderPass1 -> createFramebuffers(renderPass));
+        long[] framebuffers = this.FBO_map.computeIfAbsent(
+                renderPass.id, renderPass1 -> createFramebuffers(renderPass));
         return framebuffers[Renderer.getCurrentImage()];
     }
 
@@ -240,9 +235,8 @@ public class SwapChain extends Framebuffer {
 
         if (!DYNAMIC_RENDERING) {
             this.FBO_map.forEach(
-                    (pass, framebuffers) ->
-                            Arrays.stream(framebuffers)
-                                    .forEach(id -> vkDestroyFramebuffer(getVkDevice(), id, null)));
+                    (pass, framebuffers) -> Arrays.stream(framebuffers)
+                            .forEach(id -> vkDestroyFramebuffer(getVkDevice(), id, null)));
             this.FBO_map.clear();
         }
 
@@ -293,7 +287,8 @@ public class SwapChain extends Framebuffer {
             }
         }
 
-        if (format.format() == VK_FORMAT_B8G8R8A8_UNORM) isBGRAformat = true;
+        if (format.format() == VK_FORMAT_B8G8R8A8_UNORM)
+            isBGRAformat = true;
         return format;
     }
 
@@ -301,7 +296,8 @@ public class SwapChain extends Framebuffer {
         int requestedMode = vsync ? VK_PRESENT_MODE_FIFO_KHR : defUncappedMode;
 
         // FIFO mode is the only mode that has to be supported
-        if (requestedMode == VK_PRESENT_MODE_FIFO_KHR) return VK_PRESENT_MODE_FIFO_KHR;
+        if (requestedMode == VK_PRESENT_MODE_FIFO_KHR)
+            return VK_PRESENT_MODE_FIFO_KHR;
 
         for (int i = 0; i < availablePresentModes.capacity(); i++) {
             if (availablePresentModes.get(i) == requestedMode) {
@@ -332,12 +328,12 @@ public class SwapChain extends Framebuffer {
         }
 
         // Fallback
-        IntBuffer width = stackGet().ints(0);
-        IntBuffer height = stackGet().ints(0);
+        IntBuffer width = stackGet().mallocInt(1);
+        IntBuffer height = stackGet().mallocInt(1);
 
         glfwGetFramebufferSize(window, width, height);
 
-        VkExtent2D actualExtent = VkExtent2D.mallocStack().set(width.get(0), height.get(0));
+        VkExtent2D actualExtent = VkExtent2D.malloc(stackGet()).set(width.get(0), height.get(0));
 
         VkExtent2D minExtent = capabilities.minImageExtent();
         VkExtent2D maxExtent = capabilities.maxImageExtent();
@@ -352,9 +348,7 @@ public class SwapChain extends Framebuffer {
 
     private static int checkPresentMode(int... requestedModes) {
         try (MemoryStack stack = MemoryStack.stackPush()) {
-            var a =
-                    DeviceManager.querySurfaceProperties(vkDevice.getPhysicalDevice(), stack)
-                            .presentModes;
+            var a = DeviceManager.querySurfaceProperties(vkDevice.getPhysicalDevice(), stack).presentModes;
             for (int dMode : requestedModes) {
                 for (int i = 0; i < a.capacity(); i++) {
                     if (a.get(i) == dMode) {

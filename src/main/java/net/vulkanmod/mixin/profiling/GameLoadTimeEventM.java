@@ -17,16 +17,19 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin(GameLoadTimesEvent.class)
 public class GameLoadTimeEventM {
 
-    @Shadow @Final
+    @Shadow
+    @Final
     private Map<TelemetryProperty<GameLoadTimesEvent.Measurement>, Stopwatch> measurements;
 
-    @Shadow @Final private static Logger LOGGER;
+    @Shadow
+    @Final
+    private static Logger LOGGER;
 
-    @Shadow private OptionalLong bootstrapTime;
+    @Shadow
+    private OptionalLong bootstrapTime;
 
     public void send(TelemetryEventSender telemetryEventSender) {
-        Map<TelemetryProperty, GameLoadTimesEvent.Measurement> measurements =
-                new Reference2ReferenceOpenHashMap<>();
+        Map<TelemetryProperty<?>, GameLoadTimesEvent.Measurement> measurements = new Reference2ReferenceOpenHashMap<>();
 
         synchronized (this) {
             this.measurements.forEach(
@@ -43,16 +46,15 @@ public class GameLoadTimeEventM {
                         }
                     });
             this.bootstrapTime.ifPresent(
-                    l ->
-                            measurements.put(
-                                    TelemetryProperty.LOAD_TIME_BOOTSTRAP_MS,
-                                    new GameLoadTimesEvent.Measurement((int) l)));
+                    l -> measurements.put(
+                            TelemetryProperty.LOAD_TIME_BOOTSTRAP_MS,
+                            new GameLoadTimesEvent.Measurement((int) l)));
             this.measurements.clear();
         }
 
         StringBuilder stringBuilder = new StringBuilder("\n");
 
-        for (TelemetryProperty property : measurements.keySet()) {
+        for (TelemetryProperty<?> property : measurements.keySet()) {
             var measurement = measurements.get(property);
 
             stringBuilder.append("%s: %sms\n".formatted(property.id(), measurement.millis()));
@@ -60,35 +62,35 @@ public class GameLoadTimeEventM {
 
         LOGGER.info(stringBuilder.toString());
 
-        //        telemetryEventSender.send(
-        //                TelemetryEventType.GAME_LOAD_TIMES,
-        //                builder -> {
-        //                    synchronized (this) {
-        //                        this.measurements
-        //                                .forEach(
-        //                                        (telemetryProperty, stopwatch) -> {
-        //                                            if (!stopwatch.isRunning()) {
-        //                                                long l =
+        // telemetryEventSender.send(
+        // TelemetryEventType.GAME_LOAD_TIMES,
+        // builder -> {
+        // synchronized (this) {
+        // this.measurements
+        // .forEach(
+        // (telemetryProperty, stopwatch) -> {
+        // if (!stopwatch.isRunning()) {
+        // long l =
         // stopwatch.elapsed(TimeUnit.MILLISECONDS);
-        //                                                builder.put(telemetryProperty, new
+        // builder.put(telemetryProperty, new
         // GameLoadTimesEvent.Measurement((int)l));
-        //                                            } else {
-        //                                                LOGGER.warn(
-        //                                                        "Measurement {} was discarded
+        // } else {
+        // LOGGER.warn(
+        // "Measurement {} was discarded
         // since it was still ongoing when the event {} was sent.",
-        //                                                        telemetryProperty.id(),
+        // telemetryProperty.id(),
         //
         // TelemetryEventType.GAME_LOAD_TIMES.id()
-        //                                                );
-        //                                            }
-        //                                        }
-        //                                );
-        //                        this.bootstrapTime.ifPresent(l ->
+        // );
+        // }
+        // }
+        // );
+        // this.bootstrapTime.ifPresent(l ->
         // builder.put(TelemetryProperty.LOAD_TIME_BOOTSTRAP_MS, new
         // GameLoadTimesEvent.Measurement((int)l)));
-        //                        this.measurements.clear();
-        //                    }
-        //                }
-        //        );
+        // this.measurements.clear();
+        // }
+        // }
+        // );
     }
 }

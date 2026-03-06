@@ -30,8 +30,7 @@ public class RenderRegion implements BlockAndTintGetter {
 
     public static final int BOUNDARY_BLOCK_WIDTH = 2;
     public static final int REGION_BLOCK_WIDTH = 16 + BOUNDARY_BLOCK_WIDTH * 2;
-    public static final int BLOCK_COUNT =
-            REGION_BLOCK_WIDTH * REGION_BLOCK_WIDTH * REGION_BLOCK_WIDTH;
+    public static final int BLOCK_COUNT = REGION_BLOCK_WIDTH * REGION_BLOCK_WIDTH * REGION_BLOCK_WIDTH;
 
     public static final BlockState AIR_BLOCK_STATE = Blocks.AIR.defaultBlockState();
 
@@ -41,7 +40,7 @@ public class RenderRegion implements BlockAndTintGetter {
     private final Level level;
     private final int blendRadius;
 
-    private final PalettedContainer<BlockState>[] blockDataContainers;
+    private final java.util.List<PalettedContainer<BlockState>> blockDataContainers;
     private final BlockState[] blockData;
     private final DataLayer[][] lightData;
 
@@ -57,7 +56,7 @@ public class RenderRegion implements BlockAndTintGetter {
             int x,
             int y,
             int z,
-            PalettedContainer<BlockState>[] blockData,
+            java.util.List<PalettedContainer<BlockState>> blockData,
             DataLayer[][] lightData,
             BiomeData biomeData,
             Map<BlockPos, BlockEntity> blockEntityMap) {
@@ -93,9 +92,10 @@ public class RenderRegion implements BlockAndTintGetter {
                 for (int y = 0; y <= 2; ++y) {
                     final int idx = getSectionIdx(x, y, z);
 
-                    PalettedContainer<BlockState> container = blockDataContainers[idx];
+                    PalettedContainer<BlockState> container = blockDataContainers.get(idx);
 
-                    if (container == null) continue;
+                    if (container == null)
+                        continue;
 
                     int absBlockX = (x + minSecX) << 4;
                     int absBlockY = (y + minSecY) << 4;
@@ -131,10 +131,9 @@ public class RenderRegion implements BlockAndTintGetter {
                 for (int x = minX; x < maxX; ++x) {
                     final int idx = getBlockIdx(x - this.minX, y - this.minY, z - this.minZ);
 
-                    blockStates[idx] =
-                            container != null
-                                    ? container.get(x & 15, y & 15, z & 15)
-                                    : Blocks.AIR.defaultBlockState();
+                    blockStates[idx] = container != null
+                            ? container.get(x & 15, y & 15, z & 15)
+                            : Blocks.AIR.defaultBlockState();
                 }
             }
         }

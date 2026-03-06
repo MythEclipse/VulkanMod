@@ -3,10 +3,7 @@ package net.vulkanmod.vulkan.device;
 import static java.util.stream.Collectors.toSet;
 import static net.vulkanmod.vulkan.queue.Queue.findQueueFamilies;
 import static net.vulkanmod.vulkan.util.VUtil.asPointerBuffer;
-import static org.lwjgl.glfw.GLFWVulkan.glfwGetRequiredInstanceExtensions;
-import static org.lwjgl.system.MemoryStack.stackGet;
 import static org.lwjgl.system.MemoryStack.stackPush;
-import static org.lwjgl.vulkan.EXTDebugUtils.VK_EXT_DEBUG_UTILS_EXTENSION_NAME;
 import static org.lwjgl.vulkan.KHRSurface.*;
 import static org.lwjgl.vulkan.VK10.*;
 import static org.lwjgl.vulkan.VK12.VK_API_VERSION_1_2;
@@ -133,12 +130,15 @@ public abstract class DeviceManager {
                 break;
             } else if (deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU)
                 integratedGPUs.add(device);
-            else otherDevices.add(device);
+            else
+                otherDevices.add(device);
         }
 
         if (!flag) {
-            if (!integratedGPUs.isEmpty()) currentDevice = integratedGPUs.get(0);
-            else if (!otherDevices.isEmpty()) currentDevice = otherDevices.get(0);
+            if (!integratedGPUs.isEmpty())
+                currentDevice = integratedGPUs.get(0);
+            else if (!otherDevices.isEmpty())
+                currentDevice = otherDevices.get(0);
             else {
                 throw new IllegalStateException("Failed to find a suitable GPU");
             }
@@ -150,13 +150,12 @@ public abstract class DeviceManager {
     public static void createLogicalDevice() {
         try (MemoryStack stack = stackPush()) {
 
-            net.vulkanmod.vulkan.queue.Queue.QueueFamilyIndices indices =
-                    findQueueFamilies(physicalDevice);
+            net.vulkanmod.vulkan.queue.Queue.QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
 
             int[] uniqueQueueFamilies = indices.unique();
 
-            VkDeviceQueueCreateInfo.Buffer queueCreateInfos =
-                    VkDeviceQueueCreateInfo.calloc(uniqueQueueFamilies.length, stack);
+            VkDeviceQueueCreateInfo.Buffer queueCreateInfos = VkDeviceQueueCreateInfo.calloc(uniqueQueueFamilies.length,
+                    stack);
 
             for (int i = 0; i < uniqueQueueFamilies.length; i++) {
                 VkDeviceQueueCreateInfo queueCreateInfo = queueCreateInfos.get(i);
@@ -165,8 +164,7 @@ public abstract class DeviceManager {
                 queueCreateInfo.pQueuePriorities(stack.floats(1.0f));
             }
 
-            VkPhysicalDeviceVulkan11Features deviceVulkan11Features =
-                    VkPhysicalDeviceVulkan11Features.calloc(stack);
+            VkPhysicalDeviceVulkan11Features deviceVulkan11Features = VkPhysicalDeviceVulkan11Features.calloc(stack);
             deviceVulkan11Features.sType$Default();
             deviceVulkan11Features.shaderDrawParameters(device.isDrawIndirectSupported());
 
@@ -193,29 +191,29 @@ public abstract class DeviceManager {
             createInfo.pNext(deviceVulkan11Features);
 
             if (Vulkan.DYNAMIC_RENDERING) {
-                VkPhysicalDeviceDynamicRenderingFeaturesKHR dynamicRenderingFeaturesKHR =
-                        VkPhysicalDeviceDynamicRenderingFeaturesKHR.calloc(stack);
+                VkPhysicalDeviceDynamicRenderingFeaturesKHR dynamicRenderingFeaturesKHR = VkPhysicalDeviceDynamicRenderingFeaturesKHR
+                        .calloc(stack);
                 dynamicRenderingFeaturesKHR.sType$Default();
                 dynamicRenderingFeaturesKHR.dynamicRendering(true);
 
                 deviceVulkan11Features.pNext(dynamicRenderingFeaturesKHR.address());
 
-                //                //Vulkan 1.3 dynamic rendering
-                //                VkPhysicalDeviceVulkan13Features deviceVulkan13Features =
+                // //Vulkan 1.3 dynamic rendering
+                // VkPhysicalDeviceVulkan13Features deviceVulkan13Features =
                 // VkPhysicalDeviceVulkan13Features.calloc(stack);
-                //                deviceVulkan13Features.sType$Default();
-                //                if(!deviceInfo.availableFeatures13.dynamicRendering())
-                //                    throw new RuntimeException("Device does not support dynamic
+                // deviceVulkan13Features.sType$Default();
+                // if(!deviceInfo.availableFeatures13.dynamicRendering())
+                // throw new RuntimeException("Device does not support dynamic
                 // rendering feature.");
                 //
-                //                deviceVulkan13Features.dynamicRendering(true);
-                //                createInfo.pNext(deviceVulkan13Features);
-                //                deviceVulkan13Features.pNext(deviceVulkan11Features.address());
+                // deviceVulkan13Features.dynamicRendering(true);
+                // createInfo.pNext(deviceVulkan13Features);
+                // deviceVulkan13Features.pNext(deviceVulkan11Features.address());
             }
 
             createInfo.ppEnabledExtensionNames(asPointerBuffer(Vulkan.REQUIRED_EXTENSION));
 
-            //            Configuration.DEBUG_FUNCTIONS.set(true);
+            // Configuration.DEBUG_FUNCTIONS.set(true);
 
             createInfo.ppEnabledLayerNames(
                     Vulkan.ENABLE_VALIDATION_LAYERS
@@ -236,48 +234,26 @@ public abstract class DeviceManager {
         }
     }
 
-    private static PointerBuffer getRequiredExtensions() {
-        PointerBuffer glfwExtensions = glfwGetRequiredInstanceExtensions();
-
-        if (Vulkan.ENABLE_VALIDATION_LAYERS) {
-
-            MemoryStack stack = stackGet();
-
-            PointerBuffer extensions = stack.mallocPointer(glfwExtensions.capacity() + 1);
-
-            extensions.put(glfwExtensions);
-            extensions.put(stack.UTF8(VK_EXT_DEBUG_UTILS_EXTENSION_NAME));
-
-            // Rewind the buffer before returning it to reset its position back to 0
-            return extensions.rewind();
-        }
-
-        return glfwExtensions;
-    }
-
     private static boolean isDeviceSuitable(VkPhysicalDevice device) {
         try (MemoryStack stack = stackPush()) {
             Queue.QueueFamilyIndices indices = findQueueFamilies(device);
 
             VkExtensionProperties.Buffer availableExtensions = getAvailableExtension(stack, device);
-            boolean extensionsSupported =
-                    availableExtensions.stream()
-                            .map(VkExtensionProperties::extensionNameString)
-                            .collect(toSet())
-                            .containsAll(Vulkan.REQUIRED_EXTENSION);
+            boolean extensionsSupported = availableExtensions.stream()
+                    .map(VkExtensionProperties::extensionNameString)
+                    .collect(toSet())
+                    .containsAll(Vulkan.REQUIRED_EXTENSION);
 
             boolean swapChainAdequate = false;
 
             if (extensionsSupported) {
                 SurfaceProperties surfaceProperties = querySurfaceProperties(device, stack);
-                swapChainAdequate =
-                        surfaceProperties.formats.hasRemaining()
-                                && surfaceProperties.presentModes.hasRemaining();
+                swapChainAdequate = surfaceProperties.formats.hasRemaining()
+                        && surfaceProperties.presentModes.hasRemaining();
             }
 
             VkPhysicalDeviceFeatures supportedFeatures = VkPhysicalDeviceFeatures.malloc(stack);
             vkGetPhysicalDeviceFeatures(device, supportedFeatures);
-            boolean anisotropicFilterSupported = supportedFeatures.samplerAnisotropy();
 
             return indices.isSuitable() && extensionsSupported && swapChainAdequate;
         }
@@ -288,8 +264,7 @@ public abstract class DeviceManager {
         IntBuffer extensionCount = stack.ints(0);
         vkEnumerateDeviceExtensionProperties(device, (String) null, extensionCount, null);
 
-        VkExtensionProperties.Buffer availableExtensions =
-                VkExtensionProperties.malloc(extensionCount.get(0), stack);
+        VkExtensionProperties.Buffer availableExtensions = VkExtensionProperties.malloc(extensionCount.get(0), stack);
         vkEnumerateDeviceExtensionProperties(
                 device, (String) null, extensionCount, availableExtensions);
 
@@ -297,17 +272,17 @@ public abstract class DeviceManager {
     }
 
     // Use the optimal most performant depth format for the specific GPU
-    // Nvidia performs best with 24 bit depth, while AMD is most performant with 32-bit float
+    // Nvidia performs best with 24 bit depth, while AMD is most performant with
+    // 32-bit float
     public static int findDepthFormat(boolean use24BitsDepthFormat) {
-        int[] formats =
-                use24BitsDepthFormat
-                        ? new int[] {
-                            VK_FORMAT_D24_UNORM_S8_UINT,
-                            VK_FORMAT_X8_D24_UNORM_PACK32,
-                            VK_FORMAT_D32_SFLOAT,
-                            VK_FORMAT_D32_SFLOAT_S8_UINT
-                        }
-                        : new int[] {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT};
+        int[] formats = use24BitsDepthFormat
+                ? new int[] {
+                        VK_FORMAT_D24_UNORM_S8_UINT,
+                        VK_FORMAT_X8_D24_UNORM_PACK32,
+                        VK_FORMAT_D32_SFLOAT,
+                        VK_FORMAT_D32_SFLOAT_S8_UINT
+                }
+                : new int[] { VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT };
 
         return findSupportedFormat(
                 VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT, formats);

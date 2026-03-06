@@ -31,12 +31,11 @@ public class LevelRendererMixin {
         profiler.pop();
     }
 
-    // TODO: fix
     @Inject(method = "method_62213", at = @At(value = "HEAD"))
     private void pushProfiler3(
             GpuBufferSlice gpuBufferSlice,
-            ResourceHandle resourceHandle,
-            ResourceHandle resourceHandle2,
+            ResourceHandle<?> resourceHandle,
+            ResourceHandle<?> resourceHandle2,
             CallbackInfo ci) {
         Profiler profiler = Profiler.getMainProfiler();
         profiler.push("Particles");
@@ -45,30 +44,24 @@ public class LevelRendererMixin {
     @Inject(method = "method_62213", at = @At(value = "RETURN"))
     private void popProfiler3(
             GpuBufferSlice gpuBufferSlice,
-            ResourceHandle resourceHandle,
-            ResourceHandle resourceHandle2,
+            ResourceHandle<?> resourceHandle,
+            ResourceHandle<?> resourceHandle2,
             CallbackInfo ci) {
         Profiler profiler = Profiler.getMainProfiler();
         profiler.pop();
     }
 
-    @Inject(
-            method = "method_62214",
-            at =
-                    @At(
-                            value = "INVOKE",
-                            target =
-                                    "Lnet/minecraft/client/renderer/LevelRenderer;submitEntities(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/state/LevelRenderState;Lnet/minecraft/client/renderer/SubmitNodeCollector;)V"))
+    @Inject(method = "method_62214", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;submitEntities(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/state/LevelRenderState;Lnet/minecraft/client/renderer/SubmitNodeCollector;)V"))
     private void profilerTerrain2(
             GpuBufferSlice gpuBufferSlice,
             LevelRenderState levelRenderState,
             ProfilerFiller profilerFiller,
             Matrix4f matrix4f,
-            ResourceHandle resourceHandle,
-            ResourceHandle resourceHandle2,
+            ResourceHandle<?> resourceHandle,
+            ResourceHandle<?> resourceHandle2,
             boolean bl,
-            ResourceHandle resourceHandle3,
-            ResourceHandle resourceHandle4,
+            ResourceHandle<?> resourceHandle3,
+            ResourceHandle<?> resourceHandle4,
             CallbackInfo ci) {
         Profiler profiler = Profiler.getMainProfiler();
         profiler.pop();

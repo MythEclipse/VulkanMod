@@ -4,24 +4,18 @@ package net.vulkanmod.render.chunk.graph;
 public class SectionGraph {
     private final net.minecraft.world.level.Level level;
     private final net.vulkanmod.render.chunk.SectionGrid sectionGrid;
-    private final net.vulkanmod.render.chunk.ChunkAreaManager chunkAreaManager;
+
     private final net.vulkanmod.render.chunk.build.task.TaskDispatcher taskDispatcher;
     private net.vulkanmod.render.chunk.util.AreaSetQueue chunkAreaQueue;
     private net.vulkanmod.render.chunk.frustum.VFrustum frustum;
     int nonEmptyChunks;
-    private final net.vulkanmod.render.chunk.util.ResettableQueue<
-                    net.vulkanmod.render.chunk.RenderSection>
-            sectionQueue = new net.vulkanmod.render.chunk.util.ResettableQueue<>();
+    private final net.vulkanmod.render.chunk.util.ResettableQueue<net.vulkanmod.render.chunk.RenderSection> sectionQueue = new net.vulkanmod.render.chunk.util.ResettableQueue<>();
     private short lastFrame = 0;
-    private final net.vulkanmod.render.chunk.util.ResettableQueue<
-                    net.vulkanmod.render.chunk.RenderSection>
-            blockEntitiesSections = new net.vulkanmod.render.chunk.util.ResettableQueue<>();
-    private final net.vulkanmod.render.chunk.util.ResettableQueue<
-                    net.vulkanmod.render.chunk.RenderSection>
-            rebuildQueue = new net.vulkanmod.render.chunk.util.ResettableQueue<>();
+    private final net.vulkanmod.render.chunk.util.ResettableQueue<net.vulkanmod.render.chunk.RenderSection> blockEntitiesSections = new net.vulkanmod.render.chunk.util.ResettableQueue<>();
+    private final net.vulkanmod.render.chunk.util.ResettableQueue<net.vulkanmod.render.chunk.RenderSection> rebuildQueue = new net.vulkanmod.render.chunk.util.ResettableQueue<>();
     net.minecraft.client.Minecraft minecraft = net.minecraft.client.Minecraft.getInstance();
-    public net.vulkanmod.render.chunk.build.RenderRegionBuilder renderRegionCache =
-            net.vulkanmod.render.chunk.WorldRenderer.getInstance().renderRegionCache;
+    public net.vulkanmod.render.chunk.build.RenderRegionBuilder renderRegionCache = net.vulkanmod.render.chunk.WorldRenderer
+            .getInstance().renderRegionCache;
 
     public SectionGraph(
             net.minecraft.world.level.Level level,
@@ -29,21 +23,18 @@ public class SectionGraph {
             net.vulkanmod.render.chunk.build.task.TaskDispatcher taskDispatcher) {
         this.level = level;
         this.sectionGrid = sectionGrid;
-        this.chunkAreaManager = sectionGrid.getChunkAreaManager();
+
         this.taskDispatcher = taskDispatcher;
-        this.chunkAreaQueue =
-                new net.vulkanmod.render.chunk.util.AreaSetQueue(
-                        sectionGrid.getChunkAreaManager().size);
+        this.chunkAreaQueue = new net.vulkanmod.render.chunk.util.AreaSetQueue(
+                sectionGrid.getChunkAreaManager().size);
     }
 
     public void update(
             net.minecraft.client.Camera camera,
             net.minecraft.client.renderer.culling.Frustum frustum,
             boolean spectator) {
-        net.vulkanmod.render.profiling.Profiler profiler =
-                net.vulkanmod.render.profiling.Profiler.getMainProfiler();
-        net.minecraft.util.profiling.ProfilerFiller mcProfiler =
-                net.minecraft.util.profiling.Profiler.get();
+        net.vulkanmod.render.profiling.Profiler profiler = net.vulkanmod.render.profiling.Profiler.getMainProfiler();
+        net.minecraft.util.profiling.ProfilerFiller mcProfiler = net.minecraft.util.profiling.Profiler.get();
         net.minecraft.core.BlockPos blockpos = camera.blockPosition();
         mcProfiler.popPush("update");
         boolean flag = this.minecraft.smartCull;
@@ -51,10 +42,9 @@ public class SectionGraph {
             flag = false;
         }
         profiler.push("frustum");
-        this.frustum =
-                ((net.vulkanmod.interfaces.FrustumMixed) frustum)
-                        .customFrustum()
-                        .offsetToFullyIncludeCameraCube(8);
+        this.frustum = ((net.vulkanmod.interfaces.FrustumMixed) frustum)
+                .customFrustum()
+                .offsetToFullyIncludeCameraCube(8);
         this.sectionGrid.updateFrustumVisibility(this.frustum);
         profiler.pop();
         mcProfiler.push("partial_update");
@@ -72,29 +62,26 @@ public class SectionGraph {
     private void initializeQueueForFullUpdate(net.minecraft.client.Camera camera) {
         net.minecraft.world.phys.Vec3 vec3 = camera.position();
         net.minecraft.core.BlockPos blockpos = camera.blockPosition();
-        net.vulkanmod.render.chunk.RenderSection renderSection =
-                this.sectionGrid.getSectionAtBlockPos(blockpos);
+        net.vulkanmod.render.chunk.RenderSection renderSection = this.sectionGrid.getSectionAtBlockPos(blockpos);
         if (renderSection == null) {
             boolean flag = blockpos.getY() > this.level.getMinY();
             int y = flag ? this.level.getMaxY() - 8 : this.level.getMinY() + 8;
             int x = net.minecraft.util.Mth.floor(vec3.x / 16.0d) * 16;
             int z = net.minecraft.util.Mth.floor(vec3.z / 16.0d) * 16;
-            java.util.List<net.vulkanmod.render.chunk.RenderSection> list =
-                    com.google.common.collect.Lists.newArrayList();
-            int renderDistance =
-                    net.vulkanmod.render.chunk.WorldRenderer.getInstance().getRenderDistance();
+            java.util.List<net.vulkanmod.render.chunk.RenderSection> list = com.google.common.collect.Lists
+                    .newArrayList();
+            int renderDistance = net.vulkanmod.render.chunk.WorldRenderer.getInstance().getRenderDistance();
             for (int x1 = -renderDistance; x1 <= renderDistance; x1++) {
                 for (int z1 = -renderDistance; z1 <= renderDistance; z1++) {
-                    net.vulkanmod.render.chunk.RenderSection renderSection1 =
-                            this.sectionGrid.getSectionAtBlockPos(
-                                    new net.minecraft.core.BlockPos(
-                                            x
-                                                    + net.minecraft.core.SectionPos
-                                                            .sectionToBlockCoord(x1, 8),
-                                            y,
-                                            z
-                                                    + net.minecraft.core.SectionPos
-                                                            .sectionToBlockCoord(z1, 8)));
+                    net.vulkanmod.render.chunk.RenderSection renderSection1 = this.sectionGrid.getSectionAtBlockPos(
+                            new net.minecraft.core.BlockPos(
+                                    x
+                                            + net.minecraft.core.SectionPos
+                                                    .sectionToBlockCoord(x1, 8),
+                                    y,
+                                    z
+                                            + net.minecraft.core.SectionPos
+                                                    .sectionToBlockCoord(z1, 8)));
                     if (renderSection1 != null) {
                         initFirstNode(renderSection1, this.lastFrame);
                         list.add(renderSection1);
@@ -163,8 +150,7 @@ public class SectionGraph {
                     this.rebuildQueue.ensureCapacity(1);
                     this.rebuildQueue.add(renderSection);
                 }
-                byte dirs =
-                        (byte) (renderSection.getVisibilityDirs() & renderSection.getDirections());
+                byte dirs = (byte) (renderSection.getVisibilityDirs() & renderSection.getDirections());
                 visitAdjacentNodes(renderSection, dirs);
             }
         }
@@ -173,12 +159,12 @@ public class SectionGraph {
     private void scheduleRebuilds() {
         for (int i = 0; i < this.rebuildQueue.size(); i++) {
             net.vulkanmod.render.chunk.RenderSection section = this.rebuildQueue.get(i);
-            boolean scheduled =
-                    section.rebuildChunkAsync(this.taskDispatcher, this.renderRegionCache);
+            boolean scheduled = section.rebuildChunkAsync(this.taskDispatcher, this.renderRegionCache);
             if (scheduled) {
                 section.setNotDirty();
             }
-            // If not scheduled (chunk not ready), keep dirty so it retries when chunk becomes ready
+            // If not scheduled (chunk not ready), keep dirty so it retries when chunk
+            // becomes ready
         }
         this.rebuildQueue.clear();
     }
@@ -256,36 +242,30 @@ public class SectionGraph {
             relativeSection.mainDir = direction;
             relativeSection.sourceDirs = (byte) (1 << direction);
             byte steps = (byte) (renderSection.steps + 1);
-            relativeSection.directionChanges =
-                    (byte) (steps < 10 ? 0 : org.lwjgl.vulkan.VK10.VK_FORMAT_S8_UINT);
+            relativeSection.directionChanges = (byte) (steps < 10 ? 0 : org.lwjgl.vulkan.VK10.VK_FORMAT_S8_UINT);
             relativeSection.steps = steps;
-            relativeSection.directions =
-                    (byte) (renderSection.directions & ((1 << opposite) ^ (-1)));
+            relativeSection.directions = (byte) (renderSection.directions & ((1 << opposite) ^ (-1)));
             this.sectionQueue.add(relativeSection);
         }
         relativeSection.addDir(direction);
-        boolean increase =
-                (renderSection.sourceDirs & (1 << direction)) == 0
-                        && !renderSection.isCompletelyEmpty();
-        byte dc =
-                increase
-                        ? (byte) (renderSection.directionChanges + 1)
-                        : renderSection.directionChanges;
-        relativeSection.directionChanges =
-                dc < relativeSection.directionChanges ? dc : relativeSection.directionChanges;
+        boolean increase = (renderSection.sourceDirs & (1 << direction)) == 0
+                && !renderSection.isCompletelyEmpty();
+        byte dc = increase
+                ? (byte) (renderSection.directionChanges + 1)
+                : renderSection.directionChanges;
+        relativeSection.directionChanges = dc < relativeSection.directionChanges ? dc
+                : relativeSection.directionChanges;
     }
 
     public net.vulkanmod.render.chunk.util.AreaSetQueue getChunkAreaQueue() {
         return this.chunkAreaQueue;
     }
 
-    public net.vulkanmod.render.chunk.util.ResettableQueue<net.vulkanmod.render.chunk.RenderSection>
-            getSectionQueue() {
+    public net.vulkanmod.render.chunk.util.ResettableQueue<net.vulkanmod.render.chunk.RenderSection> getSectionQueue() {
         return this.sectionQueue;
     }
 
-    public net.vulkanmod.render.chunk.util.ResettableQueue<net.vulkanmod.render.chunk.RenderSection>
-            getBlockEntitiesSections() {
+    public net.vulkanmod.render.chunk.util.ResettableQueue<net.vulkanmod.render.chunk.RenderSection> getBlockEntitiesSections() {
         return this.blockEntitiesSections;
     }
 
@@ -296,10 +276,8 @@ public class SectionGraph {
     public java.lang.String getStatistics() {
         int totalSections = this.sectionGrid.getSectionCount();
         int sections = this.sectionQueue.size();
-        int renderDistance =
-                net.vulkanmod.render.chunk.WorldRenderer.getInstance().getRenderDistance();
-        java.lang.String tasksInfo =
-                this.taskDispatcher == null ? "null" : this.taskDispatcher.getStats();
+        int renderDistance = net.vulkanmod.render.chunk.WorldRenderer.getInstance().getRenderDistance();
+        java.lang.String tasksInfo = this.taskDispatcher == null ? "null" : this.taskDispatcher.getStats();
         return java.lang.String.format(
                 "Chunks: %d(%d)/%d D: %d, %s",
                 java.lang.Integer.valueOf(this.nonEmptyChunks),

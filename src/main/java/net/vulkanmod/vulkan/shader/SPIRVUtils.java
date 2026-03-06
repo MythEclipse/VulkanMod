@@ -27,7 +27,8 @@ public class SPIRVUtils {
     private static long compiler;
     private static long options;
 
-    // The dedicated Includer and Releaser Inner Classes used to Initialise #include Support for
+    // The dedicated Includer and Releaser Inner Classes used to Initialise #include
+    // Support for
     // ShaderC
     private static final ShaderIncluder SHADER_INCLUDER = new ShaderIncluder();
     private static final ShaderReleaser SHADER_RELEASER = new ShaderReleaser();
@@ -56,7 +57,8 @@ public class SPIRVUtils {
             shaderc_compile_options_set_optimization_level(
                     options, shaderc_optimization_level_performance);
 
-        if (DEBUG) shaderc_compile_options_set_generate_debug_info(options);
+        if (DEBUG)
+            shaderc_compile_options_set_generate_debug_info(options);
 
         shaderc_compile_options_set_target_env(
                 options, shaderc_env_version_vulkan_1_2, VK12.VK_API_VERSION_1_2);
@@ -70,7 +72,8 @@ public class SPIRVUtils {
     public static void addIncludePath(String path) {
         URL url = SPIRVUtils.class.getResource(path);
 
-        if (url != null) includePaths.add(url.toExternalForm());
+        if (url != null)
+            includePaths.add(url.toExternalForm());
     }
 
     public static SPIRV compileShader(String filename, String source, ShaderKind shaderKind) {
@@ -79,9 +82,8 @@ public class SPIRVUtils {
                     "source for %s.%s is null".formatted(filename, shaderKind));
         }
 
-        long result =
-                shaderc_compile_into_spv(
-                        compiler, source, shaderKind.kind, filename, "main", options);
+        long result = shaderc_compile_into_spv(
+                compiler, source, shaderKind.kind, filename, "main", options);
 
         if (result == NULL) {
             throw new RuntimeException("Failed to compile shader " + filename + " into SPIR-V");
@@ -111,8 +113,6 @@ public class SPIRVUtils {
     }
 
     private static class ShaderIncluder implements ShadercIncludeResolveI {
-
-        private static final int MAX_PATH_LENGTH = 4096; // Maximum Linux/Unix Path Length
 
         @Override
         public long invoke(
@@ -149,25 +149,26 @@ public class SPIRVUtils {
         }
     }
 
-    // TODO: Don't actually need the Releaser at all, (MemoryStack frees this for us)
-    // But ShaderC won't let us create the Includer without a corresponding Releaser, (so we need it
+    // TODO: Don't actually need the Releaser at all, (MemoryStack frees this for
+    // us)
+    // But ShaderC won't let us create the Includer without a corresponding
+    // Releaser, (so we need it
     // anyway)
     private static class ShaderReleaser implements ShadercIncludeResultReleaseI {
 
         @Override
         public void invoke(long user_data, long include_result) {
-            // TODO:Maybe dump Shader Compiled Binaries here to a .Misc Diretcory to allow easy
+            // TODO:Maybe dump Shader Compiled Binaries here to a .Misc Diretcory to allow
+            // easy
             // caching.recompilation...
         }
     }
 
     public static final class SPIRV implements NativeResource {
 
-        private final long handle;
         private ByteBuffer bytecode;
 
         public SPIRV(long handle, ByteBuffer bytecode) {
-            this.handle = handle;
             this.bytecode = bytecode;
         }
 
@@ -177,7 +178,7 @@ public class SPIRVUtils {
 
         @Override
         public void free() {
-            //            shaderc_result_release(handle);
+            // shaderc_result_release(handle);
             bytecode = null; // Help the GC
         }
     }

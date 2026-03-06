@@ -5,9 +5,7 @@ import net.vulkanmod.vulkan.shader.Pipeline;
 
 public class VkGlProgram {
     private static int ID_COUNTER = 1;
-    private static final Int2ReferenceOpenHashMap<VkGlProgram> map =
-            new Int2ReferenceOpenHashMap<>();
-    private static int boundProgramId = 0;
+    private static final Int2ReferenceOpenHashMap<VkGlProgram> map = new Int2ReferenceOpenHashMap<>();
     private static VkGlProgram boundProgram;
 
     public static VkGlProgram getBoundProgram() {
@@ -26,7 +24,6 @@ public class VkGlProgram {
     }
 
     public static void glUseProgram(int id) {
-        boundProgramId = id;
         boundProgram = map.get(id);
 
         if (id <= 0) {

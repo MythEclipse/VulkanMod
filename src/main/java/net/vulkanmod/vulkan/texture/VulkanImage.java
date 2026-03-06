@@ -96,32 +96,29 @@ public class VulkanImage {
         VulkanImage image = new VulkanImage(builder);
 
         image.createImage();
-        image.mainImageView =
-                createImageView(
-                        image.id,
-                        image.viewType,
-                        image.format,
-                        image.aspect,
-                        image.arrayLayers,
-                        0,
-                        image.mipLevels);
+        image.mainImageView = createImageView(
+                image.id,
+                image.viewType,
+                image.format,
+                image.aspect,
+                image.arrayLayers,
+                0,
+                image.mipLevels);
 
-        image.sampler =
-                SamplerManager.getSampler(
-                        builder.clamp, builder.linearFiltering, builder.mipLevels - 1);
+        image.sampler = SamplerManager.getSampler(
+                builder.clamp, builder.linearFiltering, builder.mipLevels - 1);
 
         return image;
     }
 
     public static VulkanImage createDepthImage(
             int format, int width, int height, int usage, boolean blur, boolean clamp) {
-        VulkanImage image =
-                VulkanImage.builder(width, height)
-                        .setFormat(format)
-                        .setUsage(usage)
-                        .setLinearFiltering(blur)
-                        .setClamp(clamp)
-                        .createVulkanImage();
+        VulkanImage image = VulkanImage.builder(width, height)
+                .setFormat(format)
+                .setUsage(usage)
+                .setLinearFiltering(blur)
+                .setClamp(clamp)
+                .createVulkanImage();
 
         return image;
     }
@@ -132,13 +129,12 @@ public class VulkanImage {
             ByteBuffer buffer = stack.malloc(4);
             buffer.putInt(0, i);
 
-            VulkanImage image =
-                    VulkanImage.builder(1, 1)
-                            .setFormat(DefaultFormat)
-                            .setUsage(VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT)
-                            .setLinearFiltering(false)
-                            .setClamp(false)
-                            .createVulkanImage();
+            VulkanImage image = VulkanImage.builder(1, 1)
+                    .setFormat(DefaultFormat)
+                    .setUsage(VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT)
+                    .setLinearFiltering(false)
+                    .setClamp(false)
+                    .createVulkanImage();
             image.uploadSubTextureAsync(0, 0, image.width, image.height, 0, 0, 0, 0, 0, buffer);
             return image;
         }
@@ -149,8 +145,7 @@ public class VulkanImage {
             LongBuffer pTextureImage = stack.mallocLong(1);
             PointerBuffer pAllocation = stack.pointers(0L);
 
-            int flags =
-                    viewType == VK_IMAGE_VIEW_TYPE_CUBE ? VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT : 0;
+            int flags = viewType == VK_IMAGE_VIEW_TYPE_CUBE ? VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT : 0;
 
             MemoryManager.getInstance()
                     .createImage(
@@ -180,12 +175,14 @@ public class VulkanImage {
     public static int getAspect(int format) {
         return switch (format) {
             case VK_FORMAT_D24_UNORM_S8_UINT,
-                    VK_FORMAT_D32_SFLOAT_S8_UINT -> VK_IMAGE_ASPECT_DEPTH_BIT
-                    | VK_IMAGE_ASPECT_STENCIL_BIT;
+                    VK_FORMAT_D32_SFLOAT_S8_UINT ->
+                VK_IMAGE_ASPECT_DEPTH_BIT
+                        | VK_IMAGE_ASPECT_STENCIL_BIT;
 
             case VK_FORMAT_X8_D24_UNORM_PACK32,
                     VK_FORMAT_D32_SFLOAT,
-                    VK_FORMAT_D16_UNORM -> VK_IMAGE_ASPECT_DEPTH_BIT;
+                    VK_FORMAT_D16_UNORM ->
+                VK_IMAGE_ASPECT_DEPTH_BIT;
 
             default -> VK_IMAGE_ASPECT_COLOR_BIT;
         };
@@ -197,7 +194,8 @@ public class VulkanImage {
                     VK_FORMAT_D24_UNORM_S8_UINT,
                     VK_FORMAT_D32_SFLOAT,
                     VK_FORMAT_D32_SFLOAT_S8_UINT,
-                    VK_FORMAT_D16_UNORM -> true;
+                    VK_FORMAT_D16_UNORM ->
+                true;
             default -> false;
         };
     }
@@ -314,8 +312,7 @@ public class VulkanImage {
 
         long bufferId = stagingBuffer.getId();
 
-        VkCommandBuffer commandBuffer =
-                ImageUploadHelper.INSTANCE.getOrStartCommandBuffer().getHandle();
+        VkCommandBuffer commandBuffer = ImageUploadHelper.INSTANCE.getOrStartCommandBuffer().getHandle();
         try (MemoryStack stack = stackPush()) {
             transferDstLayout(stack, commandBuffer);
 
@@ -343,12 +340,12 @@ public class VulkanImage {
     }
 
     public void readOnlyLayout() {
-        if (this.currentLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) return;
+        if (this.currentLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
+            return;
 
         try (MemoryStack stack = MemoryStack.stackPush()) {
             if (Renderer.getInstance().getBoundRenderPass() != null) {
-                CommandPool.CommandBuffer commandBuffer =
-                        ImageUploadHelper.INSTANCE.getOrStartCommandBuffer();
+                CommandPool.CommandBuffer commandBuffer = ImageUploadHelper.INSTANCE.getOrStartCommandBuffer();
                 VkCommandBuffer vkCommandBuffer = commandBuffer.getHandle();
 
                 readOnlyLayout(stack, vkCommandBuffer);
@@ -401,9 +398,8 @@ public class VulkanImage {
                 sourceStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
             }
             case VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL -> {
-                srcAccessMask =
-                        VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT
-                                | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+                srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT
+                        | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
                 sourceStage = VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
             }
             default -> throw new RuntimeException("Unexpected value:" + image.currentLayout);
@@ -423,14 +419,12 @@ public class VulkanImage {
                 destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
             }
             case VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL -> {
-                dstAccessMask =
-                        VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_COLOR_ATTACHMENT_READ_BIT;
+                dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_COLOR_ATTACHMENT_READ_BIT;
                 destinationStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
             }
             case VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL -> {
-                dstAccessMask =
-                        VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT
-                                | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+                dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT
+                        | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
                 destinationStage = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
             }
             case VK_IMAGE_LAYOUT_PRESENT_SRC_KHR -> {
@@ -509,16 +503,13 @@ public class VulkanImage {
         image.currentLayout = newLayout;
     }
 
-    private static boolean hasStencilComponent(int format) {
-        return format == VK_FORMAT_D32_SFLOAT_S8_UINT || format == VK_FORMAT_D24_UNORM_S8_UINT;
-    }
-
     public void free() {
         MemoryManager.getInstance().addToFreeable(this);
     }
 
     public void doFree() {
-        if (this.id == 0L) return;
+        if (this.id == 0L)
+            return;
 
         MemoryManager.freeImage(this.id, this.allocation);
 
@@ -558,15 +549,14 @@ public class VulkanImage {
 
     public long getLevelImageView(int i) {
         if (this.levelImageViews[i] == 0L) {
-            this.levelImageViews[i] =
-                    createImageView(
-                            this.id,
-                            VK_IMAGE_VIEW_TYPE_2D,
-                            this.format,
-                            this.aspect,
-                            this.arrayLayers,
-                            i,
-                            1);
+            this.levelImageViews[i] = createImageView(
+                    this.id,
+                    VK_IMAGE_VIEW_TYPE_2D,
+                    this.format,
+                    this.aspect,
+                    this.arrayLayers,
+                    i,
+                    1);
         }
         return levelImageViews[i];
     }
@@ -592,10 +582,9 @@ public class VulkanImage {
         int formatSize;
         int arrayLayers = 1;
         byte mipLevels = 1;
-        int usage =
-                VK_IMAGE_USAGE_TRANSFER_DST_BIT
-                        | VK_IMAGE_USAGE_TRANSFER_SRC_BIT
-                        | VK_IMAGE_USAGE_SAMPLED_BIT;
+        int usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT
+                | VK_IMAGE_USAGE_TRANSFER_SRC_BIT
+                | VK_IMAGE_USAGE_SAMPLED_BIT;
         int viewType = VK_IMAGE_VIEW_TYPE_2D;
 
         // Sampler settings
@@ -672,7 +661,8 @@ public class VulkanImage {
                         VK_FORMAT_D24_UNORM_S8_UINT,
                         VK_FORMAT_R8G8B8A8_UINT,
                         VK_FORMAT_R8G8B8A8_SINT,
-                        VK_FORMAT_R32_SFLOAT -> 4;
+                        VK_FORMAT_R32_SFLOAT ->
+                    4;
                 case VK_FORMAT_R16_SFLOAT -> 2;
                 case VK_FORMAT_R8_UNORM -> 1;
                 case VK_FORMAT_R16G16B16A16_SFLOAT -> 8;

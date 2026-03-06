@@ -25,7 +25,8 @@ public class Profiler {
     }
 
     public static void setActive(boolean b) {
-        if (!FORCE_ACTIVE) ACTIVE = b;
+        if (!FORCE_ACTIVE)
+            ACTIVE = b;
     }
 
     private final String name;
@@ -49,7 +50,8 @@ public class Profiler {
     }
 
     public void push(String s) {
-        if (!(ACTIVE)) return;
+        if (!(ACTIVE))
+            return;
 
         Node node = nodeMap.get(s);
 
@@ -63,7 +65,8 @@ public class Profiler {
         node.setParent(currentNode);
         node.children.clear();
 
-        if (node.parent == selectedNode) currentFrameNodes.add(node);
+        if (node.parent == selectedNode)
+            currentFrameNodes.add(node);
 
         currentNode = node;
 
@@ -77,7 +80,8 @@ public class Profiler {
     }
 
     public void pop() {
-        if (!(ACTIVE)) return;
+        if (!(ACTIVE))
+            return;
 
         if (nodeStack.isEmpty()) {
             if (DEBUG)
@@ -98,7 +102,8 @@ public class Profiler {
     }
 
     public void start() {
-        if (!(ACTIVE)) return;
+        if (!(ACTIVE))
+            return;
 
         if (!nodeStack.isEmpty()) {
             if (DEBUG)
@@ -120,12 +125,8 @@ public class Profiler {
     }
 
     public void end() {
-        if (!(ACTIVE)) return;
-
-        if (DEBUG && currentNode != mainNode) {
-            Initializer.LOGGER.error(
-                    "Profiler %s: current node is not the main node".formatted(name));
-        }
+        if (!(ACTIVE))
+            return;
 
         this.pop();
     }

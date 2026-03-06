@@ -30,8 +30,7 @@ public class SectionGrid {
         this.level = level;
         this.setViewDistance(viewDistance);
         this.createChunks();
-        this.chunkAreaManager =
-                new ChunkAreaManager(this.gridWidth, this.gridHeight, this.level.getMinY());
+        this.chunkAreaManager = new ChunkAreaManager(this.gridWidth, this.gridHeight, this.level.getMinY());
 
         this.prevSecX = Integer.MIN_VALUE;
         this.prevSecZ = Integer.MIN_VALUE;
@@ -78,7 +77,8 @@ public class SectionGrid {
     }
 
     /**
-     * This method has been optimized with circular lists to remove costly modulo computations and
+     * This method has been optimized with circular lists to remove costly modulo
+     * computations and
      * to reduce section repositioning to only the necessary.
      */
     public void repositionCamera(double x, double z) {
@@ -100,7 +100,6 @@ public class SectionGrid {
         xList.updateStartIdx(xStart);
         zList.updateStartIdx(zStart);
 
-        CircularIntList.OwnIterator xIterator = xList.iterator();
         CircularIntList.OwnIterator zIterator = zList.iterator();
 
         int xRangeStart;
@@ -129,10 +128,8 @@ public class SectionGrid {
             zRangeEnd = -dz - 1;
         }
 
-        CircularIntList.RangeIterator xRangeIterator =
-                xList.getRangeIterator(xRangeStart, xRangeEnd);
-        CircularIntList.RangeIterator zRangeIterator =
-                zList.getRangeIterator(zRangeStart, zRangeEnd);
+        CircularIntList.RangeIterator xRangeIterator = xList.getRangeIterator(xRangeStart, xRangeEnd);
+        CircularIntList.RangeIterator zRangeIterator = zList.getRangeIterator(zRangeStart, zRangeEnd);
         CircularIntList.RangeIterator xComplIterator = this.xComplIterator;
         xComplIterator.update(xComplStart, xComplEnd);
 
@@ -206,8 +203,7 @@ public class SectionGrid {
             int zCurrentIdx) {
 
         int y1 = this.level.getMinY() + (yRel << 4);
-        RenderSection renderSection =
-                this.sections[this.getChunkIndex(xRelativeIndex, yRel, zRelativeIndex)];
+        RenderSection renderSection = this.sections[this.getChunkIndex(xRelativeIndex, yRel, zRelativeIndex)];
 
         this.unsetNeighbours(renderSection);
 
@@ -233,12 +229,10 @@ public class SectionGrid {
         chunkArea.addSection();
         renderSection.setChunkArea(chunkArea);
 
-        renderSection.inAreaIndex =
-                (short)
-                        (((x1 - chunkArea.position.x()) >> 4)
-                                + (((z1 - chunkArea.position.z()) >> 4) * 8
-                                                + ((y1 - chunkArea.position.y()) >> 4))
-                                        * 8);
+        renderSection.inAreaIndex = (short) (((x1 - chunkArea.position.x()) >> 4)
+                + (((z1 - chunkArea.position.z()) >> 4) * 8
+                        + ((y1 - chunkArea.position.y()) >> 4))
+                        * 8);
     }
 
     private void setNeighbours(
@@ -307,18 +301,6 @@ public class SectionGrid {
             RenderSection neighbour = this.sections[getChunkIndex(x, y - 1, z)];
             section.setAdjacent(neighbour, GraphDirections.DOWN);
         }
-    }
-
-    private void setChunkArea(RenderSection section, int x, int y, int z) {
-        ChunkArea oldArea = section.getChunkArea();
-
-        if (oldArea != null) {
-            oldArea.removeSection();
-        }
-
-        ChunkArea chunkArea = this.chunkAreaManager.getChunkArea(section, x, y, z);
-        chunkArea.addSection();
-        section.setChunkArea(chunkArea);
     }
 
     public void setDirty(int sectionX, int sectionY, int sectionZ, boolean playerChanged) {

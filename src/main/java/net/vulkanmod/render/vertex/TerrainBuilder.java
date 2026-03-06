@@ -151,11 +151,6 @@ public class TerrainBuilder {
         return MemoryUtil.memByteBuffer(this.indexBufferPtr, indexCount * 2);
     }
 
-    private void ensureDrawing() {
-        if (!this.building) {
-            throw new IllegalStateException("Not building!");
-        }
-    }
 
     public void reset() {
         this.building = false;
@@ -189,9 +184,6 @@ public class TerrainBuilder {
             boolean indexOnly,
             boolean sequentialIndex) {
 
-        private int indexBufferSize() {
-            return this.sequentialIndex ? 0 : this.indexCount * this.indexType.bytes;
-        }
 
         public int indexCount() {
             return this.indexCount;

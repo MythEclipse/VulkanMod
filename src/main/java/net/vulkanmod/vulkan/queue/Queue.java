@@ -42,7 +42,8 @@ public abstract class Queue {
         vkGetDeviceQueue(DeviceManager.vkDevice, familyIndex, 0, pQueue);
         this.vkQueue = new VkQueue(pQueue.get(0), DeviceManager.vkDevice);
 
-        if (initCommandPool) this.commandPool = new CommandPool(familyIndex);
+        if (initCommandPool)
+            this.commandPool = new CommandPool(familyIndex);
     }
 
     public long submitCommands(CommandPool.CommandBuffer commandBuffer) {
@@ -61,7 +62,8 @@ public abstract class Queue {
     }
 
     public void cleanUp() {
-        if (commandPool != null) commandPool.cleanUp();
+        if (commandPool != null)
+            commandPool.cleanUp();
     }
 
     public void waitIdle() {
@@ -72,14 +74,9 @@ public abstract class Queue {
         return commandPool;
     }
 
-    public enum Family {
-        Graphics,
-        Transfer,
-        Compute
-    }
-
     public static QueueFamilyIndices getQueueFamilies() {
-        if (device == null) device = Vulkan.getVkDevice();
+        if (device == null)
+            device = Vulkan.getVkDevice();
 
         if (queueFamilyIndices == null) {
             queueFamilyIndices = findQueueFamilies(device.getPhysicalDevice());
@@ -96,8 +93,8 @@ public abstract class Queue {
 
             vkGetPhysicalDeviceQueueFamilyProperties(device, queueFamilyCount, null);
 
-            VkQueueFamilyProperties.Buffer queueFamilies =
-                    VkQueueFamilyProperties.mallocStack(queueFamilyCount.get(0), stack);
+            VkQueueFamilyProperties.Buffer queueFamilies = VkQueueFamilyProperties.malloc(queueFamilyCount.get(0),
+                    stack);
 
             vkGetPhysicalDeviceQueueFamilyProperties(device, queueFamilyCount, queueFamilies);
 
@@ -132,7 +129,8 @@ public abstract class Queue {
                     }
                 }
 
-                if (indices.isComplete()) break;
+                if (indices.isComplete())
+                    break;
             }
 
             if (indices.presentFamily == -1) {
@@ -152,12 +150,14 @@ public abstract class Queue {
                     int queueFlags = queueFamilies.get(i).queueFlags();
 
                     if ((queueFlags & VK_QUEUE_TRANSFER_BIT) != 0) {
-                        if (transferIndex == -1) transferIndex = i;
+                        if (transferIndex == -1)
+                            transferIndex = i;
 
                         if ((queueFlags & (VK_QUEUE_GRAPHICS_BIT)) == 0) {
                             indices.transferFamily = i;
 
-                            if (i != indices.computeFamily) break;
+                            if (i != indices.computeFamily)
+                                break;
 
                             transferIndex = i;
                         }
@@ -216,7 +216,7 @@ public abstract class Queue {
         }
 
         public int[] array() {
-            return new int[] {graphicsFamily, presentFamily};
+            return new int[] { graphicsFamily, presentFamily };
         }
     }
 }

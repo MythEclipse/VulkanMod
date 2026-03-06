@@ -29,13 +29,10 @@ public class ProfilerOverlay {
     private static float frametime;
 
     private static String buildStats;
-    //    private static int node = -1;
 
-    private final Minecraft minecraft;
     private final Font font;
 
     public ProfilerOverlay(Minecraft minecraft) {
-        this.minecraft = minecraft;
         this.font = minecraft.font;
     }
 
@@ -49,8 +46,6 @@ public class ProfilerOverlay {
     }
 
     public static void onKeyPress(int key) {
-        //        int v = key - InputConstants.KEY_0;
-        //        node = v >= 0 && v <= 15 ? v-1 : node;
     }
 
     public void render(GuiGraphics guiGraphics) {
@@ -142,21 +137,23 @@ public class ProfilerOverlay {
     }
 
     private void updateResults() {
-        if ((System.nanoTime() - lastPollTime) < POLL_PERIOD && lastResults != null) return;
+        if ((System.nanoTime() - lastPollTime) < POLL_PERIOD && lastResults != null)
+            return;
 
         Profiler.ProfilerResults results = Profiler.getMainProfiler().getProfilerResults();
-        if (results == null) return;
+        if (results == null)
+            return;
 
         frametime = results.getResult().value;
         lastResults = results;
         lastPollTime = System.nanoTime();
 
-        if (ChunkTask.BENCH) buildStats = this.getBuildStats();
+        if (ChunkTask.BENCH)
+            buildStats = this.getBuildStats();
     }
 
     private String getBuildStats() {
-        BuilderResources[] resourcesArray =
-                WorldRenderer.getInstance().getTaskDispatcher().getResourcesArray();
+        BuilderResources[] resourcesArray = WorldRenderer.getInstance().getTaskDispatcher().getResourcesArray();
         int totalTime = 0;
         int buildCount = 0;
 
@@ -167,6 +164,6 @@ public class ProfilerOverlay {
 
         return String.format(
                 "Builders time: %dms avg %dms (%d builds)",
-                totalTime, totalTime / resourcesArray.length, buildCount);
+                totalTime, resourcesArray.length > 0 ? totalTime / resourcesArray.length : 0, buildCount);
     }
 }

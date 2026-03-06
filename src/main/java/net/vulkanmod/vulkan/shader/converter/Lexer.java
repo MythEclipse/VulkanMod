@@ -8,8 +8,6 @@ public class Lexer {
     private int currentPosition;
     private char currentChar;
 
-    private State state;
-
     public Lexer(String input) {
         this.input = input;
         this.currentPosition = 0;
@@ -112,50 +110,49 @@ public class Lexer {
                 break;
         }
 
-        Token token =
-                switch (currentChar) {
-                    case '{' -> new Token(Token.TokenType.LEFT_BRACE, "{");
-                    case '}' -> new Token(Token.TokenType.RIGHT_BRACE, "}");
-                    case '(' -> new Token(Token.TokenType.LEFT_PARENTHESIS, "(");
-                    case ')' -> new Token(Token.TokenType.RIGHT_PARENTHESIS, ")");
-                    case ':' -> new Token(Token.TokenType.COLON, ":");
-                    case ';' -> new Token(Token.TokenType.SEMICOLON, ";");
-                    case '.' -> new Token(Token.TokenType.DOT, ".");
-                    case ',' -> new Token(Token.TokenType.COMMA, ",");
+        Token token = switch (currentChar) {
+            case '{' -> new Token(Token.TokenType.LEFT_BRACE, "{");
+            case '}' -> new Token(Token.TokenType.RIGHT_BRACE, "}");
+            case '(' -> new Token(Token.TokenType.LEFT_PARENTHESIS, "(");
+            case ')' -> new Token(Token.TokenType.RIGHT_PARENTHESIS, ")");
+            case ':' -> new Token(Token.TokenType.COLON, ":");
+            case ';' -> new Token(Token.TokenType.SEMICOLON, ";");
+            case '.' -> new Token(Token.TokenType.DOT, ".");
+            case ',' -> new Token(Token.TokenType.COMMA, ",");
 
-                    case '=' -> new Token(Token.TokenType.OPERATOR, "=");
-                    case '+' -> new Token(Token.TokenType.OPERATOR, "+");
-                    case '-' -> new Token(Token.TokenType.OPERATOR, "-");
-                    case '*' -> new Token(Token.TokenType.OPERATOR, "*");
-                    case '/' -> new Token(Token.TokenType.OPERATOR, "/");
-                    case '%' -> new Token(Token.TokenType.OPERATOR, "%");
-                    case '<' -> new Token(Token.TokenType.OPERATOR, "<");
-                    case '>' -> new Token(Token.TokenType.OPERATOR, ">");
-                    case '!' -> new Token(Token.TokenType.OPERATOR, "!");
-                    case '&' -> new Token(Token.TokenType.OPERATOR, "&");
-                    case '|' -> new Token(Token.TokenType.OPERATOR, "|");
-                    case '^' -> new Token(Token.TokenType.OPERATOR, "^");
-                    case '?' -> new Token(Token.TokenType.OPERATOR, "?");
-                    case '[' -> new Token(Token.TokenType.OPERATOR, "[");
-                    case ']' -> new Token(Token.TokenType.OPERATOR, "]");
+            case '=' -> new Token(Token.TokenType.OPERATOR, "=");
+            case '+' -> new Token(Token.TokenType.OPERATOR, "+");
+            case '-' -> new Token(Token.TokenType.OPERATOR, "-");
+            case '*' -> new Token(Token.TokenType.OPERATOR, "*");
+            case '/' -> new Token(Token.TokenType.OPERATOR, "/");
+            case '%' -> new Token(Token.TokenType.OPERATOR, "%");
+            case '<' -> new Token(Token.TokenType.OPERATOR, "<");
+            case '>' -> new Token(Token.TokenType.OPERATOR, ">");
+            case '!' -> new Token(Token.TokenType.OPERATOR, "!");
+            case '&' -> new Token(Token.TokenType.OPERATOR, "&");
+            case '|' -> new Token(Token.TokenType.OPERATOR, "|");
+            case '^' -> new Token(Token.TokenType.OPERATOR, "^");
+            case '?' -> new Token(Token.TokenType.OPERATOR, "?");
+            case '[' -> new Token(Token.TokenType.OPERATOR, "[");
+            case ']' -> new Token(Token.TokenType.OPERATOR, "]");
 
-                    case '#' -> {
-                        StringBuilder sb = new StringBuilder();
+            case '#' -> {
+                StringBuilder sb = new StringBuilder();
 
-                        while (checkEOF() && currentChar != '\n') {
-                            sb.append(currentChar);
-                            advance();
-                        }
-                        sb.append('\n');
+                while (checkEOF() && currentChar != '\n') {
+                    sb.append(currentChar);
+                    advance();
+                }
+                sb.append('\n');
 
-                        String value = sb.toString();
-                        yield new Token(Token.TokenType.PREPROCESSOR, value);
-                    }
+                String value = sb.toString();
+                yield new Token(Token.TokenType.PREPROCESSOR, value);
+            }
 
-                    case '\"' -> string();
+            case '\"' -> string();
 
-                    default -> null;
-                };
+            default -> null;
+        };
 
         if (token == null) {
             if (Character.isLetter(currentChar)) {
@@ -252,9 +249,4 @@ public class Lexer {
         return currentChar != '\0';
     }
 
-    enum State {
-        UNIFORM_BLOCK,
-        CODE,
-        DEFAULT
-    }
 }

@@ -18,15 +18,11 @@ public enum SimpleDirection {
     }
 
     private final int data3d;
-    private final int oppositeIndex;
-    private final int data2d;
 
     public final byte nx, ny, nz;
 
     SimpleDirection(int j, int k, int l, Vec3i normal) {
         this.data3d = j;
-        this.oppositeIndex = k;
-        this.data2d = l;
 
         this.nx = (byte) normal.getX();
         this.ny = (byte) normal.getY();

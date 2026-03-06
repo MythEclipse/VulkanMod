@@ -16,7 +16,8 @@ import org.jetbrains.annotations.Nullable;
 @Environment(EnvType.CLIENT)
 public class VkGpuBuffer extends GpuBuffer {
     protected boolean closed;
-    @Nullable protected final Supplier<String> label;
+    @Nullable
+    protected final Supplier<String> label;
 
     Buffer buffer;
 
@@ -45,10 +46,9 @@ public class VkGpuBuffer extends GpuBuffer {
             vkUsage |= VK_BUFFER_USAGE_UNIFORM_TEXEL_BUFFER_BIT;
         }
 
-        boolean mappable =
-                (usage & GpuBuffer.USAGE_MAP_READ) != 0
-                        | (usage & GpuBuffer.USAGE_MAP_WRITE) != 0
-                        | (usage & GpuBuffer.USAGE_HINT_CLIENT_STORAGE) != 0;
+        boolean mappable = (usage & GpuBuffer.USAGE_MAP_READ) != 0
+                | (usage & GpuBuffer.USAGE_MAP_WRITE) != 0
+                | (usage & GpuBuffer.USAGE_HINT_CLIENT_STORAGE) != 0;
 
         MemoryType memoryType = mappable ? MemoryTypes.HOST_MEM : MemoryTypes.GPU_MEM;
 
@@ -90,11 +90,9 @@ public class VkGpuBuffer extends GpuBuffer {
 
     @Environment(EnvType.CLIENT)
     public static class MappedView implements GpuBuffer.MappedView {
-        private final int target;
         private final ByteBuffer data;
 
         protected MappedView(int i, ByteBuffer byteBuffer) {
-            this.target = i;
             this.data = byteBuffer;
         }
 
@@ -105,7 +103,7 @@ public class VkGpuBuffer extends GpuBuffer {
 
         @Override
         public void close() {
-            //            GlStateManager._glUnmapBuffer(this.target);
+            // GlStateManager._glUnmapBuffer(this.target);
         }
     }
 }

@@ -10,7 +10,9 @@ import net.vulkanmod.vulkan.shader.layout.AlignedStruct;
 import net.vulkanmod.vulkan.shader.layout.Uniform;
 import org.lwjgl.vulkan.VK11;
 
-/** Simple parser used to convert GLSL shader code to make it Vulkan compatible */
+/**
+ * Simple parser used to convert GLSL shader code to make it Vulkan compatible
+ */
 public class GLSLParser {
     private Lexer lexer;
     private List<Token> tokens;
@@ -18,7 +20,6 @@ public class GLSLParser {
     private Token currentToken;
 
     private Stage stage;
-    State state = State.DEFAULT;
 
     LinkedList<Node> vsStream = new LinkedList<>();
     LinkedList<Node> fsStream = new LinkedList<>();
@@ -36,7 +37,8 @@ public class GLSLParser {
     ArrayList<Attribute> fragInAttributes = new ArrayList<>();
     ArrayList<Attribute> fragOutAttributes = new ArrayList<>();
 
-    public GLSLParser() {}
+    public GLSLParser() {
+    }
 
     public void setVertexFormat(VertexFormat vertexFormat) {
         this.vertexFormat = vertexFormat;
@@ -150,7 +152,6 @@ public class GLSLParser {
     }
 
     private void parseUniformBlock() {
-        this.state = State.LAYOUT;
 
         nextToken(true);
 
@@ -207,7 +208,8 @@ public class GLSLParser {
         nextToken(true);
 
         switch (currentToken.type) {
-            case SEMICOLON -> {}
+            case SEMICOLON -> {
+            }
 
             case IDENTIFIER -> {
                 ub.setAlias(currentToken.value);
@@ -245,7 +247,6 @@ public class GLSLParser {
     }
 
     private void parseAttribute() {
-        this.state = State.ATTRIBUTE;
 
         String ioType = this.currentToken.value;
 
@@ -350,7 +351,7 @@ public class GLSLParser {
         }
 
         if (vertAttribute == null) {
-            //            throw new IllegalStateException("No match found for attribute %s in vertex
+            // throw new IllegalStateException("No match found for attribute %s in vertex
             // attribute outputs.".formatted(attribute.id));
         }
         return vertAttribute;
@@ -382,11 +383,10 @@ public class GLSLParser {
     public String getOutput(Stage stage) {
         StringBuilder stringBuilder = new StringBuilder();
 
-        var stream =
-                switch (stage) {
-                    case VERTEX -> this.vsStream;
-                    case FRAGMENT -> this.fsStream;
-                };
+        var stream = switch (stage) {
+            case VERTEX -> this.vsStream;
+            case FRAGMENT -> this.fsStream;
+        };
 
         // Version
         Node node = stream.getFirst();
@@ -397,6 +397,7 @@ public class GLSLParser {
             case VERTEX -> {
                 stringBuilder.append("#define gl_VertexID gl_VertexIndex\n\n");
             }
+            case FRAGMENT -> { }
         }
 
         // Rename glsl reserved keywords
@@ -432,9 +433,8 @@ public class GLSLParser {
                 builder.addUniformInfo(uniformInfo);
             }
 
-            ubos[i] =
-                    builder.buildUBO(
-                            uniformBlock.name, uniformBlock.binding, VK11.VK_SHADER_STAGE_ALL);
+            ubos[i] = builder.buildUBO(
+                    uniformBlock.name, uniformBlock.binding, VK11.VK_SHADER_STAGE_ALL);
             ++i;
         }
 
@@ -447,12 +447,12 @@ public class GLSLParser {
         int imageIdx = 0;
         for (Sampler sampler : this.samplers) {
 
-            int descriptorType =
-                    switch (sampler.type) {
-                        case SAMPLER_2D,
-                                SAMPLER_CUBE -> VK11.VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-                        case I_SAMPLER_BUFFER -> VK11.VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER;
-                    };
+            int descriptorType = switch (sampler.type) {
+                case SAMPLER_2D,
+                        SAMPLER_CUBE ->
+                    VK11.VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+                case I_SAMPLER_BUFFER -> VK11.VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER;
+            };
 
             imageDescriptors.add(
                     new ImageDescriptor(
@@ -461,14 +461,6 @@ public class GLSLParser {
         }
 
         return imageDescriptors;
-    }
-
-    enum State {
-        LAYOUT,
-        UNIFORM,
-        UNIFORM_BLOCK,
-        ATTRIBUTE,
-        DEFAULT
     }
 
     public enum Stage {

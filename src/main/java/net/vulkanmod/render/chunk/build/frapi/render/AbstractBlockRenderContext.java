@@ -3,8 +3,6 @@ package net.vulkanmod.render.chunk.build.frapi.render;
 /* JADX INFO: loaded from: VulkanMod_1.21.11-0.6.0.jar:net/vulkanmod/render/chunk/build/frapi/render/AbstractBlockRenderContext.class */
 public abstract class AbstractBlockRenderContext
         extends net.vulkanmod.render.chunk.build.frapi.render.AbstractRenderContext {
-    private static final net.fabricmc.fabric.api.renderer.v1.Renderer RENDERER =
-            net.vulkanmod.render.chunk.build.frapi.VulkanModRenderer.INSTANCE;
     protected final net.vulkanmod.render.chunk.build.color.BlockColorRegistry blockColorRegistry;
     protected net.minecraft.world.level.block.state.BlockState blockState;
     protected net.minecraft.core.BlockPos blockPos;
@@ -17,37 +15,28 @@ public abstract class AbstractBlockRenderContext
     protected net.minecraft.util.RandomSource random;
     protected int cullCompletionFlags;
     protected int cullResultFlags;
-    private final net.vulkanmod.render.chunk.build.frapi.mesh.MutableQuadViewImpl editorQuad =
-            new net.vulkanmod.render.chunk.build.frapi.mesh.MutableQuadViewImpl() { // from class:
-                // net.vulkanmod.render.chunk.build.frapi.render.AbstractBlockRenderContext.1
-                {
-                    this.data =
-                            new int
-                                    [net.vulkanmod.render.chunk.build.frapi.mesh.EncodingFormat
-                                            .TOTAL_STRIDE];
-                    clear();
-                }
+    private final net.vulkanmod.render.chunk.build.frapi.mesh.MutableQuadViewImpl editorQuad = new net.vulkanmod.render.chunk.build.frapi.mesh.MutableQuadViewImpl() { // from
+                                                                                                                                                                       // class:
+        // net.vulkanmod.render.chunk.build.frapi.render.AbstractBlockRenderContext.1
+        {
+            this.data = new int[net.vulkanmod.render.chunk.build.frapi.mesh.EncodingFormat.TOTAL_STRIDE];
+            clear();
+        }
 
-                @Override // net.vulkanmod.render.chunk.build.frapi.mesh.MutableQuadViewImpl
-                public void emitDirectly() {
-                    net.vulkanmod.render.chunk.build.frapi.render.AbstractBlockRenderContext.this
-                            .renderQuad(this);
-                }
-            };
-    protected net.minecraft.core.BlockPos.MutableBlockPos tempPos =
-            new net.minecraft.core.BlockPos.MutableBlockPos();
-    protected final it.unimi.dsi.fastutil.objects.Object2ByteLinkedOpenHashMap<
-                    net.vulkanmod.render.chunk.build.frapi.render.AbstractBlockRenderContext
-                            .ShapePairKey>
-            occlusionCache =
-                    new it.unimi.dsi.fastutil.objects.Object2ByteLinkedOpenHashMap<
-                            net.vulkanmod.render.chunk.build.frapi.render.AbstractBlockRenderContext
-                                    .ShapePairKey>(2048, 0.25f) { // from class:
-                        // net.vulkanmod.render.chunk.build.frapi.render.AbstractBlockRenderContext.2
-                        protected void rehash(int i) {}
-                    };
-    protected final net.vulkanmod.render.chunk.build.light.data.QuadLightData quadLightData =
-            new net.vulkanmod.render.chunk.build.light.data.QuadLightData();
+        @Override // net.vulkanmod.render.chunk.build.frapi.mesh.MutableQuadViewImpl
+        public void emitDirectly() {
+            net.vulkanmod.render.chunk.build.frapi.render.AbstractBlockRenderContext.this
+                    .renderQuad(this);
+        }
+    };
+    protected net.minecraft.core.BlockPos.MutableBlockPos tempPos = new net.minecraft.core.BlockPos.MutableBlockPos();
+    protected final it.unimi.dsi.fastutil.objects.Object2ByteLinkedOpenHashMap<net.vulkanmod.render.chunk.build.frapi.render.AbstractBlockRenderContext.ShapePairKey> occlusionCache = new it.unimi.dsi.fastutil.objects.Object2ByteLinkedOpenHashMap<net.vulkanmod.render.chunk.build.frapi.render.AbstractBlockRenderContext.ShapePairKey>(
+            2048, 0.25f) { // from class:
+        // net.vulkanmod.render.chunk.build.frapi.render.AbstractBlockRenderContext.2
+        protected void rehash(int i) {
+        }
+    };
+    protected final net.vulkanmod.render.chunk.build.light.data.QuadLightData quadLightData = new net.vulkanmod.render.chunk.build.light.data.QuadLightData();
     protected boolean enableCulling = true;
 
     protected abstract com.mojang.blaze3d.vertex.VertexConsumer getVertexConsumer(
@@ -55,11 +44,10 @@ public abstract class AbstractBlockRenderContext
 
     protected AbstractBlockRenderContext() {
         this.occlusionCache.defaultReturnValue((byte) 127);
-        net.minecraft.client.color.block.BlockColors blockColors =
-                net.minecraft.client.Minecraft.getInstance().getBlockColors();
-        this.blockColorRegistry =
-                net.vulkanmod.interfaces.color.BlockColorsExtended.from(blockColors)
-                        .getColorResolverMap();
+        net.minecraft.client.color.block.BlockColors blockColors = net.minecraft.client.Minecraft.getInstance()
+                .getBlockColors();
+        this.blockColorRegistry = net.vulkanmod.interfaces.color.BlockColorsExtended.from(blockColors)
+                .getColorResolverMap();
     }
 
     protected void setupLightPipelines(
@@ -81,8 +69,7 @@ public abstract class AbstractBlockRenderContext
             boolean modelAo) {
         this.blockPos = blockPos;
         this.blockState = blockState;
-        this.defaultLayer =
-                net.minecraft.client.renderer.ItemBlockRenderTypes.getChunkRenderType(blockState);
+        this.defaultLayer = net.minecraft.client.renderer.ItemBlockRenderTypes.getChunkRenderType(blockState);
         this.useAO = net.minecraft.client.Minecraft.useAmbientOcclusion();
         this.defaultAO = this.useAO && modelAo && blockState.getLightEmission() == 0;
         this.cullCompletionFlags = 0;
@@ -113,19 +100,18 @@ public abstract class AbstractBlockRenderContext
     public boolean faceNotOccluded(
             net.minecraft.world.level.block.state.BlockState blockState,
             net.minecraft.core.Direction face) {
-        net.minecraft.world.level.block.state.BlockState adjBlockState =
-                this.renderRegion.getBlockState(this.tempPos.setWithOffset(this.blockPos, face));
+        net.minecraft.world.level.block.state.BlockState adjBlockState = this.renderRegion
+                .getBlockState(this.tempPos.setWithOffset(this.blockPos, face));
         if (blockState.skipRendering(adjBlockState, face)) {
             return false;
         }
         if (adjBlockState.canOcclude()) {
-            net.minecraft.world.phys.shapes.VoxelShape shape =
-                    blockState.getFaceOcclusionShape(face);
+            net.minecraft.world.phys.shapes.VoxelShape shape = blockState.getFaceOcclusionShape(face);
             if (shape.isEmpty()) {
                 return true;
             }
-            net.minecraft.world.phys.shapes.VoxelShape adjShape =
-                    adjBlockState.getFaceOcclusionShape(face.getOpposite());
+            net.minecraft.world.phys.shapes.VoxelShape adjShape = adjBlockState
+                    .getFaceOcclusionShape(face.getOpposite());
             if (adjShape.isEmpty()) {
                 return true;
             }
@@ -133,17 +119,14 @@ public abstract class AbstractBlockRenderContext
                     && adjShape == net.minecraft.world.phys.shapes.Shapes.block()) {
                 return false;
             }
-            net.vulkanmod.render.chunk.build.frapi.render.AbstractBlockRenderContext.ShapePairKey
-                    blockStatePairKey =
-                            new net.vulkanmod.render.chunk.build.frapi.render
-                                    .AbstractBlockRenderContext.ShapePairKey(shape, adjShape);
+            net.vulkanmod.render.chunk.build.frapi.render.AbstractBlockRenderContext.ShapePairKey blockStatePairKey = new net.vulkanmod.render.chunk.build.frapi.render.AbstractBlockRenderContext.ShapePairKey(
+                    shape, adjShape);
             byte b = this.occlusionCache.getAndMoveToFirst(blockStatePairKey);
             if (b != 127) {
                 return b != 0;
             }
-            boolean bl =
-                    net.minecraft.world.phys.shapes.Shapes.joinIsNotEmpty(
-                            shape, adjShape, net.minecraft.world.phys.shapes.BooleanOp.ONLY_FIRST);
+            boolean bl = net.minecraft.world.phys.shapes.Shapes.joinIsNotEmpty(
+                    shape, adjShape, net.minecraft.world.phys.shapes.BooleanOp.ONLY_FIRST);
             if (this.occlusionCache.size() == 2048) {
                 this.occlusionCache.removeLastByte();
             }
@@ -173,7 +156,8 @@ public abstract class AbstractBlockRenderContext
     }
 
     protected void endRenderQuad(
-            net.vulkanmod.render.chunk.build.frapi.mesh.MutableQuadViewImpl quad) {}
+            net.vulkanmod.render.chunk.build.frapi.mesh.MutableQuadViewImpl quad) {
+    }
 
     protected void tintQuad(net.vulkanmod.render.chunk.build.frapi.mesh.MutableQuadViewImpl quad) {
         int tintIndex = quad.tintIndex();
@@ -189,12 +173,11 @@ public abstract class AbstractBlockRenderContext
     }
 
     private int getBlockColor(net.minecraft.world.level.BlockAndTintGetter region, int colorIndex) {
-        net.minecraft.client.color.block.BlockColor blockColor =
-                this.blockColorRegistry.getBlockColor(this.blockState.getBlock());
-        int color =
-                blockColor != null
-                        ? blockColor.getColor(this.blockState, region, this.blockPos, colorIndex)
-                        : -1;
+        net.minecraft.client.color.block.BlockColor blockColor = this.blockColorRegistry
+                .getBlockColor(this.blockState.getBlock());
+        int color = blockColor != null
+                ? blockColor.getColor(this.blockState, region, this.blockPos, colorIndex)
+                : -1;
         return (-16777216) | color;
     }
 
@@ -221,32 +204,28 @@ public abstract class AbstractBlockRenderContext
                     i2,
                     net.vulkanmod.render.chunk.build.frapi.helper.ColorHelper.multiplyRGB(
                             quad.color(i2), data.br[i2]));
-            data.lm[i2] =
-                    net.vulkanmod.render.chunk.build.frapi.helper.ColorHelper.maxBrightness(
-                            quad.lightmap(i2), data.lm[i2]);
+            data.lm[i2] = net.vulkanmod.render.chunk.build.frapi.helper.ColorHelper.maxBrightness(
+                    quad.lightmap(i2), data.lm[i2]);
         }
     }
 
     public net.minecraft.client.renderer.chunk.ChunkSectionLayer effectiveRenderLayer(
-            @org.jetbrains.annotations.Nullable
-                    net.minecraft.client.renderer.chunk.ChunkSectionLayer quadRenderLayer) {
+            @org.jetbrains.annotations.Nullable net.minecraft.client.renderer.chunk.ChunkSectionLayer quadRenderLayer) {
         return quadRenderLayer == null ? this.defaultLayer : quadRenderLayer;
     }
 
     public void emitVanillaBlockQuads(
             net.minecraft.client.renderer.block.model.BlockStateModel model,
-            @org.jetbrains.annotations.Nullable
-                    net.minecraft.world.level.block.state.BlockState state,
+            @org.jetbrains.annotations.Nullable net.minecraft.world.level.block.state.BlockState state,
             java.util.function.Supplier<net.minecraft.util.RandomSource> randomSupplier,
             java.util.function.Predicate<net.minecraft.core.Direction> cullTest) {
         net.vulkanmod.render.chunk.build.frapi.mesh.MutableQuadViewImpl quad = this.editorQuad;
         for (int i = 0; i <= 6; i++) {
-            net.minecraft.core.Direction cullFace =
-                    net.fabricmc.fabric.api.renderer.v1.model.ModelHelper.faceFromIndex(i);
+            net.minecraft.core.Direction cullFace = net.fabricmc.fabric.api.renderer.v1.model.ModelHelper
+                    .faceFromIndex(i);
             if (!cullTest.test(cullFace)) {
-                java.util.List<net.minecraft.client.renderer.block.model.BlockModelPart> parts =
-                        ((net.minecraft.client.renderer.block.model.BlockStateModel) this)
-                                .collectParts(this.random);
+                java.util.List<net.minecraft.client.renderer.block.model.BlockModelPart> parts = model
+                        .collectParts(this.random);
                 int partCount = parts.size();
                 for (int j = 0; j < partCount; j++) {
                     parts.get(j).emitQuads(quad, cullTest);

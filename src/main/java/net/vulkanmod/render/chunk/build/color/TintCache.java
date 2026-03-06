@@ -17,9 +17,8 @@ public class TintCache {
 
     private BiomeData biomeData;
     private int blendRadius, totalWidth;
-    private int secX, secY, secZ;
     private int minX, minY, minZ;
-    private int maxX, maxY, maxZ;
+    private int maxX, maxZ;
 
     private int dataSize;
     private int[] temp;
@@ -38,17 +37,12 @@ public class TintCache {
         this.blendRadius = Minecraft.getInstance().options.biomeBlendRadius().get();
         this.totalWidth = (blendRadius * 2) + 16;
 
-        this.secX = secX;
-        this.secY = secY;
-        this.secZ = secZ;
-
         this.minX = (secX << 4) - blendRadius;
         this.minZ = (secZ << 4) - blendRadius;
         this.maxX = (secX << 4) + 15 + blendRadius;
         this.maxZ = (secZ << 4) + 15 + blendRadius;
 
         this.minY = (secY << 4) - 2;
-        this.maxY = this.minY + 15 + 4;
 
         int size = totalWidth * totalWidth;
 
@@ -144,7 +138,8 @@ public class TintCache {
             }
         }
 
-        if (needsBlur) BoxBlur.blur(buffer, temp, SECTION_WIDTH, blendRadius);
+        if (needsBlur)
+            BoxBlur.blur(buffer, temp, SECTION_WIDTH, blendRadius);
     }
 
     static class Layer {

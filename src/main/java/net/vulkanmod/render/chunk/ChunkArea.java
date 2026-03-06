@@ -16,25 +16,25 @@ public class ChunkArea {
 
     int sectionsContained = 0;
 
-    // Help JIT optimisations by hardcoding the queue size to the max possible ChunkArea limit
+    // Help JIT optimisations by hardcoding the queue size to the max possible
+    // ChunkArea limit
     public final StaticQueue<RenderSection> sectionQueue = new StaticQueue<>(512);
 
     public ChunkArea(int i, Vector3i origin, int minHeight) {
         this.index = i;
         this.position = origin;
-        this.drawBuffers = new DrawBuffers(i, origin, minHeight);
+        this.drawBuffers = new DrawBuffers(origin, minHeight);
     }
 
     public void updateFrustum(VFrustum frustum) {
         // TODO: maybe move to an aux class
-        int frustumResult =
-                frustum.cubeInFrustum(
-                        this.position.x(),
-                        this.position.y(),
-                        this.position.z(),
-                        this.position.x() + (8 << 4),
-                        this.position.y() + (8 << 4),
-                        this.position.z() + (8 << 4));
+        int frustumResult = frustum.cubeInFrustum(
+                this.position.x(),
+                this.position.y(),
+                this.position.z(),
+                this.position.x() + (8 << 4),
+                this.position.y() + (8 << 4),
+                this.position.z() + (8 << 4));
 
         // Inner cubes
         if (frustumResult == FrustumIntersection.INTERSECT) {
@@ -66,9 +66,8 @@ public class ChunkArea {
                                         float zMin2 = zMin + z2 * l2;
                                         float zMax2 = zMin2 + l2;
 
-                                        frustumResult =
-                                                frustum.cubeInFrustum(
-                                                        xMin2, yMin2, zMin2, xMax2, yMax2, zMax2);
+                                        frustumResult = frustum.cubeInFrustum(
+                                                xMin2, yMin2, zMin2, xMax2, yMax2, zMax2);
 
                                         int idx = beginIdx + (x2 << 2) + (y2 << 1) + z2;
 

@@ -7,8 +7,7 @@ import net.vulkanmod.vulkan.VRenderSystem;
 import net.vulkanmod.vulkan.framebuffer.RenderPass;
 
 public class PipelineState {
-    private static final int DEFAULT_DEPTH_OP = 515;
-    //    private static final int DEFAULT_DEPTH_OP = 518;
+
 
     public static PipelineState.BlendInfo blendInfo = PipelineState.defaultBlendInfo();
 
@@ -214,31 +213,22 @@ public class PipelineState {
 
         private static int glToVulkanBlendFactor(int value) {
             return switch (value) {
-                case 1 -> VK_BLEND_FACTOR_ONE;
                 case 0 -> VK_BLEND_FACTOR_ZERO;
-                case 771 -> VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
-                case 770 -> VK_BLEND_FACTOR_SRC_ALPHA;
-                case 775 -> VK_BLEND_FACTOR_ONE_MINUS_DST_COLOR;
-                case 769 -> VK_BLEND_FACTOR_ONE_MINUS_SRC_COLOR;
-                case 774 -> VK_BLEND_FACTOR_DST_COLOR;
+                case 1 -> VK_BLEND_FACTOR_ONE;
                 case 768 -> VK_BLEND_FACTOR_SRC_COLOR;
+                case 769 -> VK_BLEND_FACTOR_ONE_MINUS_SRC_COLOR;
+                case 770 -> VK_BLEND_FACTOR_SRC_ALPHA;
+                case 771 -> VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+                case 772 -> VK_BLEND_FACTOR_DST_ALPHA;
+                case 773 -> VK_BLEND_FACTOR_ONE_MINUS_DST_ALPHA;
+                case 774 -> VK_BLEND_FACTOR_DST_COLOR;
+                case 775 -> VK_BLEND_FACTOR_ONE_MINUS_DST_COLOR;
+                case 776 -> VK_BLEND_FACTOR_SRC_ALPHA_SATURATE;
+                case 32769 -> VK_BLEND_FACTOR_CONSTANT_COLOR;
+                case 32770 -> VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_COLOR;
+                case 32771 -> VK_BLEND_FACTOR_CONSTANT_ALPHA;
+                case 32772 -> VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_ALPHA;
                 default -> throw new RuntimeException("unknown blend factor: " + value);
-
-                    //                        CONSTANT_ALPHA(32771),
-                    //                        CONSTANT_COLOR(32769),
-                    //                        DST_ALPHA(772),
-                    //                        DST_COLOR(774),
-                    //                        ONE(1),
-                    //                        ONE_MINUS_CONSTANT_ALPHA(32772),
-                    //                        ONE_MINUS_CONSTANT_COLOR(32770),
-                    //                        ONE_MINUS_DST_ALPHA(773),
-                    //                        ONE_MINUS_DST_COLOR(775),
-                    //                        ONE_MINUS_SRC_ALPHA(771),
-                    //                        ONE_MINUS_SRC_COLOR(769),
-                    //                        SRC_ALPHA(770),
-                    //                        SRC_ALPHA_SATURATE(776),
-                    //                        SRC_COLOR(768),
-                    //                        ZERO(0);
             };
         }
     }
@@ -322,9 +312,22 @@ public class PipelineState {
 
         public static int glToVulkan(int f) {
             return switch (f) {
+                case 5376 -> VK_LOGIC_OP_CLEAR;
+                case 5377 -> VK_LOGIC_OP_AND;
+                case 5378 -> VK_LOGIC_OP_AND_REVERSE;
+                case 5379 -> VK_LOGIC_OP_COPY;
+                case 5380 -> VK_LOGIC_OP_AND_INVERTED;
+                case 5381 -> VK_LOGIC_OP_NO_OP;
+                case 5382 -> VK_LOGIC_OP_XOR;
+                case 5383 -> VK_LOGIC_OP_OR;
+                case 5384 -> VK_LOGIC_OP_NOR;
+                case 5385 -> VK_LOGIC_OP_EQUIVALENT;
+                case 5386 -> VK_LOGIC_OP_INVERT;
                 case 5387 -> VK_LOGIC_OP_OR_REVERSE;
-                    // TODO complete
-
+                case 5388 -> VK_LOGIC_OP_COPY_INVERTED;
+                case 5389 -> VK_LOGIC_OP_OR_INVERTED;
+                case 5390 -> VK_LOGIC_OP_NAND;
+                case 5391 -> VK_LOGIC_OP_SET;
                 default -> VK_LOGIC_OP_AND;
             };
         }
@@ -398,29 +401,15 @@ public class PipelineState {
 
         private static int glToVulkan(int value) {
             return switch (value) {
-                case 515 -> VK_COMPARE_OP_LESS_OR_EQUAL;
-                case 519 -> VK_COMPARE_OP_ALWAYS;
-                case 516 -> VK_COMPARE_OP_GREATER;
-                case 518 -> VK_COMPARE_OP_GREATER_OR_EQUAL;
+                case 512 -> VK_COMPARE_OP_NEVER;
+                case 513 -> VK_COMPARE_OP_LESS;
                 case 514 -> VK_COMPARE_OP_EQUAL;
+                case 515 -> VK_COMPARE_OP_LESS_OR_EQUAL;
+                case 516 -> VK_COMPARE_OP_GREATER;
+                case 517 -> VK_COMPARE_OP_NOT_EQUAL;
+                case 518 -> VK_COMPARE_OP_GREATER_OR_EQUAL;
+                case 519 -> VK_COMPARE_OP_ALWAYS;
                 default -> throw new RuntimeException("unknown blend factor..");
-
-                    //                case 515 -> VK_COMPARE_OP_GREATER_OR_EQUAL;
-                    //                case 519 -> VK_COMPARE_OP_ALWAYS;
-                    //                case 516 -> VK_COMPARE_OP_GREATER;
-                    //                case 518 -> VK_COMPARE_OP_LESS_OR_EQUAL;
-                    //                case 514 -> VK_COMPARE_OP_EQUAL;
-                    //                default -> throw new RuntimeException("unknown blend
-                    // factor..");
-
-                    //                public static final int GL_NEVER = 512;
-                    //                public static final int GL_LESS = 513;
-                    //                public static final int GL_EQUAL = 514;
-                    //                public static final int GL_LEQUAL = 515;
-                    //                public static final int GL_GREATER = 516;
-                    //                public static final int GL_NOTEQUAL = 517;
-                    //                public static final int GL_GEQUAL = 518;
-                    //                public static final int GL_ALWAYS = 519;
             };
         }
     }

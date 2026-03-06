@@ -29,8 +29,10 @@ public abstract class VideoModeManager {
     }
 
     public static VideoModeSet getFirstAvailable() {
-        if (videoModeSets != null) return videoModeSets[videoModeSets.length - 1];
-        else return VideoModeSet.getDummy();
+        if (videoModeSets != null)
+            return videoModeSets[videoModeSets.length - 1];
+        else
+            return VideoModeSet.getDummy();
     }
 
     public static VideoModeSet.VideoMode getOsVideoMode() {
@@ -40,7 +42,8 @@ public abstract class VideoModeManager {
     public static VideoModeSet.VideoMode getCurrentVideoMode(long monitor) {
         GLFWVidMode vidMode = GLFW.glfwGetVideoMode(monitor);
 
-        if (vidMode == null) throw new NullPointerException("Unable to get current video mode");
+        if (vidMode == null)
+            throw new NullPointerException("Unable to get current video mode");
 
         return new VideoModeSet.VideoMode(
                 vidMode.width(), vidMode.height(), vidMode.redBits(), vidMode.refreshRate());
@@ -59,7 +62,8 @@ public abstract class VideoModeManager {
             int bitDepth = buffer.redBits();
             if (buffer.redBits() < 8
                     || buffer.greenBits() != bitDepth
-                    || buffer.blueBits() != bitDepth) continue;
+                    || buffer.blueBits() != bitDepth)
+                continue;
 
             int width = buffer.width();
             int height = buffer.height();
@@ -74,7 +78,9 @@ public abstract class VideoModeManager {
                 videoModeSets.add(videoModeSet);
             }
 
-            videoModeSet.addRefreshRate(refreshRate);
+            if (videoModeSet != null) {
+                videoModeSet.addRefreshRate(refreshRate);
+            }
         }
 
         VideoModeSet[] arr = new VideoModeSet[videoModeSets.size()];
@@ -84,8 +90,11 @@ public abstract class VideoModeManager {
     }
 
     public static VideoModeSet getFromVideoMode(VideoModeSet.VideoMode videoMode) {
+        if (videoModeSets == null)
+            return null;
         for (var set : videoModeSets) {
-            if (set.width == videoMode.width && set.height == videoMode.height) return set;
+            if (set.width == videoMode.width && set.height == videoMode.height)
+                return set;
         }
 
         return null;

@@ -2,11 +2,7 @@ package net.vulkanmod.render.chunk.build.frapi.mesh;
 
 /* JADX INFO: loaded from: VulkanMod_1.21.11-0.6.0.jar:net/vulkanmod/render/chunk/build/frapi/mesh/EncodingFormat.class */
 public final class EncodingFormat {
-    static final int HEADER_BITS = 0;
-    static final int HEADER_FACE_NORMAL = 1;
-    static final int HEADER_TINT_INDEX = 2;
-    static final int HEADER_TAG = 3;
-    public static final int HEADER_STRIDE = 4;
+
     static final int VERTEX_X;
     static final int VERTEX_Y;
     static final int VERTEX_Z;
@@ -21,13 +17,11 @@ public final class EncodingFormat {
     public static final int TOTAL_STRIDE;
     private static final int DIRECTION_COUNT;
     private static final int NULLABLE_DIRECTION_COUNT;
-    private static final net.minecraft.client.renderer.chunk.ChunkSectionLayer[]
-            NULLABLE_BLOCK_RENDER_LAYERS;
+    private static final net.minecraft.client.renderer.chunk.ChunkSectionLayer[] NULLABLE_BLOCK_RENDER_LAYERS;
     private static final int NULLABLE_BLOCK_RENDER_LAYER_COUNT;
     private static final net.fabricmc.fabric.api.util.TriState[] TRI_STATES;
     private static final int TRI_STATE_COUNT;
-    private static final net.minecraft.client.renderer.item.ItemStackRenderState.FoilType[]
-            NULLABLE_GLINTS;
+    private static final net.minecraft.client.renderer.item.ItemStackRenderState.FoilType[] NULLABLE_GLINTS;
     private static final int NULLABLE_GLINT_COUNT;
     private static final net.fabricmc.fabric.api.renderer.v1.mesh.ShadeMode[] SHADE_MODES;
     private static final int SHADE_MODE_COUNT;
@@ -35,18 +29,7 @@ public final class EncodingFormat {
     private static final int QUAD_ATLAS_COUNT;
     private static final int NULL_RENDER_LAYER_INDEX;
     private static final int NULL_GLINT_INDEX;
-    private static final int CULL_BIT_LENGTH;
-    private static final int LIGHT_BIT_LENGTH;
-    private static final int NORMALS_BIT_LENGTH = 4;
-    private static final int GEOMETRY_BIT_LENGTH = 3;
-    private static final int RENDER_LAYER_BIT_LENGTH;
-    private static final int EMISSIVE_BIT_LENGTH = 1;
-    private static final int DIFFUSE_BIT_LENGTH = 1;
-    private static final int AO_BIT_LENGTH;
-    private static final int GLINT_BIT_LENGTH;
-    private static final int SHADE_MODE_BIT_LENGTH;
-    private static final int QUAD_ATLAS_BIT_LENGTH;
-    private static final int CULL_BIT_OFFSET = 0;
+
     private static final int LIGHT_BIT_OFFSET;
     private static final int NORMALS_BIT_OFFSET;
     private static final int GEOMETRY_BIT_OFFSET;
@@ -70,11 +53,12 @@ public final class EncodingFormat {
     private static final int SHADE_MODE_MASK;
     private static final int QUAD_ATLAS_MASK;
 
-    private EncodingFormat() {}
+    private EncodingFormat() {
+    }
 
     static {
-        com.mojang.blaze3d.vertex.VertexFormat format =
-                com.mojang.blaze3d.vertex.DefaultVertexFormat.BLOCK;
+        com.mojang.blaze3d.vertex.VertexFormat format = com.mojang.blaze3d.vertex.DefaultVertexFormat.BLOCK;
+
         VERTEX_X = 4;
         VERTEX_Y = 5;
         VERTEX_Z = 6;
@@ -89,20 +73,15 @@ public final class EncodingFormat {
         TOTAL_STRIDE = 4 + QUAD_STRIDE;
         DIRECTION_COUNT = net.minecraft.core.Direction.values().length;
         NULLABLE_DIRECTION_COUNT = DIRECTION_COUNT + 1;
-        NULLABLE_BLOCK_RENDER_LAYERS =
-                (net.minecraft.client.renderer.chunk.ChunkSectionLayer[])
-                        org.apache.commons.lang3.ArrayUtils.add(
-                                net.minecraft.client.renderer.chunk.ChunkSectionLayer.values(),
-                                (java.lang.Object) null);
+        net.minecraft.client.renderer.chunk.ChunkSectionLayer[] layers = net.minecraft.client.renderer.chunk.ChunkSectionLayer
+                .values();
+        NULLABLE_BLOCK_RENDER_LAYERS = java.util.Arrays.copyOf(layers, layers.length + 1);
         NULLABLE_BLOCK_RENDER_LAYER_COUNT = NULLABLE_BLOCK_RENDER_LAYERS.length;
         TRI_STATES = net.fabricmc.fabric.api.util.TriState.values();
         TRI_STATE_COUNT = TRI_STATES.length;
-        NULLABLE_GLINTS =
-                (net.minecraft.client.renderer.item.ItemStackRenderState.FoilType[])
-                        org.apache.commons.lang3.ArrayUtils.add(
-                                net.minecraft.client.renderer.item.ItemStackRenderState.FoilType
-                                        .values(),
-                                (java.lang.Object) null);
+        net.minecraft.client.renderer.item.ItemStackRenderState.FoilType[] glints = net.minecraft.client.renderer.item.ItemStackRenderState.FoilType
+                .values();
+        NULLABLE_GLINTS = java.util.Arrays.copyOf(glints, glints.length + 1);
         NULLABLE_GLINT_COUNT = NULLABLE_GLINTS.length;
         SHADE_MODES = net.fabricmc.fabric.api.renderer.v1.mesh.ShadeMode.values();
         SHADE_MODE_COUNT = SHADE_MODES.length;
@@ -110,15 +89,14 @@ public final class EncodingFormat {
         QUAD_ATLAS_COUNT = QUAD_ATLASES.length;
         NULL_RENDER_LAYER_INDEX = NULLABLE_BLOCK_RENDER_LAYER_COUNT - 1;
         NULL_GLINT_INDEX = NULLABLE_GLINT_COUNT - 1;
-        CULL_BIT_LENGTH = net.minecraft.util.Mth.ceillog2(NULLABLE_DIRECTION_COUNT);
-        LIGHT_BIT_LENGTH = net.minecraft.util.Mth.ceillog2(DIRECTION_COUNT);
-        RENDER_LAYER_BIT_LENGTH =
-                net.minecraft.util.Mth.ceillog2(NULLABLE_BLOCK_RENDER_LAYER_COUNT);
-        AO_BIT_LENGTH = net.minecraft.util.Mth.ceillog2(TRI_STATE_COUNT);
-        GLINT_BIT_LENGTH = net.minecraft.util.Mth.ceillog2(NULLABLE_GLINT_COUNT);
-        SHADE_MODE_BIT_LENGTH = net.minecraft.util.Mth.ceillog2(SHADE_MODE_COUNT);
-        QUAD_ATLAS_BIT_LENGTH = net.minecraft.util.Mth.ceillog2(QUAD_ATLAS_COUNT);
-        LIGHT_BIT_OFFSET = 0 + CULL_BIT_LENGTH;
+        int CULL_BIT_LENGTH = net.minecraft.util.Mth.ceillog2(NULLABLE_DIRECTION_COUNT);
+        int LIGHT_BIT_LENGTH = net.minecraft.util.Mth.ceillog2(DIRECTION_COUNT);
+        int RENDER_LAYER_BIT_LENGTH = net.minecraft.util.Mth.ceillog2(NULLABLE_BLOCK_RENDER_LAYER_COUNT);
+        int AO_BIT_LENGTH = net.minecraft.util.Mth.ceillog2(TRI_STATE_COUNT);
+        int GLINT_BIT_LENGTH = net.minecraft.util.Mth.ceillog2(NULLABLE_GLINT_COUNT);
+        int SHADE_MODE_BIT_LENGTH = net.minecraft.util.Mth.ceillog2(SHADE_MODE_COUNT);
+        int QUAD_ATLAS_BIT_LENGTH = net.minecraft.util.Mth.ceillog2(QUAD_ATLAS_COUNT);
+        LIGHT_BIT_OFFSET = CULL_BIT_LENGTH;
         NORMALS_BIT_OFFSET = LIGHT_BIT_OFFSET + LIGHT_BIT_LENGTH;
         GEOMETRY_BIT_OFFSET = NORMALS_BIT_OFFSET + 4;
         RENDER_LAYER_BIT_OFFSET = GEOMETRY_BIT_OFFSET + 3;
@@ -167,8 +145,7 @@ public final class EncodingFormat {
 
     static int lightFace(int bits, net.minecraft.core.Direction face) {
         return (bits & (LIGHT_MASK ^ (-1)))
-                | (net.fabricmc.fabric.api.renderer.v1.model.ModelHelper.toFaceIndex(face)
-                        << LIGHT_BIT_OFFSET);
+                | (net.fabricmc.fabric.api.renderer.v1.model.ModelHelper.toFaceIndex(face) << LIGHT_BIT_OFFSET);
     }
 
     static int normalFlags(int bits) {

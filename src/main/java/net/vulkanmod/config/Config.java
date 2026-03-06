@@ -60,7 +60,8 @@ public class Config {
 
         if (Files.exists(path)) {
             try (FileReader fileReader = new FileReader(path.toFile())) {
-                config = GSON.fromJson(fileReader, Config.class);
+                Object obj = GSON.fromJson(fileReader, (java.lang.reflect.Type) Config.class);
+                config = obj instanceof Config ? (Config) obj : null;
             } catch (IOException exception) {
                 throw new RuntimeException(exception.getMessage());
             }

@@ -6,7 +6,6 @@ import org.apache.commons.lang3.Validate;
 public class CircularIntList {
     private final int size;
     private final int[] list;
-    private int startIndex;
 
     private final OwnIterator iterator;
     private final RangeIterator rangeIterator;
@@ -21,7 +20,6 @@ public class CircularIntList {
 
     public void updateStartIdx(int startIndex) {
         int[] list = this.list;
-        this.startIndex = startIndex;
 
         list[0] = -1;
         list[size + 1] = -1;

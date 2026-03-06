@@ -2,7 +2,6 @@ package net.vulkanmod.config.gui.widget;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -13,8 +12,7 @@ import net.vulkanmod.config.gui.render.GuiRenderer;
 import net.vulkanmod.config.option.Option;
 import net.vulkanmod.vulkan.util.ColorUtil;
 
-public abstract class OptionWidget<O extends Option<?>> extends VAbstractWidget
-        implements NarratableEntry {
+public abstract class OptionWidget<O extends net.vulkanmod.config.option.Option<?>> extends VAbstractWidget {
     public int controlX;
     public int controlWidth;
     private final Component name;
@@ -45,20 +43,18 @@ public abstract class OptionWidget<O extends Option<?>> extends VAbstractWidget
 
         this.updateDisplayedValue();
 
-        this.controlHovered =
-                mouseX >= this.controlX
-                        && mouseY >= this.y
-                        && mouseX < this.controlX + this.controlWidth
-                        && mouseY < this.y + this.height;
+        this.controlHovered = mouseX >= this.controlX
+                && mouseY >= this.y
+                && mouseX < this.controlX + this.controlWidth
+                && mouseY < this.y + this.height;
         this.renderWidget(mouseX, mouseY);
     }
 
-    public void updateState() {}
+    public void updateState() {
+    }
 
     public void renderWidget(double mouseX, double mouseY) {
         Minecraft minecraftClient = Minecraft.getInstance();
-
-        int i = this.getYImage(this.isHovered());
 
         int xPadding = 0;
         int yPadding = 0;
@@ -182,11 +178,13 @@ public abstract class OptionWidget<O extends Option<?>> extends VAbstractWidget
     }
 
     protected void updateDisplayedValue() {
-        this.displayedValue = this.option.getDisplayedValue();
+        if (this.option != null) {
+            this.displayedValue = this.option.getDisplayedValue();
+        }
     }
 
     public Component getTooltip() {
-        return this.option.getTooltip();
+        return this.option != null ? this.option.getTooltip() : null;
     }
 
     @Override
@@ -201,7 +199,8 @@ public abstract class OptionWidget<O extends Option<?>> extends VAbstractWidget
     }
 
     @Override
-    public final void updateNarration(NarrationElementOutput narrationElementOutput) {}
+    public final void updateNarration(NarrationElementOutput narrationElementOutput) {
+    }
 
     public void playDownSound(SoundManager soundManager) {
         soundManager.play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0f));

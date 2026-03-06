@@ -27,22 +27,18 @@ public class BuildTask extends net.vulkanmod.render.chunk.build.task.ChunkTask {
         if (this.cancelled.get()) {
             return net.vulkanmod.render.chunk.build.task.ChunkTask.Result.CANCELLED;
         }
-        net.minecraft.world.phys.Vec3 vec3 =
-                net.vulkanmod.render.chunk.WorldRenderer.getCameraPos();
+        net.minecraft.world.phys.Vec3 vec3 = net.vulkanmod.render.chunk.WorldRenderer.getCameraPos();
         float x = (float) vec3.x;
         float y = (float) vec3.y;
         float z = (float) vec3.z;
-        net.vulkanmod.render.chunk.build.task.CompileResult compileResult =
-                compile(x, y, z, builderResources);
-        net.vulkanmod.render.chunk.build.task.CompiledSection compiledSection =
-                new net.vulkanmod.render.chunk.build.task.CompiledSection();
+        net.vulkanmod.render.chunk.build.task.CompileResult compileResult = compile(x, y, z, builderResources);
+        net.vulkanmod.render.chunk.build.task.CompiledSection compiledSection = new net.vulkanmod.render.chunk.build.task.CompiledSection();
         compiledSection.blockEntities.addAll(compileResult.blockEntities);
         compiledSection.transparencyState = compileResult.transparencyState;
         compiledSection.isCompletelyEmpty = compileResult.renderedLayers.isEmpty();
         compileResult.compiledSection = compiledSection;
         if (this.cancelled.get()) {
-            compileResult
-                    .renderedLayers
+            compileResult.renderedLayers
                     .values()
                     .forEach(
                             (v0) -> {
@@ -62,33 +58,27 @@ public class BuildTask extends net.vulkanmod.render.chunk.build.task.ChunkTask {
             float camZ,
             net.vulkanmod.render.chunk.build.thread.BuilderResources builderResources) {
         net.minecraft.world.level.block.entity.BlockEntity blockEntity;
-        net.vulkanmod.render.chunk.build.task.CompileResult compileResult =
-                new net.vulkanmod.render.chunk.build.task.CompileResult(this.section, true);
-        net.minecraft.core.BlockPos startBlockPos =
-                new net.minecraft.core.BlockPos(
-                                this.section.xOffset(),
-                                this.section.yOffset(),
-                                this.section.zOffset())
-                        .immutable();
-        net.minecraft.client.renderer.chunk.VisGraph visGraph =
-                new net.minecraft.client.renderer.chunk.VisGraph();
+        net.vulkanmod.render.chunk.build.task.CompileResult compileResult = new net.vulkanmod.render.chunk.build.task.CompileResult(
+                this.section, true);
+        net.minecraft.core.BlockPos startBlockPos = new net.minecraft.core.BlockPos(
+                this.section.xOffset(),
+                this.section.yOffset(),
+                this.section.zOffset())
+                .immutable();
+        net.minecraft.client.renderer.chunk.VisGraph visGraph = new net.minecraft.client.renderer.chunk.VisGraph();
         if (this.region == null) {
             compileResult.visibilitySet = visGraph.resolve();
             return compileResult;
         }
         org.joml.Vector3f pos = new org.joml.Vector3f();
-        net.vulkanmod.render.chunk.build.thread.ThreadBuilderPack bufferBuilders =
-                builderResources.builderPack;
+        net.vulkanmod.render.chunk.build.thread.ThreadBuilderPack bufferBuilders = builderResources.builderPack;
         setupBufferBuilders(bufferBuilders);
         this.region.loadBlockStates();
         this.region.initTintCache(builderResources.tintCache);
         builderResources.update(this.region, this.section);
-        net.vulkanmod.render.chunk.build.renderer.BlockRenderer blockRenderer =
-                builderResources.blockRenderer;
-        net.vulkanmod.render.chunk.build.renderer.FluidRenderer fluidRenderer =
-                builderResources.fluidRenderer;
-        net.minecraft.core.BlockPos.MutableBlockPos class_2339Var =
-                new net.minecraft.core.BlockPos.MutableBlockPos();
+        net.vulkanmod.render.chunk.build.renderer.BlockRenderer blockRenderer = builderResources.blockRenderer;
+        net.vulkanmod.render.chunk.build.renderer.FluidRenderer fluidRenderer = builderResources.fluidRenderer;
+        net.minecraft.core.BlockPos.MutableBlockPos class_2339Var = new net.minecraft.core.BlockPos.MutableBlockPos();
         for (int y = 0; y < 16; y++) {
             for (int z = 0; z < 16; z++) {
                 for (int x = 0; x < 16; x++) {
@@ -96,8 +86,8 @@ public class BuildTask extends net.vulkanmod.render.chunk.build.task.ChunkTask {
                             this.section.xOffset() + x,
                             this.section.yOffset() + y,
                             this.section.zOffset() + z);
-                    net.minecraft.world.level.block.state.BlockState blockState =
-                            this.region.getBlockState(class_2339Var);
+                    net.minecraft.world.level.block.state.BlockState blockState = this.region
+                            .getBlockState(class_2339Var);
                     if (blockState.isSolidRender()) {
                         visGraph.setOpaque(class_2339Var);
                     }
@@ -105,13 +95,11 @@ public class BuildTask extends net.vulkanmod.render.chunk.build.task.ChunkTask {
                             && (blockEntity = this.region.getBlockEntity(class_2339Var)) != null) {
                         handleBlockEntity(compileResult, blockEntity);
                     }
-                    net.minecraft.world.level.material.FluidState fluidState =
-                            blockState.getFluidState();
+                    net.minecraft.world.level.material.FluidState fluidState = blockState.getFluidState();
                     if (!fluidState.isEmpty()) {
                         fluidRenderer.renderLiquid(blockState, fluidState, class_2339Var);
                     }
-                    if (blockState.getRenderShape()
-                            == net.minecraft.world.level.block.RenderShape.MODEL) {
+                    if (blockState.getRenderShape() == net.minecraft.world.level.block.RenderShape.MODEL) {
                         pos.set(
                                 class_2339Var.getX() & 15,
                                 class_2339Var.getY() & 15,
@@ -121,13 +109,12 @@ public class BuildTask extends net.vulkanmod.render.chunk.build.task.ChunkTask {
                 }
             }
         }
-        net.vulkanmod.render.vertex.TerrainBuilder trasnlucentTerrainBuilder =
-                bufferBuilders.builder(net.vulkanmod.render.vertex.TerrainRenderType.TRANSLUCENT);
+        net.vulkanmod.render.vertex.TerrainBuilder trasnlucentTerrainBuilder = bufferBuilders
+                .builder(net.vulkanmod.render.vertex.TerrainRenderType.TRANSLUCENT);
         if (trasnlucentTerrainBuilder
-                        .getBufferBuilder(
-                                net.vulkanmod.render.chunk.cull.QuadFacing.UNDEFINED.ordinal())
-                        .getVertices()
-                > 0) {
+                .getBufferBuilder(
+                        net.vulkanmod.render.chunk.cull.QuadFacing.UNDEFINED.ordinal())
+                .getVertices() > 0) {
             trasnlucentTerrainBuilder.setupQuadSortingPoints();
             trasnlucentTerrainBuilder.setupQuadSorting(
                     camX - startBlockPos.getX(),
@@ -135,12 +122,11 @@ public class BuildTask extends net.vulkanmod.render.chunk.build.task.ChunkTask {
                     camZ - startBlockPos.getZ());
             compileResult.transparencyState = trasnlucentTerrainBuilder.getSortState();
         }
-        for (net.vulkanmod.render.vertex.TerrainRenderType renderType :
-                net.vulkanmod.render.vertex.TerrainRenderType.VALUES) {
+        for (net.vulkanmod.render.vertex.TerrainRenderType renderType : net.vulkanmod.render.vertex.TerrainRenderType.VALUES) {
             net.vulkanmod.render.vertex.TerrainBuilder builder = bufferBuilders.builder(renderType);
             net.vulkanmod.render.vertex.TerrainBuilder.DrawState drawState = builder.endDrawing();
-            net.vulkanmod.render.chunk.build.UploadBuffer uploadBuffer =
-                    new net.vulkanmod.render.chunk.build.UploadBuffer(builder, drawState);
+            net.vulkanmod.render.chunk.build.UploadBuffer uploadBuffer = new net.vulkanmod.render.chunk.build.UploadBuffer(
+                    builder, drawState);
             compileResult.renderedLayers.put(renderType, uploadBuffer);
             builder.clear();
         }
@@ -151,75 +137,23 @@ public class BuildTask extends net.vulkanmod.render.chunk.build.task.ChunkTask {
 
     private void setupBufferBuilders(
             net.vulkanmod.render.chunk.build.thread.ThreadBuilderPack builderPack) {
-        for (net.vulkanmod.render.vertex.TerrainRenderType renderType :
-                net.vulkanmod.render.vertex.TerrainRenderType.VALUES) {
-            net.vulkanmod.render.vertex.TerrainBuilder bufferBuilder =
-                    builderPack.builder(renderType);
+        for (net.vulkanmod.render.vertex.TerrainRenderType renderType : net.vulkanmod.render.vertex.TerrainRenderType.VALUES) {
+            net.vulkanmod.render.vertex.TerrainBuilder bufferBuilder = builderPack.builder(renderType);
             bufferBuilder.begin();
         }
     }
 
-    private net.vulkanmod.render.vertex.TerrainBuilder getTerrainBuilder(
-            net.vulkanmod.render.chunk.build.thread.ThreadBuilderPack bufferBuilders,
-            net.vulkanmod.render.vertex.TerrainRenderType renderType) {
-        return bufferBuilders.builder(compactRenderTypes(renderType));
-    }
-
-    /* JADX INFO: Thrown type has an unknown type hierarchy: java.lang.MatchException */
-    private net.vulkanmod.render.vertex.TerrainRenderType compactRenderTypes(
-            net.vulkanmod.render.vertex.TerrainRenderType renderType)
-            throws java.lang.MatchException {
-        net.vulkanmod.render.vertex.TerrainRenderType terrainRenderType;
-        net.vulkanmod.render.vertex.TerrainRenderType renderType2;
-        net.vulkanmod.render.vertex.TerrainRenderType terrainRenderType2;
-        if (net.vulkanmod.Initializer.CONFIG.uniqueOpaqueLayer) {
-            switch (renderType) {
-                case SOLID:
-                    terrainRenderType2 = net.vulkanmod.render.vertex.TerrainRenderType.SOLID;
-                    break;
-                case CUTOUT:
-                    terrainRenderType2 = net.vulkanmod.render.vertex.TerrainRenderType.CUTOUT;
-                    break;
-                case TRANSLUCENT:
-                    terrainRenderType2 = net.vulkanmod.render.vertex.TerrainRenderType.TRANSLUCENT;
-                    break;
-                case TRIPWIRE:
-                    terrainRenderType2 = net.vulkanmod.render.vertex.TerrainRenderType.TRIPWIRE;
-                    break;
-                default:
-                    throw new java.lang.MatchException(
-                            (java.lang.String) null, (java.lang.Throwable) null);
-            }
-            renderType2 = terrainRenderType2;
-        } else {
-            switch (renderType) {
-                case SOLID:
-                    terrainRenderType = net.vulkanmod.render.vertex.TerrainRenderType.SOLID;
-                    break;
-                case CUTOUT:
-                    terrainRenderType = net.vulkanmod.render.vertex.TerrainRenderType.CUTOUT;
-                    break;
-                case TRANSLUCENT:
-                case TRIPWIRE:
-                    terrainRenderType = net.vulkanmod.render.vertex.TerrainRenderType.TRANSLUCENT;
-                    break;
-                default:
-                    throw new java.lang.MatchException(
-                            (java.lang.String) null, (java.lang.Throwable) null);
-            }
-            renderType2 = terrainRenderType;
-        }
-        return renderType2;
-    }
+    /*
+     * JADX INFO: Thrown type has an unknown type hierarchy:
+     * java.lang.MatchException
+     */
 
     private <E extends net.minecraft.world.level.block.entity.BlockEntity> void handleBlockEntity(
             net.vulkanmod.render.chunk.build.task.CompileResult compileResult, E blockEntity) {
-        net.minecraft.client.renderer.blockentity.BlockEntityRenderer<
-                        E, net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState>
-                blockEntityRenderer =
-                        net.minecraft.client.Minecraft.getInstance()
-                                .getBlockEntityRenderDispatcher()
-                                .getRenderer(blockEntity);
+        net.minecraft.client.renderer.blockentity.BlockEntityRenderer<E, net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState> blockEntityRenderer = net.minecraft.client.Minecraft
+                .getInstance()
+                .getBlockEntityRenderDispatcher()
+                .getRenderer(blockEntity);
         if (blockEntityRenderer != null) {
             compileResult.blockEntities.add(blockEntity);
             if (blockEntityRenderer.shouldRenderOffScreen()) {

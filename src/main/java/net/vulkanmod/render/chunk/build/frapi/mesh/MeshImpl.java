@@ -25,8 +25,8 @@ import org.jetbrains.annotations.Range;
 
 public class MeshImpl implements Mesh {
     /** Used to satisfy external calls to {@link #forEach(Consumer)}. */
-    private static final ThreadLocal<ObjectArrayList<QuadViewImpl>> CURSOR_POOLS =
-            ThreadLocal.withInitial(ObjectArrayList::new);
+    private static final ThreadLocal<ObjectArrayList<QuadViewImpl>> CURSOR_POOLS = ThreadLocal
+            .withInitial(ObjectArrayList::new);
 
     int[] data;
     int limit;
@@ -36,7 +36,8 @@ public class MeshImpl implements Mesh {
         limit = data.length;
     }
 
-    MeshImpl() {}
+    MeshImpl() {
+    }
 
     @Override
     @Range(from = 0, to = Integer.MAX_VALUE)
@@ -61,13 +62,14 @@ public class MeshImpl implements Mesh {
     }
 
     /**
-     * The renderer can call this with its own cursor to avoid the performance hit of a thread-local
+     * The renderer can call this with its own cursor to avoid the performance hit
+     * of a thread-local
      * lookup or to use a mutable cursor.
      */
-    <C extends QuadViewImpl> void forEach(Consumer<? super C> action, C cursor) {
+    <C extends QuadViewImpl> void forEach(Consumer<? super C> action, @org.jetbrains.annotations.NotNull C cursor) {
         final int limit = this.limit;
         int index = 0;
-        cursor.data = data;
+        ((QuadViewImpl) cursor).data = data;
 
         while (index < limit) {
             cursor.baseIndex = index;
@@ -79,8 +81,10 @@ public class MeshImpl implements Mesh {
         cursor.data = null;
     }
 
-    // TODO: This could be optimized by checking if the emitter is that of a MutableMeshImpl and if
-    //  it has no transforms, in which case the entire data array can be copied in bulk.
+    // TODO: This could be optimized by checking if the emitter is that of a
+    // MutableMeshImpl and if
+    // it has no transforms, in which case the entire data array can be copied in
+    // bulk.
     @Override
     public void outputTo(QuadEmitter emitter) {
         MutableQuadViewImpl e = (MutableQuadViewImpl) emitter;

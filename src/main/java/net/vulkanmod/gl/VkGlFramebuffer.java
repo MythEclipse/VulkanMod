@@ -16,10 +16,8 @@ import org.lwjgl.opengl.GL30;
 public class VkGlFramebuffer {
     private static int idCounter = 1;
 
-    private static final Int2ReferenceOpenHashMap<VkGlFramebuffer> map =
-            new Int2ReferenceOpenHashMap<>();
+    private static final Int2ReferenceOpenHashMap<VkGlFramebuffer> map = new Int2ReferenceOpenHashMap<>();
     private static VkGlFramebuffer boundFramebuffer;
-    private static VkGlFramebuffer readFramebuffer;
 
     public static void resetBoundFramebuffer() {
         boundFramebuffer = null;
@@ -36,7 +34,6 @@ public class VkGlFramebuffer {
             Renderer.setInvertedViewport(0, 0, viewWidth, viewHeight);
             Renderer.setScissor(0, 0, viewWidth, viewHeight);
 
-            // TODO: invert cull instead of disabling
             VRenderSystem.disableCull();
         }
 
@@ -80,7 +77,6 @@ public class VkGlFramebuffer {
                 boundFramebuffer = glFramebuffer;
             }
             case GL30.GL_READ_FRAMEBUFFER -> {
-                readFramebuffer = glFramebuffer;
             }
         }
     }
@@ -92,7 +88,8 @@ public class VkGlFramebuffer {
 
         boundFramebuffer = map.remove(id);
 
-        if (boundFramebuffer == null) throw new NullPointerException("bound framebuffer is null");
+        if (boundFramebuffer == null)
+            throw new NullPointerException("bound framebuffer is null");
 
         boundFramebuffer.cleanUp(true);
         boundFramebuffer = null;
@@ -117,7 +114,8 @@ public class VkGlFramebuffer {
 
     public static void framebufferRenderbuffer(
             int target, int attachment, int renderbuffertarget, int renderbuffer) {
-        if (boundFramebuffer == null) return;
+        if (boundFramebuffer == null)
+            return;
 
         boundFramebuffer.setAttachmentRenderbuffer(attachment, renderbuffer);
         boundFramebuffer.create();
@@ -135,7 +133,6 @@ public class VkGlFramebuffer {
             int dstY1,
             int mask,
             int filter) {
-        // TODO: add missing parameters
         ImageUtil.blitFramebuffer(
                 boundFramebuffer.colorAttachment,
                 srcX0,
@@ -149,7 +146,6 @@ public class VkGlFramebuffer {
     }
 
     public static int glCheckFramebufferStatus(int target) {
-        // TODO
         return GL30.GL_FRAMEBUFFER_COMPLETE;
     }
 
@@ -211,7 +207,8 @@ public class VkGlFramebuffer {
     }
 
     public void setAttachmentImage(int attachment, VulkanImage image) {
-        if (image == null) throw new NullPointerException("Image is null");
+        if (image == null)
+            throw new NullPointerException("Image is null");
 
         switch (attachment) {
             case (GL30.GL_COLOR_ATTACHMENT0) -> this.setColorAttachment(image);
@@ -228,13 +225,13 @@ public class VkGlFramebuffer {
     }
 
     void setDepthAttachment(VulkanImage image) {
-        // TODO check if texture is in depth format
         this.depthAttachment = image;
     }
 
     public void create() {
         // Cannot create without color attachment
-        if (this.colorAttachment == null) return;
+        if (this.colorAttachment == null)
+            return;
 
         if (this.framebuffer != null) {
             this.cleanUp(false);
@@ -243,9 +240,8 @@ public class VkGlFramebuffer {
         boolean hasDepthImage = this.depthAttachment != null;
         VulkanImage depthImage = this.depthAttachment;
 
-        this.framebuffer =
-                Framebuffer.builder(this.colorAttachment, depthImage, this.colorAttachmentMipLevel)
-                        .build();
+        this.framebuffer = Framebuffer.builder(this.colorAttachment, depthImage, this.colorAttachmentMipLevel)
+                .build();
         RenderPass.Builder builder = RenderPass.builder(this.framebuffer);
 
         builder.getColorAttachmentInfo()

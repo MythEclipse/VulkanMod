@@ -2,7 +2,6 @@ package net.vulkanmod.mixin.compatibility;
 
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.resource.ResourceHandle;
-import com.mojang.blaze3d.vertex.*;
 import java.util.List;
 import java.util.Map;
 import net.minecraft.client.renderer.PostPass;
@@ -17,19 +16,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(PostPass.class)
 public abstract class PostPassM {
-    @Shadow @Final private List<PostPass.Input> inputs;
+    @Shadow
+    @Final
+    private List<PostPass.Input> inputs;
 
-    @Inject(
-            method = "method_67884",
-            at =
-                    @At(
-                            value = "INVOKE",
-                            target =
-                                    "Lcom/mojang/blaze3d/systems/GpuDevice;createCommandEncoder()Lcom/mojang/blaze3d/systems/CommandEncoder;"))
+    @Inject(method = "method_67884", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/GpuDevice;createCommandEncoder()Lcom/mojang/blaze3d/systems/CommandEncoder;"))
     private void transitionLayouts(
-            ResourceHandle resourceHandle,
+            ResourceHandle<?> resourceHandle,
             GpuBufferSlice gpuBufferSlice,
-            Map map,
+            Map<net.minecraft.resources.Identifier, ResourceHandle<com.mojang.blaze3d.pipeline.RenderTarget>> map,
             CallbackInfo ci) {
         Renderer.getInstance().endRenderPass();
 

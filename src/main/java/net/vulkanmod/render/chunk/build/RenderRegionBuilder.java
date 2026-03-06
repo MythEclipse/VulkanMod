@@ -18,15 +18,16 @@ public class RenderRegionBuilder {
     private static final DataLayer DEFAULT_BLOCK_LIGHT_DATA_LAYER = new DataLayer(0);
 
     private static final int MAX_CACHE_ENTRIES = 256;
-    private final Long2ReferenceLinkedOpenHashMap<LevelChunk> levelChunkCache =
-            new Long2ReferenceLinkedOpenHashMap<>(MAX_CACHE_ENTRIES);
+    private final Long2ReferenceLinkedOpenHashMap<LevelChunk> levelChunkCache = new Long2ReferenceLinkedOpenHashMap<>(
+            MAX_CACHE_ENTRIES);
 
     public RenderRegion createRegion(Level level, int secX, int secY, int secZ) {
         LevelChunk levelChunk = getLevelChunk(level, secX, secZ);
         var sections = levelChunk.getSections();
         LevelChunkSection section = sections[level.getSectionIndexFromSectionY(secY)];
 
-        if (section == null || section.hasOnlyAir()) return null;
+        if (section == null || section.hasOnlyAir())
+            return null;
 
         var blockEntityMap = levelChunk.getBlockEntities();
 
@@ -37,7 +38,8 @@ public class RenderRegionBuilder {
         int maxSecZ = secZ + 1;
         int maxSecY = secY + 1;
 
-        PalettedContainer<BlockState>[] blockData = new PalettedContainer[RenderRegion.SIZE];
+        java.util.List<PalettedContainer<BlockState>> blockData = new java.util.ArrayList<>(
+                java.util.Collections.nCopies(RenderRegion.SIZE, null));
 
         DataLayer[][] lightData = new DataLayer[RenderRegion.SIZE][2 /* Light types */];
 
@@ -52,20 +54,18 @@ public class RenderRegionBuilder {
 
                 for (int y = minSecY; y <= maxSecY; ++y) {
                     int sectionIdx = y - minHeightSec;
-                    section =
-                            sectionIdx >= 0 && sectionIdx < sections.length
-                                    ? sections[sectionIdx]
-                                    : null;
+                    section = sectionIdx >= 0 && sectionIdx < sections.length
+                            ? sections[sectionIdx]
+                            : null;
 
                     final int relX = (x - minSecX), relY = (y - minSecY), relZ = (z - minSecZ);
                     final int idx = (relY * RenderRegion.WIDTH + relZ) * RenderRegion.WIDTH + relX;
 
-                    PalettedContainer<BlockState> values =
-                            section == null || section.hasOnlyAir()
-                                    ? null
-                                    : section.getStates().copy();
+                    PalettedContainer<BlockState> values = section == null || section.hasOnlyAir()
+                            ? null
+                            : section.getStates().copy();
 
-                    blockData[idx] = values;
+                    blockData.set(idx, values);
 
                     SectionPos pos = SectionPos.of(x, y, z);
                     DataLayer[] dataLayers = getSectionDataLayers(level, pos);
@@ -85,20 +85,21 @@ public class RenderRegionBuilder {
         DataLayer[] dataLayers = new DataLayer[2];
 
         DataLayer blockDataLayer;
-        blockDataLayer =
-                level.getLightEngine().getLayerListener(LightLayer.BLOCK).getDataLayerData(pos);
+        blockDataLayer = level.getLightEngine().getLayerListener(LightLayer.BLOCK).getDataLayerData(pos);
 
-        if (blockDataLayer == null) blockDataLayer = DEFAULT_BLOCK_LIGHT_DATA_LAYER;
+        if (blockDataLayer == null)
+            blockDataLayer = DEFAULT_BLOCK_LIGHT_DATA_LAYER;
 
         dataLayers[LightLayer.BLOCK.ordinal()] = blockDataLayer;
 
         DataLayer skyDataLayer;
         if (level.dimensionType().hasSkyLight()) {
-            skyDataLayer =
-                    level.getLightEngine().getLayerListener(LightLayer.SKY).getDataLayerData(pos);
+            skyDataLayer = level.getLightEngine().getLayerListener(LightLayer.SKY).getDataLayerData(pos);
 
-            if (skyDataLayer == null) skyDataLayer = DEFAULT_SKY_LIGHT_DATA_LAYER;
-        } else skyDataLayer = null;
+            if (skyDataLayer == null)
+                skyDataLayer = DEFAULT_SKY_LIGHT_DATA_LAYER;
+        } else
+            skyDataLayer = null;
 
         dataLayers[LightLayer.SKY.ordinal()] = skyDataLayer;
 

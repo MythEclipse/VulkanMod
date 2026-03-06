@@ -82,7 +82,8 @@ public abstract class Option<T> {
     public void setNewValue(T t) {
         this.newValue = t;
 
-        if (onChange != null) onChange.run();
+        if (onChange != null)
+            onChange.run();
     }
 
     public void updateActiveState() {
@@ -108,7 +109,7 @@ public abstract class Option<T> {
     }
 
     public boolean isChanged() {
-        return !this.newValue.equals(this.value);
+        return !java.util.Objects.equals(this.newValue, this.value);
     }
 
     public void apply() {

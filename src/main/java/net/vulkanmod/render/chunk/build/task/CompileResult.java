@@ -17,8 +17,8 @@ public class CompileResult {
 
     final List<BlockEntity> globalBlockEntities = new ArrayList<>();
     final List<BlockEntity> blockEntities = new ArrayList<>();
-    public final EnumMap<TerrainRenderType, UploadBuffer> renderedLayers =
-            new EnumMap<>(TerrainRenderType.class);
+    public final EnumMap<TerrainRenderType, UploadBuffer> renderedLayers = new EnumMap<>(
+            TerrainRenderType.SOLID.getDeclaringClass());
 
     VisibilitySet visibilitySet;
     QuadSorter.SortState transparencyState;

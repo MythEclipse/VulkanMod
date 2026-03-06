@@ -38,7 +38,7 @@ import org.lwjgl.vulkan.*;
 public class Vulkan {
 
     public static final boolean ENABLE_VALIDATION_LAYERS = false;
-    //    public static final boolean ENABLE_VALIDATION_LAYERS = true;
+    // public static final boolean ENABLE_VALIDATION_LAYERS = true;
 
     public static final boolean DYNAMIC_RENDERING = false;
 
@@ -48,7 +48,7 @@ public class Vulkan {
         if (ENABLE_VALIDATION_LAYERS) {
             VALIDATION_LAYERS = new HashSet<>();
             VALIDATION_LAYERS.add("VK_LAYER_KHRONOS_validation");
-            //            VALIDATION_LAYERS.add("VK_LAYER_KHRONOS_synchronization2");
+            // VALIDATION_LAYERS.add("VK_LAYER_KHRONOS_synchronization2");
 
         } else {
             // We are not going to use it, so we don't create it
@@ -71,23 +71,22 @@ public class Vulkan {
     private static int debugCallback(
             int messageSeverity, int messageType, long pCallbackData, long pUserData) {
 
-        VkDebugUtilsMessengerCallbackDataEXT callbackData =
-                VkDebugUtilsMessengerCallbackDataEXT.create(pCallbackData);
+        VkDebugUtilsMessengerCallbackDataEXT callbackData = VkDebugUtilsMessengerCallbackDataEXT.create(pCallbackData);
 
         String s;
         if ((messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT) != 0) {
             s = "\u001B[31m" + callbackData.pMessageString();
 
-            //            System.err.println("Stack dump:");
-            //            Thread.dumpStack();
+            // System.err.println("Stack dump:");
+            // Thread.dumpStack();
         } else {
             s = callbackData.pMessageString();
         }
 
         System.err.println(s);
 
-        if ((messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT) != 0)
-            System.nanoTime();
+        if ((messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT) != 0) {
+        }
 
         return VK_FALSE;
     }
@@ -129,7 +128,6 @@ public class Vulkan {
     private static long surface;
 
     private static long commandPool;
-    private static VkCommandBuffer immediateCmdBuffer;
     private static long immediateFence;
 
     private static long allocator;
@@ -206,13 +204,10 @@ public class Vulkan {
 
     private static void createInstance() {
 
-        if (ENABLE_VALIDATION_LAYERS && !checkValidationLayerSupport()) {
-            throw new RuntimeException("Validation requested but not supported");
-        }
-
         try (MemoryStack stack = stackPush()) {
 
-            // Use calloc to initialize the structs with 0s. Otherwise, the program can crash due to
+            // Use calloc to initialize the structs with 0s. Otherwise, the program can
+            // crash due to
             // random values
 
             VkApplicationInfo appInfo = VkApplicationInfo.calloc(stack);
@@ -234,8 +229,7 @@ public class Vulkan {
 
                 createInfo.ppEnabledLayerNames(asPointerBuffer(VALIDATION_LAYERS));
 
-                VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo =
-                        VkDebugUtilsMessengerCreateInfoEXT.calloc(stack);
+                VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo = VkDebugUtilsMessengerCreateInfoEXT.calloc(stack);
                 populateDebugMessengerCreateInfo(debugCreateInfo);
                 createInfo.pNext(debugCreateInfo.address());
             }
@@ -258,15 +252,13 @@ public class Vulkan {
 
             vkEnumerateInstanceLayerProperties(layerCount, null);
 
-            VkLayerProperties.Buffer availableLayers =
-                    VkLayerProperties.malloc(layerCount.get(0), stack);
+            VkLayerProperties.Buffer availableLayers = VkLayerProperties.malloc(layerCount.get(0), stack);
 
             vkEnumerateInstanceLayerProperties(layerCount, availableLayers);
 
-            Set<String> availableLayerNames =
-                    availableLayers.stream()
-                            .map(VkLayerProperties::layerNameString)
-                            .collect(toSet());
+            Set<String> availableLayerNames = availableLayers.stream()
+                    .map(VkLayerProperties::layerNameString)
+                    .collect(toSet());
 
             return availableLayerNames.containsAll(Vulkan.VALIDATION_LAYERS);
         }
@@ -275,7 +267,8 @@ public class Vulkan {
     private static void populateDebugMessengerCreateInfo(
             VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo) {
         debugCreateInfo.sType(VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT);
-        //        debugCreateInfo.messageSeverity(VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
+        // debugCreateInfo.messageSeverity(VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT
+        // |
         // VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT |
         // VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT);
         debugCreateInfo.messageSeverity(
@@ -285,7 +278,7 @@ public class Vulkan {
                 VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT
                         | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT
                         | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT);
-        //        debugCreateInfo.messageType(VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
+        // debugCreateInfo.messageType(VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
         // VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT);
         debugCreateInfo.pfnUserCallback(Vulkan::debugCallback);
     }
@@ -298,8 +291,7 @@ public class Vulkan {
 
         try (MemoryStack stack = stackPush()) {
 
-            VkDebugUtilsMessengerCreateInfoEXT createInfo =
-                    VkDebugUtilsMessengerCreateInfoEXT.calloc(stack);
+            VkDebugUtilsMessengerCreateInfoEXT createInfo = VkDebugUtilsMessengerCreateInfoEXT.calloc(stack);
 
             populateDebugMessengerCreateInfo(createInfo);
 

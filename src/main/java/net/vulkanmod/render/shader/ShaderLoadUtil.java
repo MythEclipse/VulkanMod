@@ -2,19 +2,17 @@ package net.vulkanmod.render.shader;
 
 /* JADX INFO: loaded from: VulkanMod_1.21.11-0.6.0.jar:net/vulkanmod/render/shader/ShaderLoadUtil.class */
 public abstract class ShaderLoadUtil {
-    public static final java.lang.String RESOURCES_PATH =
-            net.vulkanmod.vulkan.shader.SPIRVUtils.class
-                    .getResource("/assets/vulkanmod")
-                    .toExternalForm();
+    public static final java.lang.String RESOURCES_PATH = net.vulkanmod.vulkan.shader.SPIRVUtils.class
+            .getResource("/assets/vulkanmod")
+            .toExternalForm();
     public static final java.lang.String SHADERS_PATH = "%s/shaders/".formatted(RESOURCES_PATH);
-    public static final java.util.Set<java.lang.String> REMAPPED_SHADERS =
-            com.google.common.collect.Sets.newHashSet(
-                    new java.lang.String[] {
-                        "core/screenquad.vsh",
-                        "core/rendertype_item_entity_translucent_cull.vsh",
-                        "core/animate_sprite.vsh",
-                        "core/animate_sprite_blit.fsh"
-                    });
+    public static final java.util.Set<java.lang.String> REMAPPED_SHADERS = java.util.Set.of(
+            new java.lang.String[] {
+                    "core/screenquad.vsh",
+                    "core/rendertype_item_entity_translucent_cull.vsh",
+                    "core/animate_sprite.vsh",
+                    "core/animate_sprite_blit.fsh"
+            });
 
     public static java.lang.String resolveShaderPath(java.lang.String path) {
         return resolveShaderPath(SHADERS_PATH, path);
@@ -30,10 +28,8 @@ public abstract class ShaderLoadUtil {
             com.google.gson.JsonObject config,
             java.lang.String configName,
             java.lang.String path) {
-        java.lang.String vertexShader =
-                config.has("vertex") ? config.get("vertex").getAsString() : configName;
-        java.lang.String fragmentShader =
-                config.has("fragment") ? config.get("fragment").getAsString() : configName;
+        java.lang.String vertexShader = config.has("vertex") ? config.get("vertex").getAsString() : configName;
+        java.lang.String fragmentShader = config.has("fragment") ? config.get("fragment").getAsString() : configName;
         if (vertexShader == null) {
             vertexShader = configName;
         }
@@ -64,6 +60,9 @@ public abstract class ShaderLoadUtil {
             java.lang.String path,
             net.vulkanmod.vulkan.shader.SPIRVUtils.ShaderKind type) {
         java.lang.String[] splitPath = splitPath(path);
+        if (splitPath == null) {
+            throw new IllegalArgumentException("Invalid shader path: " + path);
+        }
         java.lang.String shaderName = splitPath[1];
         java.lang.String subPath = splitPath[0];
         loadShader(pipelineBuilder, configName, subPath, shaderName, type);
@@ -76,14 +75,17 @@ public abstract class ShaderLoadUtil {
             java.lang.String shaderName,
             net.vulkanmod.vulkan.shader.SPIRVUtils.ShaderKind type) {
         java.lang.String source = getShaderSource(path, configName, shaderName, type);
-        net.vulkanmod.vulkan.shader.SPIRVUtils.SPIRV spirv =
-                net.vulkanmod.vulkan.shader.SPIRVUtils.compileShader(shaderName, source, type);
+        net.vulkanmod.vulkan.shader.SPIRVUtils.SPIRV spirv = net.vulkanmod.vulkan.shader.SPIRVUtils
+                .compileShader(shaderName, source, type);
         switch (type) {
             case VERTEX_SHADER:
                 pipelineBuilder.setVertShaderSPIRV(spirv);
                 break;
             case FRAGMENT_SHADER:
                 pipelineBuilder.setFragShaderSPIRV(spirv);
+                break;
+            case COMPUTE_SHADER:
+            case GEOMETRY_SHADER:
                 break;
         }
     }
@@ -93,14 +95,12 @@ public abstract class ShaderLoadUtil {
         java.lang.String basePath = "%s/shaders/%s".formatted(RESOURCES_PATH, path);
         java.lang.String configPath = "%s/%s/%s.json".formatted(basePath, rendertype, rendertype);
         try {
-            java.nio.file.Path filePath =
-                    java.nio.file.FileSystems.getDefault()
-                            .getPath(configPath, new java.lang.String[0]);
+            java.nio.file.Path filePath = java.nio.file.FileSystems.getDefault()
+                    .getPath(configPath);
             if (!java.nio.file.Files.exists(filePath, new java.nio.file.LinkOption[0])) {
                 java.lang.String configPath2 = "%s/%s.json".formatted(basePath, rendertype);
-                filePath =
-                        java.nio.file.FileSystems.getDefault()
-                                .getPath(configPath2, new java.lang.String[0]);
+                filePath = java.nio.file.FileSystems.getDefault()
+                        .getPath(configPath2);
             }
             if (!java.nio.file.Files.exists(filePath, new java.nio.file.LinkOption[0])) {
                 return null;
@@ -126,11 +126,9 @@ public abstract class ShaderLoadUtil {
             if (stream == null) {
                 return null;
             }
-            com.google.gson.JsonObject reader =
-                    (com.google.gson.JsonObject)
-                            com.google.gson.JsonParser.parseReader(
-                                    new java.io.BufferedReader(
-                                            new java.io.InputStreamReader(stream)));
+            com.google.gson.JsonObject reader = (com.google.gson.JsonObject) com.google.gson.JsonParser.parseReader(
+                    new java.io.BufferedReader(
+                            new java.io.InputStreamReader(stream)));
             stream.close();
             return reader;
         } catch (java.lang.Throwable e) {
@@ -138,47 +136,46 @@ public abstract class ShaderLoadUtil {
         }
     }
 
-    /* JADX INFO: renamed from: net.vulkanmod.render.shader.ShaderLoadUtil$1, reason: invalid class name */
-    /* JADX INFO: loaded from: VulkanMod_1.21.11-0.6.0.jar:net/vulkanmod/render/shader/ShaderLoadUtil$1.class */
+    /*
+     * JADX INFO: renamed from: net.vulkanmod.render.shader.ShaderLoadUtil$1,
+     * reason: invalid class name
+     */
+    /*
+     * JADX INFO: loaded from:
+     * VulkanMod_1.21.11-0.6.0.jar:net/vulkanmod/render/shader/ShaderLoadUtil$1.
+     * class
+     */
     static /* synthetic */ class AnonymousClass1 {
-        static final /* synthetic */ int[] $SwitchMap$com$mojang$blaze3d$shaders$ShaderType =
-                new int[com.mojang.blaze3d.shaders.ShaderType.values().length];
+        static final /* synthetic */ int[] $SwitchMap$com$mojang$blaze3d$shaders$ShaderType = new int[com.mojang.blaze3d.shaders.ShaderType
+                .values().length];
         static /* synthetic */ int[] $SwitchMap$net$vulkanmod$vulkan$shader$SPIRVUtils$ShaderKind;
 
         static {
             try {
-                $SwitchMap$com$mojang$blaze3d$shaders$ShaderType[
-                                com.mojang.blaze3d.shaders.ShaderType.VERTEX.ordinal()] =
-                        1;
+                $SwitchMap$com$mojang$blaze3d$shaders$ShaderType[com.mojang.blaze3d.shaders.ShaderType.VERTEX
+                        .ordinal()] = 1;
             } catch (java.lang.NoSuchFieldError e) {
             }
             try {
-                $SwitchMap$com$mojang$blaze3d$shaders$ShaderType[
-                                com.mojang.blaze3d.shaders.ShaderType.FRAGMENT.ordinal()] =
-                        2;
+                $SwitchMap$com$mojang$blaze3d$shaders$ShaderType[com.mojang.blaze3d.shaders.ShaderType.FRAGMENT
+                        .ordinal()] = 2;
             } catch (java.lang.NoSuchFieldError e2) {
             }
-            $SwitchMap$net$vulkanmod$vulkan$shader$SPIRVUtils$ShaderKind =
-                    new int[net.vulkanmod.vulkan.shader.SPIRVUtils.ShaderKind.values().length];
+            $SwitchMap$net$vulkanmod$vulkan$shader$SPIRVUtils$ShaderKind = new int[net.vulkanmod.vulkan.shader.SPIRVUtils.ShaderKind
+                    .values().length];
             try {
-                $SwitchMap$net$vulkanmod$vulkan$shader$SPIRVUtils$ShaderKind[
-                                net.vulkanmod.vulkan.shader.SPIRVUtils.ShaderKind.VERTEX_SHADER
-                                        .ordinal()] =
-                        1;
+                $SwitchMap$net$vulkanmod$vulkan$shader$SPIRVUtils$ShaderKind[net.vulkanmod.vulkan.shader.SPIRVUtils.ShaderKind.VERTEX_SHADER
+                        .ordinal()] = 1;
             } catch (java.lang.NoSuchFieldError e3) {
             }
             try {
-                $SwitchMap$net$vulkanmod$vulkan$shader$SPIRVUtils$ShaderKind[
-                                net.vulkanmod.vulkan.shader.SPIRVUtils.ShaderKind.FRAGMENT_SHADER
-                                        .ordinal()] =
-                        2;
+                $SwitchMap$net$vulkanmod$vulkan$shader$SPIRVUtils$ShaderKind[net.vulkanmod.vulkan.shader.SPIRVUtils.ShaderKind.FRAGMENT_SHADER
+                        .ordinal()] = 2;
             } catch (java.lang.NoSuchFieldError e4) {
             }
             try {
-                $SwitchMap$net$vulkanmod$vulkan$shader$SPIRVUtils$ShaderKind[
-                                net.vulkanmod.vulkan.shader.SPIRVUtils.ShaderKind.COMPUTE_SHADER
-                                        .ordinal()] =
-                        3;
+                $SwitchMap$net$vulkanmod$vulkan$shader$SPIRVUtils$ShaderKind[net.vulkanmod.vulkan.shader.SPIRVUtils.ShaderKind.COMPUTE_SHADER
+                        .ordinal()] = 3;
             } catch (java.lang.NoSuchFieldError e5) {
             }
         }
@@ -188,8 +185,8 @@ public abstract class ShaderLoadUtil {
             net.minecraft.resources.Identifier resourceLocation,
             com.mojang.blaze3d.shaders.ShaderType type) {
         java.lang.String str;
-        switch (net.vulkanmod.render.shader.ShaderLoadUtil.AnonymousClass1
-                .$SwitchMap$com$mojang$blaze3d$shaders$ShaderType[type.ordinal()]) {
+        switch (net.vulkanmod.render.shader.ShaderLoadUtil.AnonymousClass1.$SwitchMap$com$mojang$blaze3d$shaders$ShaderType[type
+                .ordinal()]) {
             case 1:
                 str = ".vsh";
                 break;
@@ -198,27 +195,24 @@ public abstract class ShaderLoadUtil {
                 break;
             default:
                 throw new java.lang.MatchException(
-                        (java.lang.String) null, (java.lang.Throwable) null);
+                        "Unknown ShaderType", (java.lang.Throwable) null);
         }
         java.lang.String shaderExtension = str;
         java.lang.String path = resourceLocation.getPath();
         java.lang.String[] splitPath = splitPath(path);
         java.lang.String shaderName = "%s%s".formatted(splitPath[1], shaderExtension);
-        java.lang.String shaderFile =
-                "%s/shaders/%s/%s".formatted(RESOURCES_PATH, path, shaderName);
+        java.lang.String shaderFile = "%s/shaders/%s/%s".formatted(RESOURCES_PATH, path, shaderName);
         try {
             java.io.InputStream stream = getInputStream(shaderFile);
             if (stream == null) {
-                java.lang.String shaderFile2 =
-                        "%s/shaders/%s%s".formatted(RESOURCES_PATH, path, shaderExtension);
+                java.lang.String shaderFile2 = "%s/shaders/%s%s".formatted(RESOURCES_PATH, path, shaderExtension);
                 stream = getInputStream(shaderFile2);
             }
             if (stream == null) {
                 return null;
             }
-            java.lang.String source =
-                    org.apache.commons.io.IOUtils.toString(
-                            new java.io.BufferedReader(new java.io.InputStreamReader(stream)));
+            java.lang.String source = org.apache.commons.io.IOUtils.toString(
+                    new java.io.BufferedReader(new java.io.InputStreamReader(stream)));
             stream.close();
             return source;
         } catch (java.lang.Throwable e) {
@@ -226,13 +220,16 @@ public abstract class ShaderLoadUtil {
         }
     }
 
-    /* JADX INFO: Thrown type has an unknown type hierarchy: java.lang.MatchException */
+    /*
+     * JADX INFO: Thrown type has an unknown type hierarchy:
+     * java.lang.MatchException
+     */
     public static java.lang.String getShaderSource(
             java.lang.String path, com.mojang.blaze3d.shaders.ShaderType type)
             throws java.lang.MatchException {
         java.lang.String str;
-        switch (net.vulkanmod.render.shader.ShaderLoadUtil.AnonymousClass1
-                .$SwitchMap$com$mojang$blaze3d$shaders$ShaderType[type.ordinal()]) {
+        switch (net.vulkanmod.render.shader.ShaderLoadUtil.AnonymousClass1.$SwitchMap$com$mojang$blaze3d$shaders$ShaderType[type
+                .ordinal()]) {
             case 1:
                 str = ".vsh";
                 break;
@@ -241,18 +238,16 @@ public abstract class ShaderLoadUtil {
                 break;
             default:
                 throw new java.lang.MatchException(
-                        (java.lang.String) null, (java.lang.Throwable) null);
+                        "Unknown ShaderType", (java.lang.Throwable) null);
         }
         java.lang.String shaderExtension = str;
         java.lang.String[] splitPath = splitPath(path);
         java.lang.String shaderName = "%s%s".formatted(splitPath[1], shaderExtension);
-        java.lang.String shaderFile =
-                "%s/shaders/%s/%s".formatted(RESOURCES_PATH, path, shaderName);
+        java.lang.String shaderFile = "%s/shaders/%s/%s".formatted(RESOURCES_PATH, path, shaderName);
         try {
             java.io.InputStream stream = getInputStream(shaderFile);
-            java.lang.String source =
-                    org.apache.commons.io.IOUtils.toString(
-                            new java.io.BufferedReader(new java.io.InputStreamReader(stream)));
+            java.lang.String source = org.apache.commons.io.IOUtils.toString(
+                    new java.io.BufferedReader(new java.io.InputStreamReader(stream)));
             stream.close();
             return source;
         } catch (java.lang.Throwable e) {
@@ -273,11 +268,14 @@ public abstract class ShaderLoadUtil {
             case FRAGMENT_SHADER:
                 str = ".fsh";
                 break;
+            case GEOMETRY_SHADER:
+                str = ".geom";
+                break;
             case COMPUTE_SHADER:
                 str = ".comp";
                 break;
             default:
-                throw new java.lang.UnsupportedOperationException("shader type %s unsupported");
+                throw new java.lang.UnsupportedOperationException("shader type %s unsupported".formatted(type));
         }
         java.lang.String shaderExtension = str;
         java.lang.String shaderPath = "/%s/%s".formatted(configName, configName);
@@ -286,28 +284,24 @@ public abstract class ShaderLoadUtil {
             java.io.InputStream stream = getInputStream(shaderFile);
             if (stream == null) {
                 java.lang.String shaderPath2 = "/%s".formatted(shaderName);
-                java.lang.String shaderFile2 =
-                        "%s%s%s".formatted(path, shaderPath2, shaderExtension);
+                java.lang.String shaderFile2 = "%s%s%s".formatted(path, shaderPath2, shaderExtension);
                 stream = getInputStream(shaderFile2);
             }
             if (stream == null) {
                 java.lang.String shaderPath3 = "/%s/%s".formatted(configName, shaderName);
-                java.lang.String shaderFile3 =
-                        "%s%s%s".formatted(path, shaderPath3, shaderExtension);
+                java.lang.String shaderFile3 = "%s%s%s".formatted(path, shaderPath3, shaderExtension);
                 stream = getInputStream(shaderFile3);
             }
             if (stream == null) {
                 java.lang.String shaderPath4 = "/%s/%s".formatted(shaderName, shaderName);
-                java.lang.String shaderFile4 =
-                        "%s%s%s".formatted(path, shaderPath4, shaderExtension);
+                java.lang.String shaderFile4 = "%s%s%s".formatted(path, shaderPath4, shaderExtension);
                 stream = getInputStream(shaderFile4);
             }
             if (stream == null) {
                 return null;
             }
-            java.lang.String source =
-                    org.apache.commons.io.IOUtils.toString(
-                            new java.io.BufferedReader(new java.io.InputStreamReader(stream)));
+            java.lang.String source = org.apache.commons.io.IOUtils.toString(
+                    new java.io.BufferedReader(new java.io.InputStreamReader(stream)));
             stream.close();
             return source;
         } catch (java.lang.Throwable e) {
@@ -327,7 +321,9 @@ public abstract class ShaderLoadUtil {
 
     public static java.lang.String[] splitPath(java.lang.String path) {
         int idx = path.lastIndexOf(47);
-        return new java.lang.String[] {path.substring(0, idx), path.substring(idx + 1)};
+        if (idx == -1)
+            return null;
+        return new java.lang.String[] { path.substring(0, idx), path.substring(idx + 1) };
     }
 
     public static java.io.InputStream getInputStream(java.lang.String path) {

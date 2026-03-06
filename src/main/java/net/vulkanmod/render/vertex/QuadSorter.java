@@ -11,9 +11,6 @@ public class QuadSorter {
     private float sortX = Float.NaN;
     private float sortY = Float.NaN;
     private float sortZ = Float.NaN;
-    private boolean indexOnly;
-
-    private VertexFormat format;
     private int vertexCount;
     private int indexCount;
 
@@ -37,7 +34,6 @@ public class QuadSorter {
         this.distances = sortState.distances;
         this.sortingPointsIndices = sortState.sortingPointsIndices;
 
-        this.indexOnly = true;
     }
 
     public void setupQuadSortingPoints(long bufferPtr, int vertexCount, VertexFormat format) {

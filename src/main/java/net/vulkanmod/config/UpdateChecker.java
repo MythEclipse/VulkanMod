@@ -20,30 +20,27 @@ public abstract class UpdateChecker {
         CompletableFuture.supplyAsync(
                 () -> {
                     try {
-                        String req =
-                                "https://api.modrinth.com/v2/project/vulkanmod/version?include_changelog=false";
+                        String req = "https://api.modrinth.com/v2/project/vulkanmod/version?include_changelog=false";
                         String mcVersion = SharedConstants.getCurrentVersion().name();
                         req += "&game_versions=%s".formatted(mcVersion);
 
-                        URL url = new URL(req);
+                        URL url = java.net.URI.create(req).toURL();
                         HttpURLConnection http = (HttpURLConnection) url.openConnection();
                         var inputStream = http.getInputStream();
 
-                        JsonObject data =
-                                JsonParser.parseString(
-                                                "{ versions: "
-                                                        + new String(inputStream.readAllBytes())
-                                                        + "}")
-                                        .getAsJsonObject();
+                        JsonObject data = JsonParser.parseString(
+                                "{ versions: "
+                                        + new String(inputStream.readAllBytes())
+                                        + "}")
+                                .getAsJsonObject();
                         JsonArray versions = data.getAsJsonArray("versions");
                         http.disconnect();
 
-                        String version =
-                                String.valueOf(
-                                                versions.get(0)
-                                                        .getAsJsonObject()
-                                                        .get("version_number"))
-                                        .replace("\"", "");
+                        String version = String.valueOf(
+                                versions.get(0)
+                                        .getAsJsonObject()
+                                        .get("version_number"))
+                                .replace("\"", "");
 
                         var currentVersion = VersionParser.parseSemantic(Initializer.getVersion());
                         updateAvailable = currentVersion.compareTo(Version.parse(version)) < 0;

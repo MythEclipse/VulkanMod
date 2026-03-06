@@ -29,24 +29,40 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(Window.class)
 public abstract class WindowMixin {
-    @Final @Shadow private long handle;
+    @Final
+    @Shadow
+    private long handle;
 
-    @Shadow private boolean vsync;
-    @Shadow private boolean fullscreen;
+    @Shadow
+    private boolean vsync;
+    @Shadow
+    private boolean fullscreen;
 
-    @Shadow @Final private static Logger LOGGER;
+    @Shadow
+    @Final
+    private static Logger LOGGER;
 
-    @Shadow private int windowedX;
-    @Shadow private int windowedY;
-    @Shadow private int windowedWidth;
-    @Shadow private int windowedHeight;
-    @Shadow private int x;
-    @Shadow private int y;
-    @Shadow private int width;
-    @Shadow private int height;
+    @Shadow
+    private int windowedX;
+    @Shadow
+    private int windowedY;
+    @Shadow
+    private int windowedWidth;
+    @Shadow
+    private int windowedHeight;
+    @Shadow
+    private int x;
+    @Shadow
+    private int y;
+    @Shadow
+    private int width;
+    @Shadow
+    private int height;
 
-    @Shadow private int framebufferWidth;
-    @Shadow private int framebufferHeight;
+    @Shadow
+    private int framebufferWidth;
+    @Shadow
+    private int framebufferHeight;
 
     @Shadow
     public abstract int getWidth();
@@ -58,18 +74,11 @@ public abstract class WindowMixin {
     protected abstract void updateFullscreen(
             boolean bl, @Nullable TracyFrameCapture tracyFrameCapture);
 
-    @Redirect(
-            method = "<init>",
-            at = @At(value = "INVOKE", target = "Lorg/lwjgl/glfw/GLFW;glfwWindowHint(II)V"))
-    private void redirect(int hint, int value) {}
+    @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lorg/lwjgl/glfw/GLFW;glfwWindowHint(II)V"))
+    private void redirect(int hint, int value) {
+    }
 
-    @Inject(
-            method = "<init>",
-            at =
-                    @At(
-                            value = "INVOKE",
-                            target =
-                                    "Lorg/lwjgl/glfw/GLFW;glfwCreateWindow(IILjava/lang/CharSequence;JJ)J"))
+    @Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lorg/lwjgl/glfw/GLFW;glfwCreateWindow(IILjava/lang/CharSequence;JJ)J"))
     private void vulkanHint(
             WindowEventHandler windowEventHandler,
             ScreenManager screenManager,
@@ -80,9 +89,8 @@ public abstract class WindowMixin {
         GLFW.glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
         // Fix Gnome Client-Side Decorators
-        boolean b =
-                (Platform.isGnome() | Platform.isWeston() | Platform.isGeneric())
-                        && Platform.isWayLand();
+        boolean b = (Platform.isGnome() || Platform.isWeston() || Platform.isGeneric())
+                && Platform.isWayLand();
         GLFW.glfwWindowHint(GLFW_DECORATED, (b ? GLFW_FALSE : GLFW_TRUE));
     }
 
@@ -217,16 +225,14 @@ public abstract class WindowMixin {
     @Overwrite
     private void onFramebufferResize(long window, int width, int height) {
         if (window == this.handle) {
-            int prevWidth = this.getWidth();
-            int prevHeight = this.getHeight();
 
             if (width > 0 && height > 0) {
                 this.framebufferWidth = width;
                 this.framebufferHeight = height;
-                //                if (this.framebufferWidth != prevWidth || this.framebufferHeight
+                // if (this.framebufferWidth != prevWidth || this.framebufferHeight
                 // != prevHeight) {
-                //                    this.eventHandler.resizeDisplay();
-                //                }
+                // this.eventHandler.resizeDisplay();
+                // }
 
                 Renderer.scheduleSwapChainUpdate();
             }
@@ -242,6 +248,7 @@ public abstract class WindowMixin {
         this.width = width;
         this.height = height;
 
-        if (width > 0 && height > 0) Renderer.scheduleSwapChainUpdate();
+        if (width > 0 && height > 0)
+            Renderer.scheduleSwapChainUpdate();
     }
 }

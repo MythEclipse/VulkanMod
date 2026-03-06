@@ -94,7 +94,6 @@ public abstract class GlUtil {
         };
     }
 
-    // TODO: refactor
     public static int vulkanFormat(int glInternalFormat) {
         return switch (glInternalFormat) {
             case GL30.GL_UNSIGNED_INT_8_8_8_8_REV -> VK_FORMAT_R8G8B8A8_UINT;

@@ -35,12 +35,17 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(LevelRenderer.class)
 public abstract class LevelRendererMixin {
-    @Shadow @Final private Long2ObjectMap<SortedSet<BlockDestructionProgress>> destructionProgress;
+    @Shadow
+    @Final
+    private Long2ObjectMap<SortedSet<BlockDestructionProgress>> destructionProgress;
 
-    @Unique private WorldRenderer worldRenderer;
+    @Unique
+    private WorldRenderer worldRenderer;
 
-    @Unique double camX, camY, camZ;
-    @Unique Matrix4f modelView, projection;
+    @Unique
+    double camX, camY, camZ;
+    @Unique
+    Matrix4f modelView, projection;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void init(
@@ -51,13 +56,8 @@ public abstract class LevelRendererMixin {
             LevelRenderState levelRenderState,
             FeatureRenderDispatcher featureRenderDispatcher,
             CallbackInfo ci) {
-        this.worldRenderer =
-                WorldRenderer.init(
-                        entityRenderDispatcher,
-                        blockEntityRenderDispatcher,
-                        renderBuffers,
-                        levelRenderState,
-                        featureRenderDispatcher);
+        this.worldRenderer = WorldRenderer.init(
+                blockEntityRenderDispatcher);
     }
 
     @Inject(method = "setLevel", at = @At("RETURN"))
@@ -96,7 +96,6 @@ public abstract class LevelRendererMixin {
      */
     @Overwrite
     private void cullTerrain(Camera camera, Frustum frustum, boolean spectator) {
-        // TODO: port capture frustum
         this.worldRenderer.setupRenderer(camera, frustum, false, spectator);
     }
 
@@ -136,13 +135,7 @@ public abstract class LevelRendererMixin {
         return null;
     }
 
-    @Redirect(
-            method = "method_62214",
-            at =
-                    @At(
-                            value = "INVOKE",
-                            target =
-                                    "Lnet/minecraft/client/renderer/chunk/ChunkSectionsToRender;renderGroup(Lnet/minecraft/client/renderer/chunk/ChunkSectionLayerGroup;Lcom/mojang/blaze3d/textures/GpuSampler;)V"))
+    @Redirect(method = "method_62214", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/chunk/ChunkSectionsToRender;renderGroup(Lnet/minecraft/client/renderer/chunk/ChunkSectionLayerGroup;Lcom/mojang/blaze3d/textures/GpuSampler;)V"))
     private void renderSectionLayer(
             ChunkSectionsToRender instance,
             ChunkSectionLayerGroup chunkSectionLayerGroup,
@@ -172,7 +165,8 @@ public abstract class LevelRendererMixin {
      * @reason
      */
     @Overwrite
-    public void onChunkReadyToRender(ChunkPos chunkPos) {}
+    public void onChunkReadyToRender(ChunkPos chunkPos) {
+    }
 
     /**
      * @author
@@ -211,12 +205,7 @@ public abstract class LevelRendererMixin {
         return this.worldRenderer.getVisibleSectionsCount();
     }
 
-    @Redirect(
-            method = "addWeatherPass",
-            at =
-                    @At(
-                            value = "INVOKE",
-                            target = "Lnet/minecraft/client/renderer/GameRenderer;getDepthFar()F"))
+    @Redirect(method = "addWeatherPass", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;getDepthFar()F"))
     private float getRenderDistanceZFar(GameRenderer instance) {
         return instance.getRenderDistance() * 4F;
     }
