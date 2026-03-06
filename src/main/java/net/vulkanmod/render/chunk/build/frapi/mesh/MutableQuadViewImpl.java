@@ -1,6 +1,9 @@
 package net.vulkanmod.render.chunk.build.frapi.mesh;
 
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
+import net.minecraft.client.renderer.item.ItemStackRenderState;
+import net.minecraft.core.Direction;
+import org.jspecify.annotations.Nullable;
 
 /* JADX INFO: loaded from: VulkanMod_1.21.11-0.6.0.jar:net/vulkanmod/render/chunk/build/frapi/mesh/MutableQuadViewImpl.class */
 public abstract class MutableQuadViewImpl
@@ -142,7 +145,7 @@ public abstract class MutableQuadViewImpl
         @Override // net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter,
         // net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView
         public final net.vulkanmod.render.chunk.build.frapi.mesh.MutableQuadViewImpl nominalFace(
-                        @Nullable net.minecraft.core.Direction face) {
+                        @Nullable Direction face) {
                 this.nominalFace = face;
                 return this;
         }
@@ -150,7 +153,7 @@ public abstract class MutableQuadViewImpl
         @Override // net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter,
         // net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView
         public final net.vulkanmod.render.chunk.build.frapi.mesh.MutableQuadViewImpl cullFace(
-                        @Nullable net.minecraft.core.Direction face) {
+                        @Nullable Direction face) {
                 this.data[this.baseIndex + 0] = net.vulkanmod.render.chunk.build.frapi.mesh.EncodingFormat.cullFace(
                                 this.data[this.baseIndex + 0], face);
                 nominalFace(face);
@@ -160,7 +163,7 @@ public abstract class MutableQuadViewImpl
         @Override // net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter,
         // net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView
         public net.vulkanmod.render.chunk.build.frapi.mesh.MutableQuadViewImpl renderLayer(
-                        @Nullable net.minecraft.client.renderer.chunk.ChunkSectionLayer renderLayer) {
+                        @Nullable ChunkSectionLayer renderLayer) {
                 this.data[this.baseIndex + 0] = net.vulkanmod.render.chunk.build.frapi.mesh.EncodingFormat.renderLayer(
                                 this.data[this.baseIndex + 0], renderLayer);
                 return this;
@@ -198,7 +201,7 @@ public abstract class MutableQuadViewImpl
         @Override // net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter,
         // net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView
         public net.vulkanmod.render.chunk.build.frapi.mesh.MutableQuadViewImpl glint(
-                        @Nullable net.minecraft.client.renderer.item.ItemStackRenderState.FoilType glint) {
+                        ItemStackRenderState.@Nullable FoilType glint) {
                 this.data[this.baseIndex + 0] = net.vulkanmod.render.chunk.build.frapi.mesh.EncodingFormat.glint(
                                 this.data[this.baseIndex + 0], glint);
                 return this;

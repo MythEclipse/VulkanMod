@@ -32,6 +32,7 @@ public class MeshViewImpl implements net.fabricmc.fabric.api.renderer.v1.mesh.Me
     }
 
     /* JADX WARN: Multi-variable type inference failed */
+    @SuppressWarnings("null")
     <C extends net.vulkanmod.render.chunk.build.frapi.mesh.QuadViewImpl> void forEach(
             java.util.function.Consumer<? super C> action, @org.jetbrains.annotations.NotNull C cursor) {
         int limit = this.limit;

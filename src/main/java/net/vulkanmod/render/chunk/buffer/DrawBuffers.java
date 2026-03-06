@@ -1,6 +1,7 @@
 package net.vulkanmod.render.chunk.buffer;
 
 /* JADX INFO: loaded from: VulkanMod_1.21.11-0.6.0.jar:net/vulkanmod/render/chunk/buffer/DrawBuffers.class */
+@SuppressWarnings("null")
 public class DrawBuffers {
         public static final int INDEX_SIZE = 2;
         private final org.joml.Vector3i origin;

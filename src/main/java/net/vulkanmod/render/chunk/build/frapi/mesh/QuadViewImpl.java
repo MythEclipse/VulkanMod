@@ -1,14 +1,17 @@
 package net.vulkanmod.render.chunk.build.frapi.mesh;
 
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
+import net.minecraft.core.Direction;
+import org.joml.Vector2f;
+import org.joml.Vector3f;
+import org.jspecify.annotations.Nullable;
 
 /* JADX INFO: loaded from: VulkanMod_1.21.11-0.6.0.jar:net/vulkanmod/render/chunk/build/frapi/mesh/QuadViewImpl.class */
 public class QuadViewImpl
                 implements net.fabricmc.fabric.api.renderer.v1.mesh.QuadView,
                 net.vulkanmod.render.model.quad.ModelQuadView {
 
-        @org.jetbrains.annotations.Nullable
-        protected net.minecraft.core.Direction nominalFace;
+        protected @Nullable Direction nominalFace;
         protected int[] data;
         protected net.vulkanmod.render.chunk.cull.QuadFacing facing;
         protected boolean isGeometryInvalid = true;
@@ -89,8 +92,8 @@ public class QuadViewImpl
         }
 
         @Override // net.fabricmc.fabric.api.renderer.v1.mesh.QuadView
-        public final org.joml.Vector3f copyPos(
-                        int vertexIndex, @Nullable org.joml.Vector3f target) {
+        public final Vector3f copyPos(
+                        int vertexIndex, @Nullable Vector3f target) {
                 if (target == null) {
                         target = new org.joml.Vector3f();
                 }
@@ -132,8 +135,8 @@ public class QuadViewImpl
         }
 
         @Override // net.fabricmc.fabric.api.renderer.v1.mesh.QuadView
-        public final org.joml.Vector2f copyUv(
-                        int vertexIndex, @Nullable org.joml.Vector2f target) {
+        public final Vector2f copyUv(
+                        int vertexIndex, @Nullable Vector2f target) {
                 if (target == null) {
                         target = new org.joml.Vector2f();
                 }
@@ -208,9 +211,8 @@ public class QuadViewImpl
         }
 
         @Override // net.fabricmc.fabric.api.renderer.v1.mesh.QuadView
-        @Nullable
-        public final org.joml.Vector3f copyNormal(
-                        int vertexIndex, @Nullable org.joml.Vector3f target) {
+        public final @Nullable Vector3f copyNormal(
+                        int vertexIndex, @Nullable Vector3f target) {
                 if (hasNormal(vertexIndex)) {
                         if (target == null) {
                                 target = new org.joml.Vector3f();
@@ -242,21 +244,18 @@ public class QuadViewImpl
         }
 
         @Override // net.fabricmc.fabric.api.renderer.v1.mesh.QuadView
-        @Nullable
-        public final net.minecraft.core.Direction nominalFace() {
+        public final @Nullable Direction nominalFace() {
                 return this.nominalFace;
         }
 
         @Override // net.fabricmc.fabric.api.renderer.v1.mesh.QuadView
-        @Nullable
-        public final net.minecraft.core.Direction cullFace() {
+        public final @Nullable Direction cullFace() {
                 return net.vulkanmod.render.chunk.build.frapi.mesh.EncodingFormat.cullFace(
                                 this.data[this.baseIndex + 0]);
         }
 
         @Override // net.fabricmc.fabric.api.renderer.v1.mesh.QuadView
-        @Nullable
-        public net.minecraft.client.renderer.chunk.ChunkSectionLayer renderLayer() {
+        public @Nullable ChunkSectionLayer renderLayer() {
                 return net.vulkanmod.render.chunk.build.frapi.mesh.EncodingFormat.renderLayer(
                                 this.data[this.baseIndex + 0]);
         }

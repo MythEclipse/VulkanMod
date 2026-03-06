@@ -257,7 +257,7 @@ public class WorldRenderer {
         net.minecraft.client.renderer.texture.TextureManager textureManager = net.minecraft.client.Minecraft
                 .getInstance().getTextureManager();
         net.minecraft.client.renderer.texture.AbstractTexture atlasTexture = textureManager.getTexture(
-                net.minecraft.client.renderer.texture.TextureAtlas.LOCATION_BLOCKS);
+                net.minecraft.resources.Identifier.withDefaultNamespace("textures/atlas/blocks.png"));
         com.mojang.blaze3d.textures.GpuTextureView texView = atlasTexture.getTextureView();
         com.mojang.blaze3d.textures.GpuTexture gpuTexture = texView.texture();
         if (!(gpuTexture instanceof net.vulkanmod.render.engine.VkGpuTexture)) {

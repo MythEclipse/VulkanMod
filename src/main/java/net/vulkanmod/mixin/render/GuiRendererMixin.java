@@ -81,7 +81,8 @@ public abstract class GuiRendererMixin {
         // For the same reason here we need to use vertexCount instead of indexCount
 
         VkRenderPass vkRenderPass = (VkRenderPass) renderPass;
-        if (vkRenderPass.getPipeline().getVertexFormatMode() != VertexFormat.Mode.TRIANGLES) {
+        com.mojang.blaze3d.pipeline.RenderPipeline pipeline = vkRenderPass.getPipeline();
+        if (pipeline != null && pipeline.getVertexFormatMode() != VertexFormat.Mode.TRIANGLES) {
             int vertexCount = indexCount * 2 / 3;
             renderPass.drawIndexed(baseVertex, 0, vertexCount, 1);
         } else {

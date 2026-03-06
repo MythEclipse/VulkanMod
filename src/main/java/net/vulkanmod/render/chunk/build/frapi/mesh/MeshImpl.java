@@ -66,6 +66,7 @@ public class MeshImpl implements Mesh {
      * of a thread-local
      * lookup or to use a mutable cursor.
      */
+    @SuppressWarnings("null")
     <C extends QuadViewImpl> void forEach(Consumer<? super C> action, @org.jetbrains.annotations.NotNull C cursor) {
         final int limit = this.limit;
         int index = 0;

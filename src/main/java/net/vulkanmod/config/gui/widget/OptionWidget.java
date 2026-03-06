@@ -9,7 +9,6 @@ import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.vulkanmod.config.gui.render.GuiRenderer;
-import net.vulkanmod.config.option.Option;
 import net.vulkanmod.vulkan.util.ColorUtil;
 
 public abstract class OptionWidget<O extends net.vulkanmod.config.option.Option<?>> extends VAbstractWidget {

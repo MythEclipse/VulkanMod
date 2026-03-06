@@ -1,6 +1,11 @@
 package net.vulkanmod.render.engine;
 
-import org.jetbrains.annotations.Nullable;
+import com.mojang.blaze3d.buffers.GpuBuffer;
+import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.blaze3d.textures.GpuSampler;
+import com.mojang.blaze3d.textures.GpuTextureView;
+import com.mojang.blaze3d.vertex.VertexFormat;
+import org.jspecify.annotations.Nullable;
 
 public class VkRenderPass implements com.mojang.blaze3d.systems.RenderPass {
     protected static final int MAX_VERTEX_BUFFERS = 1;
@@ -9,11 +14,9 @@ public class VkRenderPass implements com.mojang.blaze3d.systems.RenderPass {
     private final boolean hasDepthTexture;
     private boolean closed;
 
-    @Nullable
-    protected com.mojang.blaze3d.pipeline.RenderPipeline pipeline;
+    protected @Nullable RenderPipeline pipeline;
 
-    @Nullable
-    protected com.mojang.blaze3d.buffers.GpuBuffer indexBuffer;
+    protected @Nullable GpuBuffer indexBuffer;
     protected int pushedDebugGroups;
     private final boolean autoManaged;
     protected final com.mojang.blaze3d.buffers.GpuBuffer[] vertexBuffers = new com.mojang.blaze3d.buffers.GpuBuffer[1];
@@ -70,11 +73,12 @@ public class VkRenderPass implements com.mojang.blaze3d.systems.RenderPass {
     @Override
     public void bindTexture(
             java.lang.String string,
-            @Nullable com.mojang.blaze3d.textures.GpuTextureView gpuTextureView,
-            @Nullable com.mojang.blaze3d.textures.GpuSampler gpuSampler) {
+            @Nullable GpuTextureView gpuTextureView,
+            @Nullable GpuSampler gpuSampler) {
         if (gpuSampler == null) {
             this.samplers.remove(string);
         } else {
+            if (gpuTextureView == null) throw new java.lang.NullPointerException("gpuTextureView must not be null when gpuSampler is provided");
             net.vulkanmod.render.engine.VkGpuTexture texture = (net.vulkanmod.render.engine.VkGpuTexture) gpuTextureView
                     .texture();
             if (texture.needsClear()) {
@@ -152,7 +156,7 @@ public class VkRenderPass implements com.mojang.blaze3d.systems.RenderPass {
 
     @Override
     public void setIndexBuffer(
-            @Nullable com.mojang.blaze3d.buffers.GpuBuffer gpuBuffer,
+            @Nullable GpuBuffer gpuBuffer,
             com.mojang.blaze3d.vertex.VertexFormat.IndexType indexType) {
         this.indexBuffer = gpuBuffer;
         this.indexType = indexType;
@@ -170,8 +174,8 @@ public class VkRenderPass implements com.mojang.blaze3d.systems.RenderPass {
     @Override
     public <T> void drawMultipleIndexed(
             java.util.Collection<com.mojang.blaze3d.systems.RenderPass.Draw<T>> collection,
-            @Nullable com.mojang.blaze3d.buffers.GpuBuffer gpuBuffer,
-            @Nullable com.mojang.blaze3d.vertex.VertexFormat.IndexType indexType,
+            @Nullable GpuBuffer gpuBuffer,
+            VertexFormat.@Nullable IndexType indexType,
             java.util.Collection<java.lang.String> collection2,
             T object) {
         if (this.closed) {
@@ -201,8 +205,7 @@ public class VkRenderPass implements com.mojang.blaze3d.systems.RenderPass {
         }
     }
 
-    @Nullable
-    public com.mojang.blaze3d.pipeline.RenderPipeline getPipeline() {
+    public @Nullable RenderPipeline getPipeline() {
         return this.pipeline;
     }
 

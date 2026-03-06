@@ -1,14 +1,17 @@
 package net.vulkanmod.render.engine;
 
-import org.jetbrains.annotations.Nullable;
+import com.mojang.blaze3d.buffers.GpuBuffer;
+import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.blaze3d.textures.GpuTextureView;
+import com.mojang.blaze3d.vertex.VertexFormat;
+import org.jspecify.annotations.Nullable;
 
 /* JADX INFO: loaded from: VulkanMod_1.21.11-0.6.0.jar:net/vulkanmod/render/engine/VkCommandEncoder.class */
 public class VkCommandEncoder implements com.mojang.blaze3d.systems.CommandEncoder {
     private static final org.slf4j.Logger LOGGER;
     private final net.vulkanmod.render.engine.VkGpuDevice device;
 
-    @Nullable
-    private com.mojang.blaze3d.pipeline.RenderPipeline lastPipeline;
+    private @Nullable RenderPipeline lastPipeline;
 
     private boolean inRenderPass;
 
@@ -36,7 +39,7 @@ public class VkCommandEncoder implements com.mojang.blaze3d.systems.CommandEncod
             java.util.function.Supplier<java.lang.String> supplier,
             com.mojang.blaze3d.textures.GpuTextureView colorAttachmentView,
             java.util.OptionalInt optionalInt,
-            @Nullable com.mojang.blaze3d.textures.GpuTextureView depthTexture,
+            @Nullable GpuTextureView depthTexture,
             java.util.OptionalDouble optionalDouble) {
         if (this.inRenderPass) {
             throw new java.lang.IllegalStateException(
@@ -817,8 +820,8 @@ public class VkCommandEncoder implements com.mojang.blaze3d.systems.CommandEncod
     protected <T> void executeDrawMultiple(
             net.vulkanmod.render.engine.VkRenderPass renderPass,
             java.util.Collection<com.mojang.blaze3d.systems.RenderPass.Draw<T>> collection,
-            @org.jetbrains.annotations.Nullable com.mojang.blaze3d.buffers.GpuBuffer gpuBuffer,
-            @org.jetbrains.annotations.Nullable com.mojang.blaze3d.vertex.VertexFormat.IndexType indexType,
+            @Nullable GpuBuffer gpuBuffer,
+            VertexFormat.@Nullable IndexType indexType,
             java.util.Collection<java.lang.String> collection2,
             T object) {
         if (trySetup(renderPass)) {
@@ -893,7 +896,7 @@ public class VkCommandEncoder implements com.mojang.blaze3d.systems.CommandEncod
             int vertexOffset,
             int firstIndex,
             int vertexCount,
-            @org.jetbrains.annotations.Nullable com.mojang.blaze3d.vertex.VertexFormat.IndexType indexType,
+            VertexFormat.@Nullable IndexType indexType,
             int instanceCount) {
         if (trySetup(renderPass)) {
             if (com.mojang.blaze3d.opengl.GlRenderPass.VALIDATION) {
@@ -929,7 +932,7 @@ public class VkCommandEncoder implements com.mojang.blaze3d.systems.CommandEncod
             int vertexOffset,
             int firstIndex,
             int vertexCount,
-            @org.jetbrains.annotations.Nullable com.mojang.blaze3d.vertex.VertexFormat.IndexType indexType,
+            VertexFormat.@Nullable IndexType indexType,
             com.mojang.blaze3d.pipeline.RenderPipeline renderPipeline,
             int instanceCount) {
         int i;
@@ -960,7 +963,7 @@ public class VkCommandEncoder implements com.mojang.blaze3d.systems.CommandEncod
                 throw th;
             }
         }
-        if (renderPass.indexBuffer != null) {
+        if (renderPass.indexBuffer != null && indexType != null) {
             net.vulkanmod.render.engine.VkGpuBuffer indexBuffer = (net.vulkanmod.render.engine.VkGpuBuffer) renderPass.indexBuffer;
             switch (net.vulkanmod.render.engine.VkCommandEncoder.AnonymousClass2.$SwitchMap$com$mojang$blaze3d$vertex$VertexFormat$IndexType[indexType
                     .ordinal()]) {

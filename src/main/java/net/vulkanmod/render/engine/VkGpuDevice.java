@@ -1,6 +1,8 @@
 package net.vulkanmod.render.engine;
 
-import org.jetbrains.annotations.Nullable;
+import com.mojang.blaze3d.shaders.ShaderSource;
+import java.util.function.Supplier;
+import org.jspecify.annotations.Nullable;
 
 /* JADX INFO: loaded from: VulkanMod_1.21.11-0.6.0.jar:net/vulkanmod/render/engine/VkGpuDevice.class */
 public class VkGpuDevice implements com.mojang.blaze3d.systems.GpuDevice {
@@ -53,7 +55,7 @@ public class VkGpuDevice implements com.mojang.blaze3d.systems.GpuDevice {
 
         @Override
         public com.mojang.blaze3d.textures.GpuTexture createTexture(
-                        @Nullable java.util.function.Supplier<java.lang.String> supplier,
+                        @Nullable Supplier<java.lang.String> supplier,
                         int usage,
                         com.mojang.blaze3d.textures.TextureFormat textureFormat,
                         int width,
@@ -76,7 +78,7 @@ public class VkGpuDevice implements com.mojang.blaze3d.systems.GpuDevice {
          */
         @Override
         public com.mojang.blaze3d.textures.GpuTexture createTexture(
-                        @Nullable java.lang.String string,
+                        @Nullable String string,
                         int usage,
                         com.mojang.blaze3d.textures.TextureFormat textureFormat,
                         int width,
@@ -174,7 +176,7 @@ public class VkGpuDevice implements com.mojang.blaze3d.systems.GpuDevice {
 
         @Override
         public com.mojang.blaze3d.buffers.GpuBuffer createBuffer(
-                        @Nullable java.util.function.Supplier<java.lang.String> supplier,
+                        @Nullable Supplier<java.lang.String> supplier,
                         @com.mojang.blaze3d.buffers.GpuBuffer.Usage int usage,
                         long size) {
                 if (size <= 0) {
@@ -185,7 +187,7 @@ public class VkGpuDevice implements com.mojang.blaze3d.systems.GpuDevice {
 
         @Override
         public com.mojang.blaze3d.buffers.GpuBuffer createBuffer(
-                        @Nullable java.util.function.Supplier<java.lang.String> supplier,
+                        @Nullable Supplier<java.lang.String> supplier,
                         int usage,
                         java.nio.ByteBuffer byteBuffer) {
                 if (!byteBuffer.hasRemaining()) {
@@ -347,7 +349,7 @@ public class VkGpuDevice implements com.mojang.blaze3d.systems.GpuDevice {
         @Override
         public com.mojang.blaze3d.pipeline.CompiledRenderPipeline precompilePipeline(
                         com.mojang.blaze3d.pipeline.RenderPipeline renderPipeline,
-                        @Nullable com.mojang.blaze3d.shaders.ShaderSource shaderSourceGetter) {
+                        @Nullable ShaderSource shaderSourceGetter) {
                 try {
                         compilePipeline(
                                         renderPipeline,
