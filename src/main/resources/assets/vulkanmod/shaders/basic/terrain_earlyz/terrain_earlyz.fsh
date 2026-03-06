@@ -101,8 +101,6 @@ layout (location = 4) in flat float fadeFactor;
 layout (location = 0) out vec4 fragColor;
 
 void main() {
-//    vec4 color = texture(Sampler0, texCoord0) * vertexColor;
-    vec4 color = (UseRgss == 1 ? sampleRGSS(Sampler0, texCoord0, TexelSize) : sampleNearest(Sampler0, texCoord0, TexelSize)) * vertexColor;
-    color = mix(FogColor * vec4(1, 1, 1, color.a), color, fadeFactor);
+    vec4 color = texture(Sampler0, texCoord0) * vertexColor;
     fragColor = apply_fog(color, sphericalVertexDistance, cylindricalVertexDistance, FogEnvironmentalStart, FogEnvironmentalEnd, FogRenderDistanceStart, FogRenderDistanceEnd, FogColor);
 }

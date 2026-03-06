@@ -1,6 +1,7 @@
 package net.vulkanmod.mixin.render.block;
 
 import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.model.geom.builders.UVPair;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
 import net.vulkanmod.render.chunk.build.frapi.helper.NormalHelper;
@@ -92,14 +93,12 @@ public class BakedQuadM implements ModelQuadView {
 
     @Override
     public float getU(int idx) {
-        // U stored in upper 32 bits of packed long (UVPair.unpackU: lshr 32, l2i, intBitsToFloat)
-        return Float.intBitsToFloat((int) (getPackedUV(idx) >>> 32));
+        return UVPair.unpackU(getPackedUV(idx));
     }
 
     @Override
     public float getV(int idx) {
-        // V stored in lower 32 bits of packed long (UVPair.unpackV: l2i, intBitsToFloat)
-        return Float.intBitsToFloat((int) getPackedUV(idx));
+        return UVPair.unpackV(getPackedUV(idx));
     }
 
     @Override

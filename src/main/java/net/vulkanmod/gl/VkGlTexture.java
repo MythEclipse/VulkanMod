@@ -243,8 +243,15 @@ public class VkGlTexture {
         if (target != GL11.GL_TEXTURE_2D)
             throw new UnsupportedOperationException("target != GL_TEXTURE_2D not supported");
 
-        // TODO: crashing
-//        boundTexture.generateMipmaps();
+        if (boundTexture == null || boundTexture.vulkanImage == null) {
+            return;
+        }
+
+        if (boundTexture.vulkanImage.mipLevels <= 1) {
+            return;
+        }
+
+        boundTexture.generateMipmaps();
     }
 
     public static void getTexImage(int tex, int level, int format, int type, long pixels) {

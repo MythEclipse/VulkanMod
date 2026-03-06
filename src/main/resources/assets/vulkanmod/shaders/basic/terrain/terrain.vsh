@@ -4,6 +4,7 @@
 #include "fog.glsl"
 
 layout (binding = 0) uniform UniformBufferObject {
+    mat4 ModelViewMat;
     mat4 MVP;
     int CurrentTime;
 };
@@ -46,12 +47,6 @@ layout (location = 4) out flat float fadeFactor;
     layout (location = 0) in ivec4 Position;
     layout (location = 1) in uvec2 UV0;
     layout (location = 2) in uint PackedColor;
-#else
-    layout (location = 0) in vec3 Position;
-    layout (location = 1) in vec4 Color;
-    layout (location = 2) in vec2 UV0;
-    layout (location = 3) in ivec2 UV2;
-    layout (location = 4) in vec3 Normal;
 #endif
 
 const float UV_INV = 1.0 / 32768.0;
@@ -62,27 +57,20 @@ vec3 getVertexPosition() {
     const int encOffset = SectionOffsets[gl_InstanceIndex >> 2][gl_InstanceIndex & 3];
     const vec3 baseOffset = bitfieldExtract(ivec3(encOffset) >> ivec3(0, 16, 8), 0, 8);
 
-    #ifdef COMPRESSED_VERTEX
-        return fma(Position.xyz, POSITION_INV, ModelOffset + baseOffset);
-    #else
-        return Position.xyz + ModelOffset + baseOffset;
-    #endif
+    return fma(Position.xyz, POSITION_INV, ModelOffset + baseOffset);
 }
 
 void main() {
     const vec3 pos = getVertexPosition();
+    vec4 viewPos = ModelViewMat * vec4(pos, 1.0);
     gl_Position = MVP * vec4(pos, 1.0);
 
-    sphericalVertexDistance = fog_spherical_distance(pos);
-    cylindricalVertexDistance = fog_cylindrical_distance(pos);
+    sphericalVertexDistance = fog_spherical_distance(viewPos.xyz);
+    cylindricalVertexDistance = fog_cylindrical_distance(viewPos.xyz);
 
-    const vec4 Color = unpackUnorm4x8(PackedColor);
-
-    vertexColor = Color * sample_lightmap2(Sampler2, Position.a);
-//    vertexColor = Color * sample_lightmap(Sampler2, UV2);
+    const vec4 color = unpackUnorm4x8(PackedColor);
+    vertexColor = color * sample_lightmap2(Sampler2, Position.a);
+    texCoord0 = UV0 * UV_INV;
 
     fadeFactor = SectionFadeFactors[gl_InstanceIndex >> 2][gl_InstanceIndex & 3];
-
-    texCoord0 = UV0 * UV_INV;
-//    texCoord0 = UV0;
 }

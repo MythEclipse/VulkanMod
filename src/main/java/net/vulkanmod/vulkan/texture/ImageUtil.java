@@ -146,11 +146,15 @@ public abstract class ImageUtil {
 
             for (level = 1; level < image.mipLevels; level++) {
                 prevLevel = level - 1;
+                int prevWidth = java.lang.Math.max(1, image.width >> prevLevel);
+                int prevHeight = java.lang.Math.max(1, image.height >> prevLevel);
+                int levelWidth = java.lang.Math.max(1, image.width >> level);
+                int levelHeight = java.lang.Math.max(1, image.height >> level);
 
                 VkImageMemoryBarrier.Buffer barrier = VkImageMemoryBarrier.calloc(1, stack);
                 barrier.sType(VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER);
-                barrier.oldLayout(VK_IMAGE_USAGE_TRANSFER_DST_BIT);
-                barrier.newLayout(VK_IMAGE_USAGE_TRANSFER_SRC_BIT);
+                barrier.oldLayout(VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+                barrier.newLayout(VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
                 barrier.srcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED);
                 barrier.dstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED);
                 barrier.image(image.getId());
@@ -167,12 +171,9 @@ public abstract class ImageUtil {
 
                 vkCmdPipelineBarrier(commandBuffer.getHandle(), VK_PIPELINE_STAGE_TRANSFER_BIT,
                                      VK_PIPELINE_STAGE_TRANSFER_BIT, 0, null, null, barrier);
-
-                prevLevel = level - 1;
-
                 VkImageBlit.Buffer blit = VkImageBlit.calloc(1, stack);
                 blit.srcOffsets(0, VkOffset3D.calloc(stack).set(0, 0, 0));
-                blit.srcOffsets(1, VkOffset3D.calloc(stack).set(image.width >> prevLevel, image.height >> prevLevel, 1));
+                blit.srcOffsets(1, VkOffset3D.calloc(stack).set(prevWidth, prevHeight, 1));
                 blit.srcSubresource()
                     .aspectMask(VK_IMAGE_ASPECT_COLOR_BIT)
                     .mipLevel(prevLevel)
@@ -180,7 +181,7 @@ public abstract class ImageUtil {
                     .layerCount(1);
 
                 blit.dstOffsets(0, VkOffset3D.calloc(stack).set(0, 0, 0));
-                blit.dstOffsets(1, VkOffset3D.calloc(stack).set(image.width >> level, image.height >> level, 1));
+                blit.dstOffsets(1, VkOffset3D.calloc(stack).set(levelWidth, levelHeight, 1));
                 blit.dstSubresource().aspectMask(VK_IMAGE_ASPECT_COLOR_BIT).mipLevel(level).baseArrayLayer(0)
                     .layerCount(1);
 
@@ -191,7 +192,7 @@ public abstract class ImageUtil {
 
             VkImageMemoryBarrier.Buffer barrier = VkImageMemoryBarrier.calloc(1, stack);
             barrier.sType(VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER);
-            barrier.oldLayout(VK_IMAGE_USAGE_TRANSFER_SRC_BIT);
+            barrier.oldLayout(VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
             barrier.newLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
             barrier.srcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED);
             barrier.dstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED);
@@ -204,21 +205,24 @@ public abstract class ImageUtil {
 
             barrier.subresourceRange().aspectMask(image.aspect);
 
-            barrier.srcAccessMask(VK_ACCESS_TRANSFER_WRITE_BIT);
+            barrier.srcAccessMask(VK_ACCESS_TRANSFER_READ_BIT);
             barrier.dstAccessMask(VK_ACCESS_SHADER_READ_BIT);
 
             vkCmdPipelineBarrier(commandBuffer.getHandle(),
-                                 VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
+                                 VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
                                  0,
                                  null, null,
                                  barrier);
 
-            barrier.oldLayout(VK_IMAGE_USAGE_TRANSFER_DST_BIT);
+            barrier.oldLayout(VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+            barrier.newLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+            barrier.srcAccessMask(VK_ACCESS_TRANSFER_WRITE_BIT);
+            barrier.dstAccessMask(VK_ACCESS_SHADER_READ_BIT);
             barrier.subresourceRange().baseMipLevel(image.mipLevels - 1);
             barrier.subresourceRange().levelCount(1);
 
             vkCmdPipelineBarrier(commandBuffer.getHandle(),
-                                 VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
+                                 VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
                                  0,
                                  null, null,
                                  barrier);

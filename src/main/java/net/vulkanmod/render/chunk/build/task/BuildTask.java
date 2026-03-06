@@ -122,12 +122,16 @@ public class BuildTask extends net.vulkanmod.render.chunk.build.task.ChunkTask {
         if (net.vulkanmod.Initializer.CONFIG.uniqueOpaqueLayer) {
             switch (renderType) {
                 case SOLID:
+                    terrainRenderType2 = net.vulkanmod.render.vertex.TerrainRenderType.SOLID;
+                    break;
                 case CUTOUT:
                     terrainRenderType2 = net.vulkanmod.render.vertex.TerrainRenderType.CUTOUT;
                     break;
                 case TRANSLUCENT:
-                case TRIPWIRE:
                     terrainRenderType2 = net.vulkanmod.render.vertex.TerrainRenderType.TRANSLUCENT;
+                    break;
+                case TRIPWIRE:
+                    terrainRenderType2 = net.vulkanmod.render.vertex.TerrainRenderType.TRIPWIRE;
                     break;
                 default:
                     throw new java.lang.MatchException((java.lang.String) null, (java.lang.Throwable) null);

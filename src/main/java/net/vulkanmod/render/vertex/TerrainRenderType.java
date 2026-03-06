@@ -10,13 +10,12 @@ public enum TerrainRenderType {
     private static java.util.function.Function<net.vulkanmod.render.vertex.TerrainRenderType, net.vulkanmod.render.vertex.TerrainRenderType> remapper;
     public final float alphaCutout;
     public static final net.vulkanmod.render.vertex.TerrainRenderType[] VALUES = values();
-    public static final java.util.EnumSet<net.vulkanmod.render.vertex.TerrainRenderType> COMPACT_RENDER_TYPES = java.util.EnumSet.of(CUTOUT, TRANSLUCENT);
+    public static final java.util.EnumSet<net.vulkanmod.render.vertex.TerrainRenderType> COMPACT_RENDER_TYPES = java.util.EnumSet.of(SOLID, CUTOUT, TRANSLUCENT);
     public static final java.util.EnumSet<net.vulkanmod.render.vertex.TerrainRenderType> SEMI_COMPACT_RENDER_TYPES = java.util.EnumSet.of(SOLID, CUTOUT, TRANSLUCENT);
 
     static {
-        SEMI_COMPACT_RENDER_TYPES.add(CUTOUT);
-        SEMI_COMPACT_RENDER_TYPES.add(TRANSLUCENT);
-        COMPACT_RENDER_TYPES.add(TRANSLUCENT);
+        COMPACT_RENDER_TYPES.add(TRIPWIRE);
+        SEMI_COMPACT_RENDER_TYPES.add(TRIPWIRE);
     }
 
     TerrainRenderType(float alphaCutout) {
@@ -105,14 +104,17 @@ public enum TerrainRenderType {
 
     public static void updateMapping() {
         if (net.vulkanmod.Initializer.CONFIG.uniqueOpaqueLayer) {
+            net.vulkanmod.Initializer.LOGGER.warn("uniqueOpaqueLayer is temporarily using safe fallback mapping to avoid broken block textures.");
             remapper = renderType -> {
                 switch (renderType) {
                     case SOLID:
+                        return SOLID;
                     case CUTOUT:
                         return CUTOUT;
                     case TRANSLUCENT:
-                    case TRIPWIRE:
                         return TRANSLUCENT;
+                    case TRIPWIRE:
+                        return TRIPWIRE;
                     default:
                         throw new java.lang.MatchException((java.lang.String) null, (java.lang.Throwable) null);
                 }

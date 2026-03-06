@@ -244,11 +244,9 @@ public class WorldRenderer {
         net.minecraft.client.renderer.texture.TextureManager textureManager = net.minecraft.client.Minecraft.getInstance().getTextureManager();
         net.minecraft.client.renderer.texture.AbstractTexture atlasTexture = textureManager.getTexture(net.minecraft.client.renderer.texture.TextureAtlas.LOCATION_BLOCKS);
         com.mojang.blaze3d.textures.GpuTextureView texView = atlasTexture.getTextureView();
-        boolean useAnisotropy = this.minecraft.options.textureFiltering().get() == net.minecraft.client.TextureFilteringMethod.ANISOTROPIC;
-        int maxAnisotropy = this.minecraft.options.maxAnisotropyValue();
         net.vulkanmod.render.engine.VkGpuTexture texture = (net.vulkanmod.render.engine.VkGpuTexture) texView.texture();
         if (this.terrainSampler == 0) {
-            this.terrainSampler = net.vulkanmod.vulkan.texture.SamplerManager.getSampler(true, true, texture.getVulkanImage().mipLevels - 1, useAnisotropy, maxAnisotropy);
+            this.terrainSampler = net.vulkanmod.vulkan.texture.SamplerManager.getSampler(true, true, 0, false, 0);
         }
         texture.getVulkanImage().setSampler(this.terrainSampler);
         net.vulkanmod.vulkan.VRenderSystem.setShaderTexture(0, texView);

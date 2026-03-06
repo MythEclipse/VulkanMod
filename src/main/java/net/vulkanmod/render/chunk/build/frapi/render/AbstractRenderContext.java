@@ -43,7 +43,8 @@ public abstract class AbstractRenderContext {
                 quad.copyNormal(i, normalVec);
                 matrices.transformNormal(normalVec, normalVec);
             }
-            vertexConsumer.addVertex(posVec.x(), posVec.y(), posVec.z(), quad.color(i), quad.u(i), quad.v(i), this.overlay, quad.lightmap(i), normalVec.x(), normalVec.y(), normalVec.z());
+            int packedColor = net.vulkanmod.vulkan.util.ColorUtil.ARGB.toRGBA(quad.color(i));
+            vertexConsumer.addVertex(posVec.x(), posVec.y(), posVec.z(), packedColor, quad.u(i), quad.v(i), this.overlay, quad.lightmap(i), normalVec.x(), normalVec.y(), normalVec.z());
         }
     }
 }

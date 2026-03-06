@@ -19,7 +19,7 @@ public class Config {
     public int advCulling = 2;
     public boolean indirectDraw = true;
 
-    public boolean uniqueOpaqueLayer = true;
+    public boolean uniqueOpaqueLayer = false;
     public boolean entityCulling = true;
     public int device = -1;
 
