@@ -1,16 +1,15 @@
 package net.vulkanmod.vulkan.util;
 
+import static org.lwjgl.system.MemoryStack.stackGet;
+
+import java.lang.reflect.Field;
+import java.nio.ByteBuffer;
+import java.util.Collection;
 import net.vulkanmod.vulkan.memory.buffer.Buffer;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 import sun.misc.Unsafe;
-
-import java.lang.reflect.Field;
-import java.nio.ByteBuffer;
-import java.util.Collection;
-
-import static org.lwjgl.system.MemoryStack.stackGet;
 
 public class VUtil {
     public static final boolean CHECKS = true;
@@ -38,9 +37,7 @@ public class VUtil {
 
         PointerBuffer buffer = stack.mallocPointer(collection.size());
 
-        collection.stream()
-                .map(stack::UTF8)
-                .forEach(buffer::put);
+        collection.stream().map(stack::UTF8).forEach(buffer::put);
 
         return buffer.rewind();
     }
@@ -52,7 +49,8 @@ public class VUtil {
     public static void memcpy(ByteBuffer src, Buffer dst, long size) {
         if (CHECKS) {
             if (size > dst.getBufferSize() - dst.getUsedBytes()) {
-                throw new IllegalArgumentException("Upload size is greater than available dst buffer size");
+                throw new IllegalArgumentException(
+                        "Upload size is greater than available dst buffer size");
             }
         }
 
@@ -65,7 +63,8 @@ public class VUtil {
     public static void memcpy(Buffer src, ByteBuffer dst, long size) {
         if (CHECKS) {
             if (size > dst.remaining()) {
-                throw new IllegalArgumentException("Upload size is greater than available dst buffer size");
+                throw new IllegalArgumentException(
+                        "Upload size is greater than available dst buffer size");
             }
         }
 
@@ -75,10 +74,12 @@ public class VUtil {
         MemoryUtil.memCopy(srcPtr, dstPtr, size);
     }
 
-    public static void memcpy(ByteBuffer src, Buffer dst, long size, long srcOffset, long dstOffset) {
+    public static void memcpy(
+            ByteBuffer src, Buffer dst, long size, long srcOffset, long dstOffset) {
         if (CHECKS) {
             if (size > dst.getBufferSize() - dstOffset) {
-                throw new IllegalArgumentException("Upload size is greater than available dst buffer size");
+                throw new IllegalArgumentException(
+                        "Upload size is greater than available dst buffer size");
             }
         }
 
@@ -91,5 +92,4 @@ public class VUtil {
         int r = x % align;
         return r == 0 ? x : x + align - r;
     }
-
 }

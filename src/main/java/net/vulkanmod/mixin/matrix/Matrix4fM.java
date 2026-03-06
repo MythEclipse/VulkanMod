@@ -8,19 +8,43 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin(Matrix4f.class)
 public abstract class Matrix4fM {
 
-    @Shadow public abstract Matrix4f perspective(float fovy, float aspect, float zNear, float zFar, boolean zZeroToOne);
-    @Shadow public abstract Matrix4f ortho(float left, float right, float bottom, float top, float zNear, float zFar, boolean zZeroToOne);
-    @Shadow public abstract Matrix4f setPerspective(float fovy, float aspect, float zNear, float zFar, boolean zZeroToOne);
-    @Shadow public abstract Matrix4f setOrtho(float left, float right, float bottom, float top, float zNear, float zFar, boolean zZeroToOne);
+    @Shadow
+    public abstract Matrix4f perspective(
+            float fovy, float aspect, float zNear, float zFar, boolean zZeroToOne);
+
+    @Shadow
+    public abstract Matrix4f ortho(
+            float left,
+            float right,
+            float bottom,
+            float top,
+            float zNear,
+            float zFar,
+            boolean zZeroToOne);
+
+    @Shadow
+    public abstract Matrix4f setPerspective(
+            float fovy, float aspect, float zNear, float zFar, boolean zZeroToOne);
+
+    @Shadow
+    public abstract Matrix4f setOrtho(
+            float left,
+            float right,
+            float bottom,
+            float top,
+            float zNear,
+            float zFar,
+            boolean zZeroToOne);
 
     /**
      * @author
      * @reason
      */
     @Overwrite(remap = false)
-    public Matrix4f setOrtho(float left, float right, float bottom, float top, float zNear, float zFar) {
+    public Matrix4f setOrtho(
+            float left, float right, float bottom, float top, float zNear, float zFar) {
         this.setOrtho(left, right, bottom, top, zNear, zFar, true);
-        return (Matrix4f)(Object)this;
+        return (Matrix4f) (Object) this;
     }
 
     /**
@@ -28,7 +52,8 @@ public abstract class Matrix4fM {
      * @reason
      */
     @Overwrite(remap = false)
-    public Matrix4f ortho(float left, float right, float bottom, float top, float zNear, float zFar) {
+    public Matrix4f ortho(
+            float left, float right, float bottom, float top, float zNear, float zFar) {
         return this.ortho(left, right, bottom, top, zNear, zFar, true);
     }
 
@@ -48,6 +73,6 @@ public abstract class Matrix4fM {
     @Overwrite(remap = false)
     public Matrix4f setPerspective(float fovy, float aspect, float zNear, float zFar) {
         this.setPerspective(fovy, aspect, zNear, zFar, true);
-        return (Matrix4f)(Object)this;
+        return (Matrix4f) (Object) this;
     }
 }

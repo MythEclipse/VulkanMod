@@ -4,16 +4,17 @@ package net.vulkanmod.mixin.texture.update;
 @org.spongepowered.asm.mixin.Mixin({net.minecraft.client.renderer.texture.TextureManager.class})
 public abstract class MTextureManager {
 
-    @org.spongepowered.asm.mixin.Shadow
-    @org.spongepowered.asm.mixin.Final
+    @org.spongepowered.asm.mixin.Shadow @org.spongepowered.asm.mixin.Final
     private java.util.Set<net.minecraft.client.renderer.texture.TickableTexture> tickableTextures;
 
     @org.spongepowered.asm.mixin.Overwrite
     public void tick() {
-        if (net.vulkanmod.vulkan.Renderer.skipRendering || !net.vulkanmod.Initializer.CONFIG.textureAnimations) {
+        if (net.vulkanmod.vulkan.Renderer.skipRendering
+                || !net.vulkanmod.Initializer.CONFIG.textureAnimations) {
             return;
         }
-        for (net.minecraft.client.renderer.texture.TickableTexture tickable : this.tickableTextures) {
+        for (net.minecraft.client.renderer.texture.TickableTexture tickable :
+                this.tickableTextures) {
             tickable.tick();
         }
         net.vulkanmod.render.texture.SpriteUpdateUtil.transitionLayouts();

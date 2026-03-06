@@ -2,6 +2,7 @@ package net.vulkanmod.config.gui.render;
 
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.vertex.*;
+import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -9,8 +10,6 @@ import net.minecraft.client.gui.render.TextureSetup;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
 import org.joml.Matrix3x2f;
-
-import java.util.List;
 
 public abstract class GuiRenderer {
 
@@ -47,7 +46,8 @@ public abstract class GuiRenderer {
         guiGraphics.fillGradient(x0, y0, x1, y1, color1, color2);
     }
 
-    public static void renderBoxBorder(int x0, int y0, int width, int height, int borderWidth, int color) {
+    public static void renderBoxBorder(
+            int x0, int y0, int width, int height, int borderWidth, int color) {
         renderBorder(x0, y0, x0 + width, y0 + height, borderWidth, color);
     }
 
@@ -63,21 +63,30 @@ public abstract class GuiRenderer {
         drawString(font, component.getVisualOrderText(), x, y, color);
     }
 
-    public static void drawString(Font font, FormattedCharSequence formattedCharSequence, int x, int y, int color) {
+    public static void drawString(
+            Font font, FormattedCharSequence formattedCharSequence, int x, int y, int color) {
         guiGraphics.drawString(font, formattedCharSequence, x, y, color);
     }
 
-    public static void drawString(Font font, Component component, int x, int y, int color, boolean shadow) {
+    public static void drawString(
+            Font font, Component component, int x, int y, int color, boolean shadow) {
         drawString(font, component.getVisualOrderText(), x, y, color, shadow);
     }
 
-    public static void drawString(Font font, FormattedCharSequence formattedCharSequence, int x, int y, int color, boolean shadow) {
+    public static void drawString(
+            Font font,
+            FormattedCharSequence formattedCharSequence,
+            int x,
+            int y,
+            int color,
+            boolean shadow) {
         guiGraphics.drawString(font, formattedCharSequence, x, y, color, shadow);
     }
 
     public static void drawCenteredString(Font font, Component component, int x, int y, int color) {
         FormattedCharSequence formattedCharSequence = component.getVisualOrderText();
-        guiGraphics.drawString(font, formattedCharSequence, x - font.width(formattedCharSequence) / 2, y, color);
+        guiGraphics.drawString(
+                font, formattedCharSequence, x - font.width(formattedCharSequence) / 2, y, color);
     }
 
     public static int getMaxTextWidth(Font font, List<FormattedCharSequence> list) {
@@ -91,11 +100,18 @@ public abstract class GuiRenderer {
         return maxWidth;
     }
 
-    public static void submitPolygon(RenderPipeline renderPipeline, TextureSetup textureSetup, float[][] vertices, int color) {
+    public static void submitPolygon(
+            RenderPipeline renderPipeline,
+            TextureSetup textureSetup,
+            float[][] vertices,
+            int color) {
         guiGraphics.guiRenderState.submitGuiElement(
                 new PolygonRenderState(
-                        renderPipeline, textureSetup, new Matrix3x2f(), vertices, color, guiGraphics.scissorStack.peek()
-                )
-        );
+                        renderPipeline,
+                        textureSetup,
+                        new Matrix3x2f(),
+                        vertices,
+                        color,
+                        guiGraphics.scissorStack.peek()));
     }
 }

@@ -2,30 +2,39 @@ package net.vulkanmod.render.chunk.build.frapi.render;
 
 /* JADX INFO: loaded from: VulkanMod_1.21.11-0.6.0.jar:net/vulkanmod/render/chunk/build/frapi/render/AbstractRenderContext.class */
 public abstract class AbstractRenderContext {
-    private final net.vulkanmod.render.chunk.build.frapi.mesh.MutableQuadViewImpl editorQuad = new net.vulkanmod.render.chunk.build.frapi.mesh.MutableQuadViewImpl() { // from class: net.vulkanmod.render.chunk.build.frapi.render.AbstractRenderContext.1
-        {
-            this.data = new int[net.vulkanmod.render.chunk.build.frapi.mesh.EncodingFormat.TOTAL_STRIDE];
-            clear();
-        }
+    private final net.vulkanmod.render.chunk.build.frapi.mesh.MutableQuadViewImpl editorQuad =
+            new net.vulkanmod.render.chunk.build.frapi.mesh.MutableQuadViewImpl() { // from class:
+                // net.vulkanmod.render.chunk.build.frapi.render.AbstractRenderContext.1
+                {
+                    this.data =
+                            new int
+                                    [net.vulkanmod.render.chunk.build.frapi.mesh.EncodingFormat
+                                            .TOTAL_STRIDE];
+                    clear();
+                }
 
-        @Override // net.vulkanmod.render.chunk.build.frapi.mesh.MutableQuadViewImpl
-        protected void emitDirectly() {
-            net.vulkanmod.render.chunk.build.frapi.render.AbstractRenderContext.this.bufferQuad(this);
-        }
-    };
+                @Override // net.vulkanmod.render.chunk.build.frapi.mesh.MutableQuadViewImpl
+                protected void emitDirectly() {
+                    net.vulkanmod.render.chunk.build.frapi.render.AbstractRenderContext.this
+                            .bufferQuad(this);
+                }
+            };
     private final org.joml.Vector4f posVec = new org.joml.Vector4f();
     private final org.joml.Vector3f normalVec = new org.joml.Vector3f();
     protected com.mojang.blaze3d.vertex.PoseStack.Pose matrices;
     protected int overlay;
 
-    protected abstract void bufferQuad(net.vulkanmod.render.chunk.build.frapi.mesh.MutableQuadViewImpl mutableQuadViewImpl);
+    protected abstract void bufferQuad(
+            net.vulkanmod.render.chunk.build.frapi.mesh.MutableQuadViewImpl mutableQuadViewImpl);
 
     protected net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter getEmitter() {
         this.editorQuad.clear();
         return this.editorQuad;
     }
 
-    protected void bufferQuad(net.vulkanmod.render.chunk.build.frapi.mesh.MutableQuadViewImpl quad, com.mojang.blaze3d.vertex.VertexConsumer vertexConsumer) {
+    protected void bufferQuad(
+            net.vulkanmod.render.chunk.build.frapi.mesh.MutableQuadViewImpl quad,
+            com.mojang.blaze3d.vertex.VertexConsumer vertexConsumer) {
         org.joml.Vector4f posVec = this.posVec;
         org.joml.Vector3f normalVec = this.normalVec;
         com.mojang.blaze3d.vertex.PoseStack.Pose matrices = this.matrices;
@@ -44,7 +53,18 @@ public abstract class AbstractRenderContext {
                 matrices.transformNormal(normalVec, normalVec);
             }
             int packedColor = net.vulkanmod.vulkan.util.ColorUtil.ARGB.toRGBA(quad.color(i));
-            vertexConsumer.addVertex(posVec.x(), posVec.y(), posVec.z(), packedColor, quad.u(i), quad.v(i), this.overlay, quad.lightmap(i), normalVec.x(), normalVec.y(), normalVec.z());
+            vertexConsumer.addVertex(
+                    posVec.x(),
+                    posVec.y(),
+                    posVec.z(),
+                    packedColor,
+                    quad.u(i),
+                    quad.v(i),
+                    this.overlay,
+                    quad.lightmap(i),
+                    normalVec.x(),
+                    normalVec.y(),
+                    normalVec.z());
         }
     }
 }

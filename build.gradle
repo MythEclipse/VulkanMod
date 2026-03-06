@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '1.13-SNAPSHOT'
+	id 'fabric-loom' version '1.15-SNAPSHOT'
 	id 'maven-publish'
 }
 
@@ -13,6 +13,13 @@ base {
 loom {
 	accessWidenerPath = file("src/main/resources/vulkanmod.accesswidener")
 }
+
+project.ext.lwjglVersion = "3.3.3"
+project.ext.jomlVersion = "1.10.4"
+project.ext.winNatives = "natives-windows"
+project.ext.linuxNatives = "natives-linux"
+project.ext.macosNatives = "natives-macos"
+project.ext.macosArmNatives = "natives-macos-arm64"
 
 dependencies {
 	// To change the versions see the gradle.properties file
@@ -38,16 +45,8 @@ dependencies {
 	includeModule("fabric-block-view-api-v2")
 	includeModule("fabric-lifecycle-events-v1")
 	includeModule("fabric-transitive-access-wideners-v1")
-}
 
-project.ext.lwjglVersion = "3.3.3"
-project.ext.jomlVersion = "1.10.4"
-project.ext.winNatives = "natives-windows"
-project.ext.linuxNatives = "natives-linux"
-project.ext.macosNatives = "natives-macos"
-project.ext.macosArmNatives = "natives-macos-arm64"
-
-dependencies {
+	// LWJGL
 	include(implementation("org.lwjgl:lwjgl-vulkan:$lwjglVersion"))
 
 	ext.includeNatives = { name ->

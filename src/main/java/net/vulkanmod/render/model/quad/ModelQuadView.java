@@ -32,6 +32,4 @@ public interface ModelQuadView {
     default boolean isTinted() {
         return this.getColorIndex() != -1;
     }
-
-
 }

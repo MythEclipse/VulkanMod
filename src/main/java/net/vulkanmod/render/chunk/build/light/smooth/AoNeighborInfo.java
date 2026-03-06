@@ -3,15 +3,20 @@ package net.vulkanmod.render.chunk.build.light.smooth;
 import net.vulkanmod.render.chunk.util.SimpleDirection;
 
 /**
- * The neighbor information for each face of a block, used when performing smooth lighting in order to calculate
- * the occlusion of each corner.
+ * The neighbor information for each face of a block, used when performing smooth lighting in order
+ * to calculate the occlusion of each corner.
  */
 @SuppressWarnings("UnnecessaryLocalVariable")
 enum AoNeighborInfo {
-    DOWN(new SimpleDirection[] { SimpleDirection.SOUTH, SimpleDirection.WEST, SimpleDirection.NORTH, SimpleDirection.EAST },
-        new int[] {4, 5, 6, 7,
-                0, 1, 2, 3},
-        0.5F) {
+    DOWN(
+            new SimpleDirection[] {
+                SimpleDirection.SOUTH,
+                SimpleDirection.WEST,
+                SimpleDirection.NORTH,
+                SimpleDirection.EAST
+            },
+            new int[] {4, 5, 6, 7, 0, 1, 2, 3},
+            0.5F) {
         @Override
         public void calculateCornerWeights(float x, float y, float z, float[] out) {
             final float u = 1.0f - x;
@@ -35,10 +40,15 @@ enum AoNeighborInfo {
             return y;
         }
     },
-    UP(new SimpleDirection[] { SimpleDirection.NORTH, SimpleDirection.WEST, SimpleDirection.SOUTH, SimpleDirection.EAST },
-        new int[] {2, 3, 0, 1,
-                    6, 7, 4, 5},
-        1.0F) {
+    UP(
+            new SimpleDirection[] {
+                SimpleDirection.NORTH,
+                SimpleDirection.WEST,
+                SimpleDirection.SOUTH,
+                SimpleDirection.EAST
+            },
+            new int[] {2, 3, 0, 1, 6, 7, 4, 5},
+            1.0F) {
         @Override
         public void calculateCornerWeights(float x, float y, float z, float[] out) {
             final float u = 1.0f - x;
@@ -62,9 +72,11 @@ enum AoNeighborInfo {
             return 1.0f - y;
         }
     },
-    NORTH(new SimpleDirection[] { SimpleDirection.UP, SimpleDirection.EAST, SimpleDirection.DOWN, SimpleDirection.WEST },
-            new int[] {3, 2, 7, 6,
-                    1, 0, 5, 4},
+    NORTH(
+            new SimpleDirection[] {
+                SimpleDirection.UP, SimpleDirection.EAST, SimpleDirection.DOWN, SimpleDirection.WEST
+            },
+            new int[] {3, 2, 7, 6, 1, 0, 5, 4},
             0.8F) {
         @Override
         public void calculateCornerWeights(float x, float y, float z, float[] out) {
@@ -89,9 +101,11 @@ enum AoNeighborInfo {
             return z;
         }
     },
-    SOUTH(new SimpleDirection[] { SimpleDirection.UP, SimpleDirection.WEST, SimpleDirection.DOWN, SimpleDirection.EAST },
-            new int[] {0, 1, 4, 5,
-                    2, 3, 6, 7},
+    SOUTH(
+            new SimpleDirection[] {
+                SimpleDirection.UP, SimpleDirection.WEST, SimpleDirection.DOWN, SimpleDirection.EAST
+            },
+            new int[] {0, 1, 4, 5, 2, 3, 6, 7},
             0.8F) {
         @Override
         public void calculateCornerWeights(float x, float y, float z, float[] out) {
@@ -116,9 +130,14 @@ enum AoNeighborInfo {
             return 1.0f - z;
         }
     },
-    WEST(new SimpleDirection[] { SimpleDirection.UP, SimpleDirection.NORTH, SimpleDirection.DOWN, SimpleDirection.SOUTH },
-            new int[] {1, 3, 5, 7,
-                    0, 2, 4, 6},
+    WEST(
+            new SimpleDirection[] {
+                SimpleDirection.UP,
+                SimpleDirection.NORTH,
+                SimpleDirection.DOWN,
+                SimpleDirection.SOUTH
+            },
+            new int[] {1, 3, 5, 7, 0, 2, 4, 6},
             0.6F) {
         @Override
         public void calculateCornerWeights(float x, float y, float z, float[] out) {
@@ -143,9 +162,14 @@ enum AoNeighborInfo {
             return x;
         }
     },
-    EAST(new SimpleDirection[] { SimpleDirection.UP, SimpleDirection.SOUTH, SimpleDirection.DOWN, SimpleDirection.NORTH },
-            new int[] {2, 0, 6, 4,
-                    3, 1, 7, 5},
+    EAST(
+            new SimpleDirection[] {
+                SimpleDirection.UP,
+                SimpleDirection.SOUTH,
+                SimpleDirection.DOWN,
+                SimpleDirection.NORTH
+            },
+            new int[] {2, 0, 6, 4, 3, 1, 7, 5},
             0.6F) {
         @Override
         public void calculateCornerWeights(float x, float y, float z, float[] out) {
@@ -172,25 +196,22 @@ enum AoNeighborInfo {
     };
 
     /**
-     * The direction of each corner block from this face, which can be retrieved by offsetting the position of the origin
-     * block by the direction vector.
+     * The direction of each corner block from this face, which can be retrieved by offsetting the
+     * position of the origin block by the direction vector.
      */
     public final SimpleDirection[] faces;
 
     /**
-     * The constant brightness modifier for this face. This data exists to emulate the results of the OpenGL lighting
-     * model which gives a faux directional light appearance to blocks in the game. Not currently used.
+     * The constant brightness modifier for this face. This data exists to emulate the results of
+     * the OpenGL lighting model which gives a faux directional light appearance to blocks in the
+     * game. Not currently used.
      */
     public final float strength;
 
-    /**
-     * The indexes of each inner corner occlusion bit for every model vertex.
-     */
+    /** The indexes of each inner corner occlusion bit for every model vertex. */
     public final int[] inCornerBits = new int[4 * 2];
 
-    /**
-     * The indexes of each outer corner occlusion bit for every model vertex.
-     */
+    /** The indexes of each outer corner occlusion bit for every model vertex. */
     public final int[] outCornerBits = new int[3 * 4 * 2];
 
     AoNeighborInfo(SimpleDirection[] directions, int[] indices, float strength) {
@@ -202,8 +223,9 @@ enum AoNeighborInfo {
     }
 
     /**
-     * Calculates how much each corner contributes to the final "darkening" of the vertex at the specified position. The
-     * weight is a function of the distance from the vertex's position to the corner block's position.
+     * Calculates how much each corner contributes to the final "darkening" of the vertex at the
+     * specified position. The weight is a function of the distance from the vertex's position to
+     * the corner block's position.
      *
      * @param x The x-position of the vertex
      * @param y The y-position of the vertex
@@ -217,8 +239,8 @@ enum AoNeighborInfo {
     public abstract float getV(float x, float y, float z);
 
     /**
-     * Maps the light map and occlusion value arrays {@param lm0} and {@param ao0} from {@link AoFaceData} to the
-     * correct corners for this facing.
+     * Maps the light map and occlusion value arrays {@param lm0} and {@param ao0} from {@link
+     * AoFaceData} to the correct corners for this facing.
      *
      * @param lm0 The input light map texture coordinates array
      * @param ao0 The input ambient occlusion color array
@@ -238,8 +260,8 @@ enum AoNeighborInfo {
     }
 
     /**
-     * Calculates the depth (or inset) of the vertex into this facing of the block. Used to determine
-     * how much shadow is contributed by the direct neighbors of a block.
+     * Calculates the depth (or inset) of the vertex into this facing of the block. Used to
+     * determine how much shadow is contributed by the direct neighbors of a block.
      *
      * @param x The x-position of the vertex
      * @param y The y-position of the vertex
@@ -257,9 +279,7 @@ enum AoNeighborInfo {
         return VALUES[direction.get3DDataValue()];
     }
 
-    /**
-     * Calculates corner weights using bilinear interpolation.
-     */
+    /** Calculates corner weights using bilinear interpolation. */
     public static void calculateCornerWeights(float u, float v, float[] out) {
         out[0] = u * v;
         out[1] = u * (1.0f - v);

@@ -1,10 +1,16 @@
 package net.vulkanmod.vulkan.shader;
 
+import static org.lwjgl.system.MemoryStack.stackPush;
+import static org.lwjgl.vulkan.VK10.*;
+
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormatElement;
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
+import java.nio.ByteBuffer;
+import java.nio.LongBuffer;
+import java.util.List;
 import net.vulkanmod.interfaces.VertexFormatMixed;
 import net.vulkanmod.vulkan.Renderer;
 import net.vulkanmod.vulkan.Vulkan;
@@ -12,13 +18,6 @@ import net.vulkanmod.vulkan.device.DeviceManager;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 import org.lwjgl.vulkan.*;
-
-import java.nio.ByteBuffer;
-import java.nio.LongBuffer;
-import java.util.List;
-
-import static org.lwjgl.system.MemoryStack.stackPush;
-import static org.lwjgl.vulkan.VK10.*;
 
 public class GraphicsPipeline extends Pipeline {
     private final Object2LongMap<PipelineState> graphicsPipelines = new Object2LongOpenHashMap<>();
@@ -44,8 +43,7 @@ public class GraphicsPipeline extends Pipeline {
         createShaderModules(builder.vertShaderSPIRV, builder.fragShaderSPIRV);
 
         if (builder.renderPass != null)
-            graphicsPipelines.computeIfAbsent(PipelineState.DEFAULT,
-                    this::createGraphicsPipeline);
+            graphicsPipelines.computeIfAbsent(PipelineState.DEFAULT, this::createGraphicsPipeline);
 
         createDescriptorSets(Renderer.getFramesNum());
 
@@ -60,7 +58,8 @@ public class GraphicsPipeline extends Pipeline {
         try (MemoryStack stack = stackPush()) {
             ByteBuffer entryPoint = stack.UTF8("main");
 
-            VkPipelineShaderStageCreateInfo.Buffer shaderStages = VkPipelineShaderStageCreateInfo.calloc(2, stack);
+            VkPipelineShaderStageCreateInfo.Buffer shaderStages =
+                    VkPipelineShaderStageCreateInfo.calloc(2, stack);
 
             VkPipelineShaderStageCreateInfo vertShaderStageInfo = shaderStages.get(0);
 
@@ -78,26 +77,32 @@ public class GraphicsPipeline extends Pipeline {
 
             // ===> VERTEX STAGE <===
 
-            VkPipelineVertexInputStateCreateInfo vertexInputInfo = VkPipelineVertexInputStateCreateInfo.calloc(stack);
+            VkPipelineVertexInputStateCreateInfo vertexInputInfo =
+                    VkPipelineVertexInputStateCreateInfo.calloc(stack);
             vertexInputInfo.sType(VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO);
 
             if (vertexInputDescription != null) {
-                vertexInputInfo.pVertexBindingDescriptions(vertexInputDescription.bindingDescriptions);
-                vertexInputInfo.pVertexAttributeDescriptions(vertexInputDescription.attributeDescriptions);
+                vertexInputInfo.pVertexBindingDescriptions(
+                        vertexInputDescription.bindingDescriptions);
+                vertexInputInfo.pVertexAttributeDescriptions(
+                        vertexInputDescription.attributeDescriptions);
             }
 
             // ===> ASSEMBLY STAGE <===
 
-            final int topology = PipelineState.AssemblyRasterState.decodeTopology(state.assemblyRasterState);
+            final int topology =
+                    PipelineState.AssemblyRasterState.decodeTopology(state.assemblyRasterState);
 
-            VkPipelineInputAssemblyStateCreateInfo inputAssembly = VkPipelineInputAssemblyStateCreateInfo.calloc(stack);
+            VkPipelineInputAssemblyStateCreateInfo inputAssembly =
+                    VkPipelineInputAssemblyStateCreateInfo.calloc(stack);
             inputAssembly.sType(VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO);
             inputAssembly.topology(topology);
             inputAssembly.primitiveRestartEnable(false);
 
             // ===> VIEWPORT & SCISSOR
 
-            VkPipelineViewportStateCreateInfo viewportState = VkPipelineViewportStateCreateInfo.calloc(stack);
+            VkPipelineViewportStateCreateInfo viewportState =
+                    VkPipelineViewportStateCreateInfo.calloc(stack);
             viewportState.sType(VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO);
 
             viewportState.viewportCount(1);
@@ -105,10 +110,13 @@ public class GraphicsPipeline extends Pipeline {
 
             // ===> RASTERIZATION STAGE <===
 
-            final int polygonMode = PipelineState.AssemblyRasterState.decodePolygonMode(state.assemblyRasterState);
-            final int cullMode = PipelineState.AssemblyRasterState.decodeCullMode(state.assemblyRasterState);
+            final int polygonMode =
+                    PipelineState.AssemblyRasterState.decodePolygonMode(state.assemblyRasterState);
+            final int cullMode =
+                    PipelineState.AssemblyRasterState.decodeCullMode(state.assemblyRasterState);
 
-            VkPipelineRasterizationStateCreateInfo rasterizer = VkPipelineRasterizationStateCreateInfo.calloc(stack);
+            VkPipelineRasterizationStateCreateInfo rasterizer =
+                    VkPipelineRasterizationStateCreateInfo.calloc(stack);
             rasterizer.sType(VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO);
             rasterizer.depthClampEnable(false);
             rasterizer.rasterizerDiscardEnable(false);
@@ -120,18 +128,21 @@ public class GraphicsPipeline extends Pipeline {
 
             // ===> MULTISAMPLING <===
 
-            VkPipelineMultisampleStateCreateInfo multisampling = VkPipelineMultisampleStateCreateInfo.calloc(stack);
+            VkPipelineMultisampleStateCreateInfo multisampling =
+                    VkPipelineMultisampleStateCreateInfo.calloc(stack);
             multisampling.sType(VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO);
             multisampling.sampleShadingEnable(false);
             multisampling.rasterizationSamples(VK_SAMPLE_COUNT_1_BIT);
 
             // ===> DEPTH TEST <===
 
-            VkPipelineDepthStencilStateCreateInfo depthStencil = VkPipelineDepthStencilStateCreateInfo.calloc(stack);
+            VkPipelineDepthStencilStateCreateInfo depthStencil =
+                    VkPipelineDepthStencilStateCreateInfo.calloc(stack);
             depthStencil.sType(VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO);
             depthStencil.depthTestEnable(PipelineState.DepthState.depthTest(state.depthState_i));
             depthStencil.depthWriteEnable(PipelineState.DepthState.depthMask(state.depthState_i));
-            depthStencil.depthCompareOp(PipelineState.DepthState.decodeDepthFun(state.depthState_i));
+            depthStencil.depthCompareOp(
+                    PipelineState.DepthState.decodeDepthFun(state.depthState_i));
             depthStencil.depthBoundsTestEnable(false);
             depthStencil.minDepthBounds(0.0f); // Optional
             depthStencil.maxDepthBounds(1.0f); // Optional
@@ -139,23 +150,30 @@ public class GraphicsPipeline extends Pipeline {
 
             // ===> COLOR BLENDING <===
 
-            VkPipelineColorBlendAttachmentState.Buffer colorBlendAttachment = VkPipelineColorBlendAttachmentState.calloc(1, stack);
+            VkPipelineColorBlendAttachmentState.Buffer colorBlendAttachment =
+                    VkPipelineColorBlendAttachmentState.calloc(1, stack);
             colorBlendAttachment.colorWriteMask(state.colorMask_i);
 
             if (PipelineState.BlendState.enable(state.blendState_i)) {
                 colorBlendAttachment.blendEnable(true);
-                colorBlendAttachment.srcColorBlendFactor(PipelineState.BlendState.getSrcRgbFactor(state.blendState_i));
-                colorBlendAttachment.dstColorBlendFactor(PipelineState.BlendState.getDstRgbFactor(state.blendState_i));
-                colorBlendAttachment.colorBlendOp(PipelineState.BlendState.blendOp(state.blendState_i));
-                colorBlendAttachment.srcAlphaBlendFactor(PipelineState.BlendState.getSrcAlphaFactor(state.blendState_i));
-                colorBlendAttachment.dstAlphaBlendFactor(PipelineState.BlendState.getDstAlphaFactor(state.blendState_i));
-                colorBlendAttachment.alphaBlendOp(PipelineState.BlendState.blendOp(state.blendState_i));
-            }
-            else {
+                colorBlendAttachment.srcColorBlendFactor(
+                        PipelineState.BlendState.getSrcRgbFactor(state.blendState_i));
+                colorBlendAttachment.dstColorBlendFactor(
+                        PipelineState.BlendState.getDstRgbFactor(state.blendState_i));
+                colorBlendAttachment.colorBlendOp(
+                        PipelineState.BlendState.blendOp(state.blendState_i));
+                colorBlendAttachment.srcAlphaBlendFactor(
+                        PipelineState.BlendState.getSrcAlphaFactor(state.blendState_i));
+                colorBlendAttachment.dstAlphaBlendFactor(
+                        PipelineState.BlendState.getDstAlphaFactor(state.blendState_i));
+                colorBlendAttachment.alphaBlendOp(
+                        PipelineState.BlendState.blendOp(state.blendState_i));
+            } else {
                 colorBlendAttachment.blendEnable(false);
             }
 
-            VkPipelineColorBlendStateCreateInfo colorBlending = VkPipelineColorBlendStateCreateInfo.calloc(stack);
+            VkPipelineColorBlendStateCreateInfo colorBlending =
+                    VkPipelineColorBlendStateCreateInfo.calloc(stack);
             colorBlending.sType(VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO);
             colorBlending.logicOpEnable(PipelineState.LogicOpState.enable(state.logicOp_i));
             colorBlending.logicOp(PipelineState.LogicOpState.decodeFun(state.logicOp_i));
@@ -164,20 +182,28 @@ public class GraphicsPipeline extends Pipeline {
 
             // ===> DYNAMIC STATES <===
 
-            VkPipelineDynamicStateCreateInfo dynamicStates = VkPipelineDynamicStateCreateInfo.calloc(stack);
+            VkPipelineDynamicStateCreateInfo dynamicStates =
+                    VkPipelineDynamicStateCreateInfo.calloc(stack);
             dynamicStates.sType(VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO);
 
-            if (topology == VK_PRIMITIVE_TOPOLOGY_LINE_LIST || polygonMode == VK_POLYGON_MODE_LINE) {
+            if (topology == VK_PRIMITIVE_TOPOLOGY_LINE_LIST
+                    || polygonMode == VK_POLYGON_MODE_LINE) {
                 dynamicStates.pDynamicStates(
-                        stack.ints(VK_DYNAMIC_STATE_DEPTH_BIAS, VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR,
-                                   VK_DYNAMIC_STATE_LINE_WIDTH));
-            }
-            else {
+                        stack.ints(
+                                VK_DYNAMIC_STATE_DEPTH_BIAS,
+                                VK_DYNAMIC_STATE_VIEWPORT,
+                                VK_DYNAMIC_STATE_SCISSOR,
+                                VK_DYNAMIC_STATE_LINE_WIDTH));
+            } else {
                 dynamicStates.pDynamicStates(
-                        stack.ints(VK_DYNAMIC_STATE_DEPTH_BIAS, VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR));
+                        stack.ints(
+                                VK_DYNAMIC_STATE_DEPTH_BIAS,
+                                VK_DYNAMIC_STATE_VIEWPORT,
+                                VK_DYNAMIC_STATE_SCISSOR));
             }
 
-            VkGraphicsPipelineCreateInfo.Buffer pipelineInfo = VkGraphicsPipelineCreateInfo.calloc(1, stack);
+            VkGraphicsPipelineCreateInfo.Buffer pipelineInfo =
+                    VkGraphicsPipelineCreateInfo.calloc(1, stack);
             pipelineInfo.sType(VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO);
             pipelineInfo.pStages(shaderStages);
             pipelineInfo.pVertexInputState(vertexInputInfo);
@@ -195,20 +221,29 @@ public class GraphicsPipeline extends Pipeline {
             if (!Vulkan.DYNAMIC_RENDERING) {
                 pipelineInfo.renderPass(state.renderPass.getId());
                 pipelineInfo.subpass(0);
-            }
-            else {
-                //dyn-rendering
-                VkPipelineRenderingCreateInfoKHR renderingInfo = VkPipelineRenderingCreateInfoKHR.calloc(stack);
-                renderingInfo.sType(KHRDynamicRendering.VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO_KHR);
-                renderingInfo.pColorAttachmentFormats(stack.ints(state.renderPass.getFramebuffer().getFormat()));
-                renderingInfo.depthAttachmentFormat(state.renderPass.getFramebuffer().getDepthFormat());
+            } else {
+                // dyn-rendering
+                VkPipelineRenderingCreateInfoKHR renderingInfo =
+                        VkPipelineRenderingCreateInfoKHR.calloc(stack);
+                renderingInfo.sType(
+                        KHRDynamicRendering.VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO_KHR);
+                renderingInfo.pColorAttachmentFormats(
+                        stack.ints(state.renderPass.getFramebuffer().getFormat()));
+                renderingInfo.depthAttachmentFormat(
+                        state.renderPass.getFramebuffer().getDepthFormat());
                 pipelineInfo.pNext(renderingInfo);
             }
 
             LongBuffer pGraphicsPipeline = stack.mallocLong(1);
 
-            Vulkan.checkResult(vkCreateGraphicsPipelines(DeviceManager.vkDevice, PIPELINE_CACHE, pipelineInfo, null, pGraphicsPipeline),
-                               "Failed to create graphics pipeline " + this.name);
+            Vulkan.checkResult(
+                    vkCreateGraphicsPipelines(
+                            DeviceManager.vkDevice,
+                            PIPELINE_CACHE,
+                            pipelineInfo,
+                            null,
+                            pGraphicsPipeline),
+                    "Failed to create graphics pipeline " + this.name);
 
             return pGraphicsPipeline.get(0);
         }
@@ -227,9 +262,10 @@ public class GraphicsPipeline extends Pipeline {
 
         destroyDescriptorSets();
 
-        graphicsPipelines.forEach((state, pipeline) -> {
-            vkDestroyPipeline(DeviceManager.vkDevice, pipeline, null);
-        });
+        graphicsPipelines.forEach(
+                (state, pipeline) -> {
+                    vkDestroyPipeline(DeviceManager.vkDevice, pipeline, null);
+                });
         graphicsPipelines.clear();
 
         vkDestroyDescriptorSetLayout(DeviceManager.vkDevice, descriptorSetLayout, null);
@@ -247,8 +283,7 @@ public class GraphicsPipeline extends Pipeline {
             if (vertexFormat != DefaultVertexFormat.EMPTY) {
                 this.bindingDescriptions = getBindingDescription(vertexFormat);
                 this.attributeDescriptions = getAttributeDescriptions(vertexFormat);
-            }
-            else {
+            } else {
                 this.bindingDescriptions = null;
                 this.attributeDescriptions = null;
             }
@@ -262,8 +297,10 @@ public class GraphicsPipeline extends Pipeline {
         }
     }
 
-    private static VkVertexInputBindingDescription.Buffer getBindingDescription(VertexFormat vertexFormat) {
-        VkVertexInputBindingDescription.Buffer bindingDescription = VkVertexInputBindingDescription.calloc(1);
+    private static VkVertexInputBindingDescription.Buffer getBindingDescription(
+            VertexFormat vertexFormat) {
+        VkVertexInputBindingDescription.Buffer bindingDescription =
+                VkVertexInputBindingDescription.calloc(1);
 
         bindingDescription.binding(0);
         bindingDescription.stride(vertexFormat.getVertexSize());
@@ -272,12 +309,14 @@ public class GraphicsPipeline extends Pipeline {
         return bindingDescription;
     }
 
-    private static VkVertexInputAttributeDescription.Buffer getAttributeDescriptions(VertexFormat vertexFormat) {
+    private static VkVertexInputAttributeDescription.Buffer getAttributeDescriptions(
+            VertexFormat vertexFormat) {
         List<VertexFormatElement> elements = vertexFormat.getElements();
 
         int size = elements.size();
 
-        VkVertexInputAttributeDescription.Buffer attributeDescriptions = VkVertexInputAttributeDescription.calloc(size);
+        VkVertexInputAttributeDescription.Buffer attributeDescriptions =
+                VkVertexInputAttributeDescription.calloc(size);
 
         int offset = 0;
 
@@ -313,7 +352,6 @@ public class GraphicsPipeline extends Pipeline {
                             offset += 4;
                         }
                     }
-
                 }
 
                 case COLOR -> {
@@ -375,21 +413,18 @@ public class GraphicsPipeline extends Pipeline {
                         posDescription.offset(offset);
 
                         offset += 2;
-                    }
-                    else if (type == VertexFormatElement.Type.INT && elementCount == 1) {
+                    } else if (type == VertexFormatElement.Type.INT && elementCount == 1) {
                         posDescription.format(VK_FORMAT_R32_SINT);
                         posDescription.offset(offset);
 
                         offset += 4;
-                    }
-                    else if (type == VertexFormatElement.Type.FLOAT && elementCount == 1) {
+                    } else if (type == VertexFormatElement.Type.FLOAT && elementCount == 1) {
                         // LINE_WIDTH element (new in 1.21.11): GENERIC usage, FLOAT type, count 1
                         posDescription.format(VK_FORMAT_R32_SFLOAT);
                         posDescription.offset(offset);
 
                         offset += 4;
-                    }
-                    else {
+                    } else {
                         throw new RuntimeException(String.format("Unknown format: %s", usage));
                     }
                 }

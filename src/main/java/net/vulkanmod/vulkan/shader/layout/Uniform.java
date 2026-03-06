@@ -1,10 +1,9 @@
 package net.vulkanmod.vulkan.shader.layout;
 
+import java.util.function.Supplier;
 import net.vulkanmod.vulkan.shader.Uniforms;
 import net.vulkanmod.vulkan.util.MappedBuffer;
 import org.lwjgl.system.MemoryUtil;
-
-import java.util.function.Supplier;
 
 public class Uniform {
     protected Supplier<MappedBuffer> values;
@@ -57,7 +56,9 @@ public class Uniform {
         return info.offset;
     }
 
-    public int getSize() { return info.size; }
+    public int getSize() {
+        return info.size;
+    }
 
     public Info getInfo() {
         return info;
@@ -123,7 +124,9 @@ public class Uniform {
             this.size = size;
         }
 
-        int getSizeBytes() { return 4 * this.size; }
+        int getSizeBytes() {
+            return 4 * this.size;
+        }
 
         int computeAlignmentOffset(int builderOffset) {
             return this.offset = builderOffset + ((align - (builderOffset % align)) % align);
@@ -148,6 +151,5 @@ public class Uniform {
         public void setBufferSupplier(Supplier<MappedBuffer> supplier) {
             this.bufferSupplier = supplier;
         }
-
     }
 }

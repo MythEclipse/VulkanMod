@@ -1,6 +1,7 @@
 package net.vulkanmod.render.chunk;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
@@ -9,8 +10,6 @@ import net.vulkanmod.render.chunk.frustum.VFrustum;
 import net.vulkanmod.render.chunk.graph.GraphDirections;
 import net.vulkanmod.render.chunk.util.CircularIntList;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.List;
 
 public class SectionGrid {
 
@@ -31,7 +30,8 @@ public class SectionGrid {
         this.level = level;
         this.setViewDistance(viewDistance);
         this.createChunks();
-        this.chunkAreaManager = new ChunkAreaManager(this.gridWidth, this.gridHeight, this.level.getMinY());
+        this.chunkAreaManager =
+                new ChunkAreaManager(this.gridWidth, this.gridHeight, this.level.getMinY());
 
         this.prevSecX = Integer.MIN_VALUE;
         this.prevSecZ = Integer.MIN_VALUE;
@@ -43,7 +43,8 @@ public class SectionGrid {
 
     protected void createChunks() {
         if (!Minecraft.getInstance().isSameThread()) {
-            throw new IllegalStateException("createChunks called from wrong thread: " + Thread.currentThread().getName());
+            throw new IllegalStateException(
+                    "createChunks called from wrong thread: " + Thread.currentThread().getName());
         } else {
             int size = this.gridWidth * this.gridHeight * this.gridWidth;
             this.sections = new RenderSection[size];
@@ -77,8 +78,8 @@ public class SectionGrid {
     }
 
     /**
-     * This method has been optimized with circular lists to remove costly modulo computations
-     * and to reduce section repositioning to only the necessary.
+     * This method has been optimized with circular lists to remove costly modulo computations and
+     * to reduce section repositioning to only the necessary.
      */
     public void repositionCamera(double x, double z) {
         int secX = Mth.floor(x) >> 4;
@@ -128,8 +129,10 @@ public class SectionGrid {
             zRangeEnd = -dz - 1;
         }
 
-        CircularIntList.RangeIterator xRangeIterator = xList.getRangeIterator(xRangeStart, xRangeEnd);
-        CircularIntList.RangeIterator zRangeIterator = zList.getRangeIterator(zRangeStart, zRangeEnd);
+        CircularIntList.RangeIterator xRangeIterator =
+                xList.getRangeIterator(xRangeStart, xRangeEnd);
+        CircularIntList.RangeIterator zRangeIterator =
+                zList.getRangeIterator(zRangeStart, zRangeEnd);
         CircularIntList.RangeIterator xComplIterator = this.xComplIterator;
         xComplIterator.update(xComplStart, xComplEnd);
 
@@ -146,8 +149,16 @@ public class SectionGrid {
                 int z1 = (zAbsChunkIndex << 4);
 
                 for (int yRel = 0; yRel < this.gridHeight; ++yRel) {
-                    moveSection(xRelativeIndex, yRel, zRelativeIndex, x1, z1,
-                                xList, zList, xRangeIterator.getCurrentIndex(), zIterator.getCurrentIndex());
+                    moveSection(
+                            xRelativeIndex,
+                            yRel,
+                            zRelativeIndex,
+                            x1,
+                            z1,
+                            xList,
+                            zList,
+                            xRangeIterator.getCurrentIndex(),
+                            zIterator.getCurrentIndex());
                 }
             }
         }
@@ -165,8 +176,16 @@ public class SectionGrid {
                 int z1 = (zAbsChunkIndex << 4);
 
                 for (int yRel = 0; yRel < this.gridHeight; ++yRel) {
-                    moveSection(xRelativeIndex, yRel, zRelativeIndex, x1, z1,
-                                xList, zList, xComplIterator.getCurrentIndex(), zRangeIterator.getCurrentIndex());
+                    moveSection(
+                            xRelativeIndex,
+                            yRel,
+                            zRelativeIndex,
+                            x1,
+                            z1,
+                            xList,
+                            zList,
+                            xComplIterator.getCurrentIndex(),
+                            zRangeIterator.getCurrentIndex());
                 }
             }
         }
@@ -175,20 +194,34 @@ public class SectionGrid {
         this.prevSecZ = secZ;
     }
 
-    private void moveSection(int xRelativeIndex, int yRel, int zRelativeIndex,
-                             int x1, int z1,
-                             CircularIntList xList, CircularIntList zList,
-                             int xCurrentIdx, int zCurrentIdx) {
+    private void moveSection(
+            int xRelativeIndex,
+            int yRel,
+            int zRelativeIndex,
+            int x1,
+            int z1,
+            CircularIntList xList,
+            CircularIntList zList,
+            int xCurrentIdx,
+            int zCurrentIdx) {
 
         int y1 = this.level.getMinY() + (yRel << 4);
-        RenderSection renderSection = this.sections[this.getChunkIndex(xRelativeIndex, yRel, zRelativeIndex)];
+        RenderSection renderSection =
+                this.sections[this.getChunkIndex(xRelativeIndex, yRel, zRelativeIndex)];
 
         this.unsetNeighbours(renderSection);
 
         renderSection.setOrigin(x1, y1, z1);
 
-        this.setNeighbours(renderSection, xList, zList, xCurrentIdx, zCurrentIdx,
-                           xRelativeIndex, yRel, zRelativeIndex);
+        this.setNeighbours(
+                renderSection,
+                xList,
+                zList,
+                xCurrentIdx,
+                zCurrentIdx,
+                xRelativeIndex,
+                yRel,
+                zRelativeIndex);
 
         ChunkArea oldArea = renderSection.getChunkArea();
 
@@ -200,14 +233,23 @@ public class SectionGrid {
         chunkArea.addSection();
         renderSection.setChunkArea(chunkArea);
 
-        renderSection.inAreaIndex = (short) (((x1 - chunkArea.position.x()) >> 4) +
-                (((z1 - chunkArea.position.z()) >> 4) * 8 + ((y1 - chunkArea.position.y()) >> 4)) * 8);
-
+        renderSection.inAreaIndex =
+                (short)
+                        (((x1 - chunkArea.position.x()) >> 4)
+                                + (((z1 - chunkArea.position.z()) >> 4) * 8
+                                                + ((y1 - chunkArea.position.y()) >> 4))
+                                        * 8);
     }
 
-    private void setNeighbours(RenderSection section, CircularIntList xList, CircularIntList zList,
-                               int xIdx, int zIdx, int x, int y, int z) {
-
+    private void setNeighbours(
+            RenderSection section,
+            CircularIntList xList,
+            CircularIntList zList,
+            int xIdx,
+            int zIdx,
+            int x,
+            int y,
+            int z) {
 
         int eastX = xList.getNext(xIdx);
         int westX = xList.getPrevious(xIdx);
@@ -236,7 +278,7 @@ public class SectionGrid {
     }
 
     private void unsetNeighbours(RenderSection section) {
-        //Reset only X-Z directions
+        // Reset only X-Z directions
         section.adjDirs &= 0b11;
 
         for (int i = 2; i < 6; i++) {

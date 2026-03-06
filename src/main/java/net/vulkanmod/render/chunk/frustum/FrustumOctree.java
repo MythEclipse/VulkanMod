@@ -1,11 +1,10 @@
 package net.vulkanmod.render.chunk.frustum;
 
-import net.vulkanmod.render.chunk.ChunkArea;
-import org.joml.FrustumIntersection;
+import static net.vulkanmod.render.chunk.ChunkAreaManager.AREA_SH_XZ;
 
 import java.util.Arrays;
-
-import static net.vulkanmod.render.chunk.ChunkAreaManager.AREA_SH_XZ;
+import net.vulkanmod.render.chunk.ChunkArea;
+import org.joml.FrustumIntersection;
 
 public class FrustumOctree {
     static final int LEVELS = 2;
@@ -19,21 +18,27 @@ public class FrustumOctree {
             int minY2 = position.y;
             int minZ2 = position.z;
 
-            int frustumResult = frustum.cubeInFrustum(minX2, minY2, minZ2,
-                    minX2 + width, minY2 + width, minZ2 + width);
+            int frustumResult =
+                    frustum.cubeInFrustum(
+                            minX2, minY2, minZ2, minX2 + width, minY2 + width, minZ2 + width);
 
             byte[] buffer = chunkArea.getFrustumBuffer();
 
             if (frustumResult != FrustumIntersection.INTERSECT)
                 Arrays.fill(buffer, (byte) frustumResult);
-            else
-                innerCube(frustum, buffer, LEVELS, minX2, minY2, minZ2, width, 0);
+            else innerCube(frustum, buffer, LEVELS, minX2, minY2, minZ2, width, 0);
         }
     }
 
-    static void innerCube(VFrustum frustum, byte[] buffer, int level,
-                          float xMin, float yMin, float zMin,
-                          int prevWidth, int beginIdx) {
+    static void innerCube(
+            VFrustum frustum,
+            byte[] buffer,
+            int level,
+            float xMin,
+            float yMin,
+            float zMin,
+            int prevWidth,
+            int beginIdx) {
 
         if (level == 1) {
             lastInnerCube(frustum, buffer, xMin, yMin, zMin, prevWidth, beginIdx);
@@ -55,25 +60,28 @@ public class FrustumOctree {
                     float zMin2 = zMin + z * width;
                     float zMax2 = zMin2 + width;
 
-                    int frustumResult = frustum.cubeInFrustum(xMin2, yMin2, zMin2,
-                            xMax2, yMax2, zMax2);
+                    int frustumResult =
+                            frustum.cubeInFrustum(xMin2, yMin2, zMin2, xMax2, yMax2, zMax2);
 
                     int idx = beginIdx + getOffset(lvlShift, x, y, z);
                     int endIdx = idx + (1 << lvlShift);
 
                     if (frustumResult != FrustumIntersection.INTERSECT)
                         fillResultBuffer(buffer, idx, endIdx, (byte) frustumResult);
-                    else
-                        innerCube(frustum, buffer, level - 1, xMin2, yMin2, zMin2, width, idx);
+                    else innerCube(frustum, buffer, level - 1, xMin2, yMin2, zMin2, width, idx);
                 }
-
             }
         }
     }
 
-    static void lastInnerCube(VFrustum frustum, byte[] buffer,
-                              float xMin, float yMin, float zMin,
-                              int prevWidth, int beginIdx) {
+    static void lastInnerCube(
+            VFrustum frustum,
+            byte[] buffer,
+            float xMin,
+            float yMin,
+            float zMin,
+            int prevWidth,
+            int beginIdx) {
         int width = prevWidth >> 1;
 
         for (int x = 0; x < 2; x++) {
@@ -88,17 +96,15 @@ public class FrustumOctree {
                     float zMin2 = zMin + z * width;
                     float zMax2 = zMin2 + width;
 
-                    final int frustumResult = frustum.cubeInFrustum(xMin2, yMin2, zMin2,
-                            xMax2, yMax2, zMax2);
+                    final int frustumResult =
+                            frustum.cubeInFrustum(xMin2, yMin2, zMin2, xMax2, yMax2, zMax2);
 
                     int idx = beginIdx + (x << 2) + (y << 1) + z;
 
                     buffer[idx] = (byte) frustumResult;
                 }
-
             }
         }
-
     }
 
     static int getOffset(int baseShift, int x, int y, int z) {

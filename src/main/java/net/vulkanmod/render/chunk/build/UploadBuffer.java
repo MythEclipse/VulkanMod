@@ -1,12 +1,10 @@
 package net.vulkanmod.render.chunk.build;
 
+import java.nio.ByteBuffer;
 import net.vulkanmod.render.chunk.cull.QuadFacing;
 import net.vulkanmod.render.chunk.util.BufferUtil;
-import net.vulkanmod.render.vertex.TerrainBufferBuilder;
 import net.vulkanmod.render.vertex.TerrainBuilder;
 import org.lwjgl.system.MemoryUtil;
-
-import java.nio.ByteBuffer;
 
 public class UploadBuffer {
     public final int indexCount;
@@ -30,15 +28,13 @@ public class UploadBuffer {
                     this.vertexBuffers[i] = BufferUtil.clone(bufferBuilder.getBuffer());
                 }
             }
-        }
-        else {
+        } else {
             this.vertexBuffers = null;
         }
 
         if (!drawState.sequentialIndex()) {
             this.indexBuffer = BufferUtil.clone(terrainBuilder.getIndexBuffer());
-        }
-        else {
+        } else {
             this.indexBuffer = null;
         }
     }
@@ -58,11 +54,9 @@ public class UploadBuffer {
     public void release() {
         if (vertexBuffers != null)
             for (var vertexBuffer : vertexBuffers) {
-                if (vertexBuffer != null)
-                    MemoryUtil.memFree(vertexBuffer);
+                if (vertexBuffer != null) MemoryUtil.memFree(vertexBuffer);
             }
 
-        if (indexBuffer != null)
-            MemoryUtil.memFree(indexBuffer);
+        if (indexBuffer != null) MemoryUtil.memFree(indexBuffer);
     }
 }

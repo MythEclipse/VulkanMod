@@ -3,7 +3,8 @@ package net.vulkanmod.vulkan;
 /* JADX INFO: loaded from: VulkanMod_1.21.11-0.6.0.jar:net/vulkanmod/vulkan/VRenderSystem.class */
 public abstract class VRenderSystem {
     private static long window;
-    public static net.minecraft.client.renderer.fog.FogData fogData = new net.minecraft.client.renderer.fog.FogData();
+    public static net.minecraft.client.renderer.fog.FogData fogData =
+            new net.minecraft.client.renderer.fog.FogData();
     private static int currentTime;
     public static boolean depthTest = true;
     public static boolean depthMask = true;
@@ -11,26 +12,41 @@ public abstract class VRenderSystem {
     public static int topology = 3;
     public static int polygonMode = 0;
     public static boolean canSetLineWidth = false;
-    public static int colorMask = net.vulkanmod.vulkan.shader.PipelineState.ColorMask.getColorMask(true, true, true, true);
+    public static int colorMask =
+            net.vulkanmod.vulkan.shader.PipelineState.ColorMask.getColorMask(
+                    true, true, true, true);
     public static boolean cull = true;
     public static boolean logicOp = false;
     public static int logicOpFun = 0;
-    private static final com.mojang.blaze3d.textures.GpuTextureView[] shaderTextures = new com.mojang.blaze3d.textures.GpuTextureView[12];
+    private static final com.mojang.blaze3d.textures.GpuTextureView[] shaderTextures =
+            new com.mojang.blaze3d.textures.GpuTextureView[12];
     private static final float DEFAULT_DEPTH_VALUE = 1.0f;
     public static float clearDepthValue = DEFAULT_DEPTH_VALUE;
     public static java.nio.FloatBuffer clearColor = org.lwjgl.system.MemoryUtil.memCallocFloat(4);
-    public static net.vulkanmod.vulkan.util.MappedBuffer modelViewMatrix = new net.vulkanmod.vulkan.util.MappedBuffer(64);
-    public static net.vulkanmod.vulkan.util.MappedBuffer projectionMatrix = new net.vulkanmod.vulkan.util.MappedBuffer(64);
-    public static net.vulkanmod.vulkan.util.MappedBuffer TextureMatrix = new net.vulkanmod.vulkan.util.MappedBuffer(64);
-    public static net.vulkanmod.vulkan.util.MappedBuffer MVP = new net.vulkanmod.vulkan.util.MappedBuffer(64);
-    public static net.vulkanmod.vulkan.util.MappedBuffer modelOffset = new net.vulkanmod.vulkan.util.MappedBuffer(12);
-    public static net.vulkanmod.vulkan.util.MappedBuffer lightDirection0 = new net.vulkanmod.vulkan.util.MappedBuffer(12);
-    public static net.vulkanmod.vulkan.util.MappedBuffer lightDirection1 = new net.vulkanmod.vulkan.util.MappedBuffer(12);
-    public static net.vulkanmod.vulkan.util.MappedBuffer shaderColor = new net.vulkanmod.vulkan.util.MappedBuffer(16);
-    public static net.vulkanmod.vulkan.util.MappedBuffer shaderFogColor = new net.vulkanmod.vulkan.util.MappedBuffer(16);
-    public static net.vulkanmod.vulkan.util.MappedBuffer screenSize = new net.vulkanmod.vulkan.util.MappedBuffer(8);
-    public static net.vulkanmod.vulkan.util.MappedBuffer textureSize = new net.vulkanmod.vulkan.util.MappedBuffer(8);
-    public static net.vulkanmod.vulkan.util.MappedBuffer texelSize = new net.vulkanmod.vulkan.util.MappedBuffer(8);
+    public static net.vulkanmod.vulkan.util.MappedBuffer modelViewMatrix =
+            new net.vulkanmod.vulkan.util.MappedBuffer(64);
+    public static net.vulkanmod.vulkan.util.MappedBuffer projectionMatrix =
+            new net.vulkanmod.vulkan.util.MappedBuffer(64);
+    public static net.vulkanmod.vulkan.util.MappedBuffer TextureMatrix =
+            new net.vulkanmod.vulkan.util.MappedBuffer(64);
+    public static net.vulkanmod.vulkan.util.MappedBuffer MVP =
+            new net.vulkanmod.vulkan.util.MappedBuffer(64);
+    public static net.vulkanmod.vulkan.util.MappedBuffer modelOffset =
+            new net.vulkanmod.vulkan.util.MappedBuffer(12);
+    public static net.vulkanmod.vulkan.util.MappedBuffer lightDirection0 =
+            new net.vulkanmod.vulkan.util.MappedBuffer(12);
+    public static net.vulkanmod.vulkan.util.MappedBuffer lightDirection1 =
+            new net.vulkanmod.vulkan.util.MappedBuffer(12);
+    public static net.vulkanmod.vulkan.util.MappedBuffer shaderColor =
+            new net.vulkanmod.vulkan.util.MappedBuffer(16);
+    public static net.vulkanmod.vulkan.util.MappedBuffer shaderFogColor =
+            new net.vulkanmod.vulkan.util.MappedBuffer(16);
+    public static net.vulkanmod.vulkan.util.MappedBuffer screenSize =
+            new net.vulkanmod.vulkan.util.MappedBuffer(8);
+    public static net.vulkanmod.vulkan.util.MappedBuffer textureSize =
+            new net.vulkanmod.vulkan.util.MappedBuffer(8);
+    public static net.vulkanmod.vulkan.util.MappedBuffer texelSize =
+            new net.vulkanmod.vulkan.util.MappedBuffer(8);
     public static float alphaCutout = 0.0f;
     private static boolean depthBiasEnabled = false;
     private static float depthBiasConstant = 0.0f;
@@ -38,10 +54,14 @@ public abstract class VRenderSystem {
 
     public static void initRenderer() {
         net.vulkanmod.vulkan.Vulkan.initVulkan(window);
-        setShaderColor(DEFAULT_DEPTH_VALUE, DEFAULT_DEPTH_VALUE, DEFAULT_DEPTH_VALUE, DEFAULT_DEPTH_VALUE);
+        setShaderColor(
+                DEFAULT_DEPTH_VALUE, DEFAULT_DEPTH_VALUE, DEFAULT_DEPTH_VALUE, DEFAULT_DEPTH_VALUE);
     }
 
-    public static void setShaderTexture(int i, @org.jetbrains.annotations.Nullable com.mojang.blaze3d.textures.GpuTextureView gpuTextureView) {
+    public static void setShaderTexture(
+            int i,
+            @org.jetbrains.annotations.Nullable
+                    com.mojang.blaze3d.textures.GpuTextureView gpuTextureView) {
         com.mojang.blaze3d.systems.RenderSystem.assertOnRenderThread();
         if (i >= 0 && i < shaderTextures.length) {
             shaderTextures[i] = gpuTextureView;
@@ -63,7 +83,8 @@ public abstract class VRenderSystem {
     }
 
     public static void updateScreenSize() {
-        com.mojang.blaze3d.platform.Window window2 = net.minecraft.client.Minecraft.getInstance().getWindow();
+        com.mojang.blaze3d.platform.Window window2 =
+                net.minecraft.client.Minecraft.getInstance().getWindow();
         screenSize.putFloat(0, window2.getWidth());
         screenSize.putFloat(4, window2.getHeight());
     }
@@ -92,7 +113,9 @@ public abstract class VRenderSystem {
     }
 
     public static int maxSupportedTextureSize() {
-        return net.vulkanmod.vulkan.device.DeviceManager.deviceProperties.limits().maxImageDimension2D();
+        return net.vulkanmod.vulkan.device.DeviceManager.deviceProperties
+                .limits()
+                .maxImageDimension2D();
     }
 
     public static void applyMVP(org.joml.Matrix4f MV, org.joml.Matrix4f P) {
@@ -109,9 +132,15 @@ public abstract class VRenderSystem {
         mat.get(projectionMatrix.buffer.asFloatBuffer());
     }
 
-    public static void applyProjectionMatrix(com.mojang.blaze3d.buffers.GpuBufferSlice bufferSlice) {
-        long ptr = ((net.vulkanmod.render.engine.VkGpuBuffer) bufferSlice.buffer()).getBuffer().getDataPtr();
-        java.nio.ByteBuffer byteBuffer = org.lwjgl.system.MemoryUtil.memByteBuffer(ptr + bufferSlice.offset(), (int) bufferSlice.length());
+    public static void applyProjectionMatrix(
+            com.mojang.blaze3d.buffers.GpuBufferSlice bufferSlice) {
+        long ptr =
+                ((net.vulkanmod.render.engine.VkGpuBuffer) bufferSlice.buffer())
+                        .getBuffer()
+                        .getDataPtr();
+        java.nio.ByteBuffer byteBuffer =
+                org.lwjgl.system.MemoryUtil.memByteBuffer(
+                        ptr + bufferSlice.offset(), (int) bufferSlice.length());
         org.joml.Matrix4f matrix4f = new org.joml.Matrix4f().set(byteBuffer);
         matrix4f.get(projectionMatrix.buffer.asFloatBuffer());
     }
@@ -209,7 +238,10 @@ public abstract class VRenderSystem {
                 break;
             case 2:
             default:
-                throw new java.lang.RuntimeException(java.lang.String.format("Unknown GL primitive topology: %s", java.lang.Integer.valueOf(mode)));
+                throw new java.lang.RuntimeException(
+                        java.lang.String.format(
+                                "Unknown GL primitive topology: %s",
+                                java.lang.Integer.valueOf(mode)));
             case 4:
             case 5:
             case 6:
@@ -232,7 +264,9 @@ public abstract class VRenderSystem {
                 i = 0;
                 break;
             default:
-                throw new java.lang.RuntimeException(java.lang.String.format("Unknown GL polygon mode: %s", java.lang.Integer.valueOf(mode)));
+                throw new java.lang.RuntimeException(
+                        java.lang.String.format(
+                                "Unknown GL polygon mode: %s", java.lang.Integer.valueOf(mode)));
         }
         polygonMode = i;
     }
@@ -279,8 +313,10 @@ public abstract class VRenderSystem {
         net.vulkanmod.vulkan.shader.PipelineState.blendInfo.setBlendFunction(srcFactor, dstFactor);
     }
 
-    public static void blendFuncSeparate(int srcFactorRGB, int dstFactorRGB, int srcFactorAlpha, int dstFactorAlpha) {
-        net.vulkanmod.vulkan.shader.PipelineState.blendInfo.setBlendFuncSeparate(srcFactorRGB, dstFactorRGB, srcFactorAlpha, dstFactorAlpha);
+    public static void blendFuncSeparate(
+            int srcFactorRGB, int dstFactorRGB, int srcFactorAlpha, int dstFactorAlpha) {
+        net.vulkanmod.vulkan.shader.PipelineState.blendInfo.setBlendFuncSeparate(
+                srcFactorRGB, dstFactorRGB, srcFactorAlpha, dstFactorAlpha);
     }
 
     public static void blendOp(int op) {

@@ -1,15 +1,5 @@
 package net.vulkanmod.vulkan.device;
 
-import org.lwjgl.PointerBuffer;
-import org.lwjgl.system.MemoryStack;
-import org.lwjgl.vulkan.*;
-import oshi.SystemInfo;
-import oshi.hardware.CentralProcessor;
-
-import java.nio.IntBuffer;
-import java.util.HashSet;
-import java.util.Set;
-
 import static java.util.stream.Collectors.toSet;
 import static org.lwjgl.glfw.GLFW.GLFW_PLATFORM_WIN32;
 import static org.lwjgl.glfw.GLFW.glfwGetPlatform;
@@ -17,6 +7,12 @@ import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.vulkan.VK10.*;
 import static org.lwjgl.vulkan.VK11.vkEnumerateInstanceVersion;
 import static org.lwjgl.vulkan.VK11.vkGetPhysicalDeviceFeatures2;
+
+import java.nio.IntBuffer;
+import java.util.HashSet;
+import java.util.Set;
+import org.lwjgl.system.MemoryStack;
+import org.lwjgl.vulkan.*;
 
 public class Device {
     final VkPhysicalDevice physicalDevice;
@@ -31,8 +27,8 @@ public class Device {
     public final VkPhysicalDeviceFeatures2 availableFeatures;
     public final VkPhysicalDeviceVulkan11Features availableFeatures11;
 
-//    public final VkPhysicalDeviceVulkan13Features availableFeatures13;
-//    public final boolean vulkan13Support;
+    //    public final VkPhysicalDeviceVulkan13Features availableFeatures13;
+    //    public final boolean vulkan13Support;
 
     private boolean drawIndirectSupported;
 
@@ -55,18 +51,19 @@ public class Device {
         this.availableFeatures11.sType$Default();
         this.availableFeatures.pNext(this.availableFeatures11);
 
-        //Vulkan 1.3
-//        this.availableFeatures13 = VkPhysicalDeviceVulkan13Features.malloc();
-//        this.availableFeatures13.sType$Default();
-//        this.availableFeatures11.pNext(this.availableFeatures13.address());
-//
-//        this.vulkan13Support = this.device.getCapabilities().apiVersion == VK_API_VERSION_1_3;
+        // Vulkan 1.3
+        //        this.availableFeatures13 = VkPhysicalDeviceVulkan13Features.malloc();
+        //        this.availableFeatures13.sType$Default();
+        //        this.availableFeatures11.pNext(this.availableFeatures13.address());
+        //
+        //        this.vulkan13Support = this.device.getCapabilities().apiVersion ==
+        // VK_API_VERSION_1_3;
 
         vkGetPhysicalDeviceFeatures2(this.physicalDevice, this.availableFeatures);
 
-        if (this.availableFeatures.features().multiDrawIndirect() && this.availableFeatures11.shaderDrawParameters())
+        if (this.availableFeatures.features().multiDrawIndirect()
+                && this.availableFeatures11.shaderDrawParameters())
             this.drawIndirectSupported = true;
-
     }
 
     private static String decodeVendor(int i) {
@@ -74,7 +71,8 @@ public class Device {
             case (0x10DE) -> "Nvidia";
             case (0x1022) -> "AMD";
             case (0x8086) -> "Intel";
-            default -> "undef"; //Either AMD or Unknown Driver version/vendor and.or Encoding Scheme
+            default -> "undef"; // Either AMD or Unknown Driver version/vendor and.or Encoding
+                // Scheme
         };
     }
 
@@ -86,13 +84,14 @@ public class Device {
 
     // 0x10DE = Nvidia: https://pcisig.com/membership/member-companies?combine=Nvidia
     // https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkPhysicalDeviceProperties.html
-    // this should work with Nvidia + AMD but is not guaranteed to work with intel drivers in Windows and more obscure/Exotic Drivers/vendors
+    // this should work with Nvidia + AMD but is not guaranteed to work with intel drivers in
+    // Windows and more obscure/Exotic Drivers/vendors
     private static String decodeDvrVersion(int v, int i) {
         return switch (i) {
-            case (0x10DE) -> decodeNvidia(v); //Nvidia
-            case (0x1022) -> decDefVersion(v); //AMD
-            case (0x8086) -> decIntelVersion(v); //Intel
-            default -> decDefVersion(v); //Either AMD or Unknown Driver Encoding Scheme
+            case (0x10DE) -> decodeNvidia(v); // Nvidia
+            case (0x1022) -> decDefVersion(v); // AMD
+            case (0x8086) -> decIntelVersion(v); // Intel
+            default -> decDefVersion(v); // Either AMD or Unknown Driver Encoding Scheme
         };
     }
 
@@ -100,12 +99,19 @@ public class Device {
     // Won't Work with older Drivers (15.45 And.or older)
     // May not work as this uses Guess work+Assumptions
     private static String decIntelVersion(int v) {
-        return (glfwGetPlatform() == GLFW_PLATFORM_WIN32) ? (v >>> 14) + "." + (v & 0x3fff) : decDefVersion(v);
+        return (glfwGetPlatform() == GLFW_PLATFORM_WIN32)
+                ? (v >>> 14) + "." + (v & 0x3fff)
+                : decDefVersion(v);
     }
 
-
     private static String decodeNvidia(int v) {
-        return (v >>> 22 & 0x3FF) + "." + (v >>> 14 & 0xff) + "." + (v >>> 6 & 0xff) + "." + (v & 0xff);
+        return (v >>> 22 & 0x3FF)
+                + "."
+                + (v >>> 14 & 0xff)
+                + "."
+                + (v >>> 6 & 0xff)
+                + "."
+                + (v & 0xff);
     }
 
     static int getVkVer() {
@@ -114,7 +120,8 @@ public class Device {
             vkEnumerateInstanceVersion(a);
             int vkVer1 = a.get(0);
             if (VK_VERSION_MINOR(vkVer1) < 2) {
-                throw new RuntimeException("Vulkan 1.2 not supported: Only Has: %s".formatted(decDefVersion(vkVer1)));
+                throw new RuntimeException(
+                        "Vulkan 1.2 not supported: Only Has: %s".formatted(decDefVersion(vkVer1)));
             }
             return vkVer1;
         }
@@ -125,15 +132,19 @@ public class Device {
 
             IntBuffer extensionCount = stack.ints(0);
 
-            vkEnumerateDeviceExtensionProperties(physicalDevice, (String) null, extensionCount, null);
+            vkEnumerateDeviceExtensionProperties(
+                    physicalDevice, (String) null, extensionCount, null);
 
-            VkExtensionProperties.Buffer availableExtensions = VkExtensionProperties.malloc(extensionCount.get(0), stack);
+            VkExtensionProperties.Buffer availableExtensions =
+                    VkExtensionProperties.malloc(extensionCount.get(0), stack);
 
-            vkEnumerateDeviceExtensionProperties(physicalDevice, (String) null, extensionCount, availableExtensions);
+            vkEnumerateDeviceExtensionProperties(
+                    physicalDevice, (String) null, extensionCount, availableExtensions);
 
-            Set<String> extensions = availableExtensions.stream()
-                    .map(VkExtensionProperties::extensionNameString)
-                    .collect(toSet());
+            Set<String> extensions =
+                    availableExtensions.stream()
+                            .map(VkExtensionProperties::extensionNameString)
+                            .collect(toSet());
 
             Set<String> unsupportedExtensions = new HashSet<>(requiredExtensions);
             unsupportedExtensions.removeAll(extensions);

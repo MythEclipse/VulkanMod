@@ -2,19 +2,15 @@ package net.vulkanmod.vulkan.shader.converter;
 
 import com.mojang.blaze3d.vertex.VertexFormat;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import java.util.*;
 import net.vulkanmod.Initializer;
 import net.vulkanmod.vulkan.shader.descriptor.ImageDescriptor;
 import net.vulkanmod.vulkan.shader.descriptor.UBO;
 import net.vulkanmod.vulkan.shader.layout.AlignedStruct;
 import net.vulkanmod.vulkan.shader.layout.Uniform;
-import net.vulkanmod.vulkan.texture.VTextureSelector;
 import org.lwjgl.vulkan.VK11;
 
-import java.util.*;
-
-/**
- * Simple parser used to convert GLSL shader code to make it Vulkan compatible
- */
+/** Simple parser used to convert GLSL shader code to make it Vulkan compatible */
 public class GLSLParser {
     private Lexer lexer;
     private List<Token> tokens;
@@ -58,12 +54,12 @@ public class GLSLParser {
         nextToken();
 
         // Parse version
-        if (currentToken.type != Token.TokenType.PREPROCESSOR && !currentToken.value.startsWith("#version")) {
+        if (currentToken.type != Token.TokenType.PREPROCESSOR
+                && !currentToken.value.startsWith("#version")) {
             throw new IllegalStateException("First glsl line must contain version");
         }
         appendToken(new Token(Token.TokenType.PREPROCESSOR, "#version 450\n"));
         nextToken();
-
 
         while (currentToken.type != Token.TokenType.EOF) {
             switch (currentToken.type) {
@@ -90,7 +86,7 @@ public class GLSLParser {
         }
     }
 
-    private void parsePreprocessor()  {
+    private void parsePreprocessor() {
         if (!currentToken.value.startsWith("#line")) {
             appendToken(currentToken);
         }
@@ -108,7 +104,8 @@ public class GLSLParser {
             case "samplerCube" -> parseSampler(Sampler.Type.SAMPLER_CUBE);
             case "isamplerBuffer" -> parseSampler(Sampler.Type.I_SAMPLER_BUFFER);
 
-            default -> throw new IllegalStateException("Unrecognized value: %s".formatted(currentToken.value));
+            default -> throw new IllegalStateException(
+                    "Unrecognized value: %s".formatted(currentToken.value));
         }
         // TODO: parse uniform
     }
@@ -131,8 +128,7 @@ public class GLSLParser {
         if (next.type == Token.TokenType.SPACING) {
             if (Objects.equals(next.value, "\n")) {
                 currentTokenIdx++;
-            }
-            else {
+            } else {
                 int i = next.value.indexOf("\n");
                 if (i >= 0) {
                     next.value = next.value.substring(i + 1);
@@ -144,8 +140,7 @@ public class GLSLParser {
 
         if (samplerMap.get(name) != null) {
             sampler = samplerMap.get(name);
-        }
-        else {
+        } else {
             sampler.setBinding(currentUniformLocation++);
             this.samplerMap.put(name, sampler);
             this.samplers.add(sampler);
@@ -230,8 +225,7 @@ public class GLSLParser {
         if (next.type == Token.TokenType.SPACING) {
             if (Objects.equals(next.value, "\n")) {
                 currentTokenIdx++;
-            }
-            else {
+            } else {
                 int i = next.value.indexOf("\n");
                 if (i >= 0) {
                     next.value = next.value.substring(i + 1);
@@ -241,8 +235,7 @@ public class GLSLParser {
 
         if (uniformBlockMap.get(ub.name) != null) {
             ub = uniformBlockMap.get(ub.name);
-        }
-        else {
+        } else {
             ub.setBinding(this.currentUniformLocation++);
             this.uniformBlockMap.put(ub.name, ub);
             this.uniformBlocks.add(ub);
@@ -277,8 +270,7 @@ public class GLSLParser {
         if (next.type == Token.TokenType.SPACING) {
             if (Objects.equals(next.value, "\n")) {
                 currentTokenIdx++;
-            }
-            else {
+            } else {
                 int i = next.value.indexOf("\n");
                 if (i >= 0) {
                     next.value = next.value.substring(i + 1);
@@ -298,7 +290,9 @@ public class GLSLParser {
                             attributeLocation = attributeNames.indexOf(attribute.id);
 
                             if (attributeLocation == -1) {
-                                Initializer.LOGGER.error("Element %s not found in elements %s".formatted(attribute.id, attributeNames));
+                                Initializer.LOGGER.error(
+                                        "Element %s not found in elements %s"
+                                                .formatted(attribute.id, attributeNames));
                                 attributeLocation = currentInAtt;
                             }
 
@@ -326,14 +320,14 @@ public class GLSLParser {
                         if (vertAttribute != null) {
                             attribute.setLocation(vertAttribute.location);
                             fragInAttributes.add(attribute);
-                        }
-                        else {
+                        } else {
                             return;
                         }
                     }
                     case "out" -> {
                         if (currentOutAtt > 0) {
-                            throw new UnsupportedOperationException("Multiple outputs not currently supported.");
+                            throw new UnsupportedOperationException(
+                                    "Multiple outputs not currently supported.");
                         }
 
                         attribute.setLocation(currentOutAtt++);
@@ -356,7 +350,8 @@ public class GLSLParser {
         }
 
         if (vertAttribute == null) {
-//            throw new IllegalStateException("No match found for attribute %s in vertex attribute outputs.".formatted(attribute.id));
+            //            throw new IllegalStateException("No match found for attribute %s in vertex
+            // attribute outputs.".formatted(attribute.id));
         }
         return vertAttribute;
     }
@@ -387,10 +382,11 @@ public class GLSLParser {
     public String getOutput(Stage stage) {
         StringBuilder stringBuilder = new StringBuilder();
 
-        var stream = switch (stage) {
-            case VERTEX -> this.vsStream;
-            case FRAGMENT -> this.fsStream;
-        };
+        var stream =
+                switch (stage) {
+                    case VERTEX -> this.vsStream;
+                    case FRAGMENT -> this.fsStream;
+                };
 
         // Version
         Node node = stream.getFirst();
@@ -436,7 +432,9 @@ public class GLSLParser {
                 builder.addUniformInfo(uniformInfo);
             }
 
-             ubos[i] = builder.buildUBO(uniformBlock.name, uniformBlock.binding, VK11.VK_SHADER_STAGE_ALL);
+            ubos[i] =
+                    builder.buildUBO(
+                            uniformBlock.name, uniformBlock.binding, VK11.VK_SHADER_STAGE_ALL);
             ++i;
         }
 
@@ -449,12 +447,16 @@ public class GLSLParser {
         int imageIdx = 0;
         for (Sampler sampler : this.samplers) {
 
-            int descriptorType = switch (sampler.type) {
-                case SAMPLER_2D, SAMPLER_CUBE -> VK11.VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-                case I_SAMPLER_BUFFER -> VK11.VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER;
-            };
+            int descriptorType =
+                    switch (sampler.type) {
+                        case SAMPLER_2D,
+                                SAMPLER_CUBE -> VK11.VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+                        case I_SAMPLER_BUFFER -> VK11.VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER;
+                    };
 
-            imageDescriptors.add(new ImageDescriptor(sampler.binding, "sampler2D", sampler.id, imageIdx, descriptorType));
+            imageDescriptors.add(
+                    new ImageDescriptor(
+                            sampler.binding, "sampler2D", sampler.id, imageIdx, descriptorType));
             imageIdx++;
         }
 
@@ -488,5 +490,3 @@ public class GLSLParser {
         }
     }
 }
-
-

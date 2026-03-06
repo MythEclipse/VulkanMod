@@ -1,9 +1,20 @@
 package net.vulkanmod.vulkan.shader;
 
+import static org.lwjgl.system.MemoryStack.stackPush;
+import static org.lwjgl.vulkan.VK10.*;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import java.nio.ByteBuffer;
+import java.nio.LongBuffer;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 import net.minecraft.util.GsonHelper;
 import net.vulkanmod.vulkan.Renderer;
 import net.vulkanmod.vulkan.Vulkan;
@@ -25,18 +36,6 @@ import org.apache.commons.lang3.Validate;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.vulkan.*;
 
-import java.nio.ByteBuffer;
-import java.nio.LongBuffer;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
-
-import static org.lwjgl.system.MemoryStack.stackPush;
-import static org.lwjgl.vulkan.VK10.*;
-
 public abstract class Pipeline {
 
     private static final VkDevice DEVICE = Vulkan.getVkDevice();
@@ -51,7 +50,8 @@ public abstract class Pipeline {
 
             LongBuffer pPipelineCache = stack.mallocLong(1);
 
-            if (vkCreatePipelineCache(DEVICE, cacheCreateInfo, null, pPipelineCache) != VK_SUCCESS) {
+            if (vkCreatePipelineCache(DEVICE, cacheCreateInfo, null, pPipelineCache)
+                    != VK_SUCCESS) {
                 throw new RuntimeException("Failed to create graphics pipeline");
             }
 
@@ -64,10 +64,11 @@ public abstract class Pipeline {
     }
 
     public static void recreateDescriptorSets(int frames) {
-        PIPELINES.forEach(pipeline -> {
-            pipeline.destroyDescriptorSets();
-            pipeline.createDescriptorSets(frames);
-        });
+        PIPELINES.forEach(
+                pipeline -> {
+                    pipeline.destroyDescriptorSets();
+                    pipeline.createDescriptorSets(frames);
+                });
     }
 
     public final String name;
@@ -89,7 +90,8 @@ public abstract class Pipeline {
         try (MemoryStack stack = stackPush()) {
             int bindingsSize = this.buffers.size() + imageDescriptors.size();
 
-            VkDescriptorSetLayoutBinding.Buffer bindings = VkDescriptorSetLayoutBinding.calloc(bindingsSize, stack);
+            VkDescriptorSetLayoutBinding.Buffer bindings =
+                    VkDescriptorSetLayoutBinding.calloc(bindingsSize, stack);
 
             for (UBO ubo : this.buffers) {
                 VkDescriptorSetLayoutBinding uboLayoutBinding = bindings.get(ubo.getBinding());
@@ -101,7 +103,8 @@ public abstract class Pipeline {
             }
 
             for (ImageDescriptor imageDescriptor : this.imageDescriptors) {
-                VkDescriptorSetLayoutBinding samplerLayoutBinding = bindings.get(imageDescriptor.getBinding());
+                VkDescriptorSetLayoutBinding samplerLayoutBinding =
+                        bindings.get(imageDescriptor.getBinding());
                 samplerLayoutBinding.binding(imageDescriptor.getBinding());
                 samplerLayoutBinding.descriptorCount(1);
                 samplerLayoutBinding.descriptorType(imageDescriptor.getType());
@@ -109,13 +112,16 @@ public abstract class Pipeline {
                 samplerLayoutBinding.stageFlags(imageDescriptor.getStages());
             }
 
-            VkDescriptorSetLayoutCreateInfo layoutInfo = VkDescriptorSetLayoutCreateInfo.calloc(stack);
+            VkDescriptorSetLayoutCreateInfo layoutInfo =
+                    VkDescriptorSetLayoutCreateInfo.calloc(stack);
             layoutInfo.sType(VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO);
             layoutInfo.pBindings(bindings);
 
             LongBuffer pDescriptorSetLayout = stack.mallocLong(1);
 
-            if (vkCreateDescriptorSetLayout(DeviceManager.vkDevice, layoutInfo, null, pDescriptorSetLayout) != VK_SUCCESS) {
+            if (vkCreateDescriptorSetLayout(
+                            DeviceManager.vkDevice, layoutInfo, null, pDescriptorSetLayout)
+                    != VK_SUCCESS) {
                 throw new RuntimeException("Failed to create descriptor set layout");
             }
 
@@ -127,7 +133,8 @@ public abstract class Pipeline {
         try (MemoryStack stack = stackPush()) {
             // ===> PIPELINE LAYOUT CREATION <===
 
-            VkPipelineLayoutCreateInfo pipelineLayoutInfo = VkPipelineLayoutCreateInfo.calloc(stack);
+            VkPipelineLayoutCreateInfo pipelineLayoutInfo =
+                    VkPipelineLayoutCreateInfo.calloc(stack);
             pipelineLayoutInfo.sType(VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO);
             pipelineLayoutInfo.pSetLayouts(stack.longs(this.descriptorSetLayout));
 
@@ -142,7 +149,8 @@ public abstract class Pipeline {
 
             LongBuffer pPipelineLayout = stack.longs(VK_NULL_HANDLE);
 
-            if (vkCreatePipelineLayout(DEVICE, pipelineLayoutInfo, null, pPipelineLayout) != VK_SUCCESS) {
+            if (vkCreatePipelineLayout(DEVICE, pipelineLayoutInfo, null, pPipelineLayout)
+                    != VK_SUCCESS) {
                 throw new RuntimeException("Failed to create pipeline layout");
             }
 
@@ -176,9 +184,7 @@ public abstract class Pipeline {
     }
 
     public void resetDescriptorPool(int i) {
-        if (this.descriptorSets != null)
-            this.descriptorSets[i].resetIdx();
-
+        if (this.descriptorSets != null) this.descriptorSets[i].resetIdx();
     }
 
     public PushConstants getPushConstants() {
@@ -233,11 +239,14 @@ public abstract class Pipeline {
 
     public void bindDescriptorSets(VkCommandBuffer commandBuffer, int frame) {
         UniformBuffer uniformBuffer = Renderer.getDrawer().getUniformBuffer();
-        this.descriptorSets[frame].bindSets(commandBuffer, uniformBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS);
+        this.descriptorSets[frame].bindSets(
+                commandBuffer, uniformBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS);
     }
 
-    public void bindDescriptorSets(VkCommandBuffer commandBuffer, UniformBuffer uniformBuffer, int frame) {
-        this.descriptorSets[frame].bindSets(commandBuffer, uniformBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS);
+    public void bindDescriptorSets(
+            VkCommandBuffer commandBuffer, UniformBuffer uniformBuffer, int frame) {
+        this.descriptorSets[frame].bindSets(
+                commandBuffer, uniformBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS);
     }
 
     protected static long createShaderModule(ByteBuffer spirvCode) {
@@ -287,12 +296,14 @@ public abstract class Pipeline {
         }
 
         public GraphicsPipeline createGraphicsPipeline() {
-            Validate.isTrue(this.imageDescriptors != null && this.UBOs != null
-                            && this.vertShaderSPIRV != null && this.fragShaderSPIRV != null,
-                            "Cannot create Pipeline: resources missing");
+            Validate.isTrue(
+                    this.imageDescriptors != null
+                            && this.UBOs != null
+                            && this.vertShaderSPIRV != null
+                            && this.fragShaderSPIRV != null,
+                    "Cannot create Pipeline: resources missing");
 
-            if (this.manualUBO != null)
-                this.UBOs.add(this.manualUBO);
+            if (this.manualUBO != null) this.UBOs.add(this.manualUBO);
 
             return new GraphicsPipeline(this);
         }
@@ -308,8 +319,12 @@ public abstract class Pipeline {
         }
 
         public void compileShaders(String name, String vsh, String fsh) {
-            this.vertShaderSPIRV = SPIRVUtils.compileShader(String.format("%s.vsh", name), vsh, ShaderKind.VERTEX_SHADER);
-            this.fragShaderSPIRV = SPIRVUtils.compileShader(String.format("%s.fsh", name), fsh, ShaderKind.FRAGMENT_SHADER);
+            this.vertShaderSPIRV =
+                    SPIRVUtils.compileShader(
+                            String.format("%s.vsh", name), vsh, ShaderKind.VERTEX_SHADER);
+            this.fragShaderSPIRV =
+                    SPIRVUtils.compileShader(
+                            String.format("%s.fsh", name), fsh, ShaderKind.FRAGMENT_SHADER);
         }
 
         public void setVertShaderSPIRV(SPIRV vertShaderSPIRV) {
@@ -327,7 +342,8 @@ public abstract class Pipeline {
             JsonArray jsonUbos = GsonHelper.getAsJsonArray(jsonObject, "UBOs", null);
             JsonArray jsonManualUbos = GsonHelper.getAsJsonArray(jsonObject, "ManualUBOs", null);
             JsonArray jsonSamplers = GsonHelper.getAsJsonArray(jsonObject, "samplers", null);
-            JsonArray jsonPushConstants = GsonHelper.getAsJsonArray(jsonObject, "PushConstants", null);
+            JsonArray jsonPushConstants =
+                    GsonHelper.getAsJsonArray(jsonObject, "PushConstants", null);
 
             if (jsonUbos != null) {
                 for (JsonElement jsonelement : jsonUbos) {
@@ -350,7 +366,8 @@ public abstract class Pipeline {
             }
         }
 
-        public void setUniformSupplierGetter(Function<Uniform.Info, Supplier<MappedBuffer>> uniformSupplierGetter) {
+        public void setUniformSupplierGetter(
+                Function<Uniform.Info, Supplier<MappedBuffer>> uniformSupplierGetter) {
             this.uniformSupplierGetter = uniformSupplierGetter;
         }
 
@@ -379,13 +396,16 @@ public abstract class Pipeline {
                             var uniformSupplier = this.uniformSupplierGetter.apply(uniformInfo);
 
                             if (uniformSupplier == null) {
-                                throw new IllegalStateException("No uniform supplier found for uniform: (%s:%s)".formatted(type2, name));
+                                throw new IllegalStateException(
+                                        "No uniform supplier found for uniform: (%s:%s)"
+                                                .formatted(type2, name));
                             }
 
                             uniformInfo.setBufferSupplier(uniformSupplier);
-                        }
-                        else {
-                            throw new IllegalStateException("No uniform supplier found for uniform: (%s:%s)".formatted(type2, name));
+                        } else {
+                            throw new IllegalStateException(
+                                    "No uniform supplier found for uniform: (%s:%s)"
+                                            .formatted(type2, name));
                         }
                     }
 
@@ -393,16 +413,14 @@ public abstract class Pipeline {
                 }
 
                 ubo = builder.buildUBO(binding, type);
-            }
-            else {
+            } else {
                 int size = GsonHelper.getAsInt(uboJson, "size");
 
                 ubo = new UBO("UBO %d".formatted(binding), binding, type, size, null);
                 ubo.setUseGlobalBuffer(false);
             }
 
-            if (binding >= this.nextBinding)
-                this.nextBinding = binding + 1;
+            if (binding >= this.nextBinding) this.nextBinding = binding + 1;
 
             this.UBOs.add(ubo);
         }
@@ -413,8 +431,7 @@ public abstract class Pipeline {
             int stage = getStageFromString(GsonHelper.getAsString(jsonobject, "type"));
             int size = GsonHelper.getAsInt(jsonobject, "size");
 
-            if (binding >= this.nextBinding)
-                this.nextBinding = binding + 1;
+            if (binding >= this.nextBinding) this.nextBinding = binding + 1;
 
             this.manualUBO = new ManualUBO(binding, stage, size);
         }
@@ -424,7 +441,8 @@ public abstract class Pipeline {
             String name = GsonHelper.getAsString(jsonobject, "name");
 
             int imageIdx = VTextureSelector.getTextureIdx(name);
-            this.imageDescriptors.add(new ImageDescriptor(this.nextBinding, "sampler2D", name, imageIdx));
+            this.imageDescriptors.add(
+                    new ImageDescriptor(this.nextBinding, "sampler2D", name, imageIdx));
             this.nextBinding++;
         }
 
@@ -432,7 +450,8 @@ public abstract class Pipeline {
             AlignedStruct.Builder builder = new AlignedStruct.Builder();
 
             for (JsonElement jsonelement : jsonArray) {
-                JsonObject jsonobject2 = GsonHelper.convertToJsonObject(jsonelement, "PushConstants");
+                JsonObject jsonobject2 =
+                        GsonHelper.convertToJsonObject(jsonelement, "PushConstants");
 
                 String name = GsonHelper.getAsString(jsonobject2, "name");
                 String type2 = GsonHelper.getAsString(jsonobject2, "type");

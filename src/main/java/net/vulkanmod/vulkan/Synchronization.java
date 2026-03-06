@@ -1,17 +1,16 @@
 package net.vulkanmod.vulkan;
 
+import static org.lwjgl.vulkan.VK10.*;
+
 import it.unimi.dsi.fastutil.longs.LongArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import java.nio.LongBuffer;
 import net.vulkanmod.vulkan.memory.MemoryManager;
 import net.vulkanmod.vulkan.queue.CommandPool;
 import net.vulkanmod.vulkan.util.VUtil;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 import org.lwjgl.vulkan.VkDevice;
-
-import java.nio.LongBuffer;
-
-import static org.lwjgl.vulkan.VK10.*;
 
 /***
  * Synchronization utility to sync in frame ops that need to be completed before executing main cmd buffer.
@@ -37,28 +36,26 @@ public class Synchronization {
         addCommandBuffer(commandBuffer, false);
     }
 
-    public synchronized void addCommandBuffer(CommandPool.CommandBuffer commandBuffer, boolean useSemaphore) {
+    public synchronized void addCommandBuffer(
+            CommandPool.CommandBuffer commandBuffer, boolean useSemaphore) {
         if (!useSemaphore) {
             this.addFence(commandBuffer.getFence());
             this.fenceCbs.add(commandBuffer);
-        }
-        else {
+        } else {
             this.semaphores.add(commandBuffer.getSemaphore());
             this.semaphoreCbs.add(commandBuffer);
         }
     }
 
     public synchronized void addFence(long fence) {
-        if (idx == ALLOCATION_SIZE)
-            waitFences();
+        if (idx == ALLOCATION_SIZE) waitFences();
 
         fences.put(idx, fence);
         idx++;
     }
 
     public synchronized void waitFences() {
-        if (idx == 0)
-            return;
+        if (idx == 0) return;
 
         VkDevice device = Vulkan.getVkDevice();
 
@@ -78,8 +75,9 @@ public class Synchronization {
     }
 
     public LongBuffer getWaitSemaphores(MemoryStack stack) {
-        var buffer = stack.mallocLong(this.semaphores.size())
-                          .put(this.semaphores.elements(), 0, this.semaphores.size());
+        var buffer =
+                stack.mallocLong(this.semaphores.size())
+                        .put(this.semaphores.elements(), 0, this.semaphores.size());
         buffer.flip();
 
         this.semaphores.clear();
@@ -88,11 +86,11 @@ public class Synchronization {
 
     public void scheduleCbReset() {
         final var frameSemaphoreCbs = this.semaphoreCbs.clone();
-        MemoryManager.getInstance().addFrameOp(
-                () -> {
-                    frameSemaphoreCbs.forEach(CommandPool.CommandBuffer::reset);
-                }
-        );
+        MemoryManager.getInstance()
+                .addFrameOp(
+                        () -> {
+                            frameSemaphoreCbs.forEach(CommandPool.CommandBuffer::reset);
+                        });
 
         this.semaphoreCbs.clear();
     }
@@ -107,5 +105,4 @@ public class Synchronization {
         VkDevice device = Vulkan.getVkDevice();
         return vkGetFenceStatus(device, fence) == VK_SUCCESS;
     }
-
 }

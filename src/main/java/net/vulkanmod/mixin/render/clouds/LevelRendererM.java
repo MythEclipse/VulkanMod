@@ -21,7 +21,15 @@ public abstract class LevelRendererM {
     @Unique private CloudRenderer cloudRenderer;
 
     @Inject(method = "addCloudsPass", at = @At("HEAD"), cancellable = true)
-    public void addCloudsPass(FrameGraphBuilder frameGraphBuilder, CloudStatus cloudStatus, Vec3 camPos, long gameTime, float partialTicks, int cloudColor, float cloudHeight, CallbackInfo ci) {
+    public void addCloudsPass(
+            FrameGraphBuilder frameGraphBuilder,
+            CloudStatus cloudStatus,
+            Vec3 camPos,
+            long gameTime,
+            float partialTicks,
+            int cloudColor,
+            float cloudHeight,
+            CallbackInfo ci) {
         if (this.cloudRenderer == null) {
             this.cloudRenderer = new CloudRenderer();
         }
@@ -33,14 +41,22 @@ public abstract class LevelRendererM {
             this.targets.main = framePass.readsAndWrites(this.targets.main);
         }
 
-        framePass.executes(() -> {
-            Profiler profiler = Profiler.getMainProfiler();
-            profiler.push("Clouds");
+        framePass.executes(
+                () -> {
+                    Profiler profiler = Profiler.getMainProfiler();
+                    profiler.push("Clouds");
 
-            this.cloudRenderer.renderClouds(cloudHeight, cloudColor, camPos.x(), camPos.y(), camPos.z(), gameTime, partialTicks);
+                    this.cloudRenderer.renderClouds(
+                            cloudHeight,
+                            cloudColor,
+                            camPos.x(),
+                            camPos.y(),
+                            camPos.z(),
+                            gameTime,
+                            partialTicks);
 
-            profiler.pop();
-        });
+                    profiler.pop();
+                });
 
         ci.cancel();
     }
@@ -58,5 +74,4 @@ public abstract class LevelRendererM {
             this.cloudRenderer.loadTexture();
         }
     }
-
 }

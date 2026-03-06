@@ -2,7 +2,8 @@ package net.vulkanmod.render.chunk;
 
 import com.google.common.collect.Sets;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
-import net.minecraft.client.Minecraft;
+import java.util.Collection;
+import java.util.Set;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.vulkanmod.render.chunk.buffer.AreaBuffer;
@@ -10,18 +11,15 @@ import net.vulkanmod.render.chunk.buffer.DrawBuffers;
 import net.vulkanmod.render.chunk.buffer.DrawParametersBuffer;
 import net.vulkanmod.render.chunk.build.RenderRegion;
 import net.vulkanmod.render.chunk.build.RenderRegionBuilder;
-import net.vulkanmod.render.chunk.build.task.TaskDispatcher;
 import net.vulkanmod.render.chunk.build.task.BuildTask;
 import net.vulkanmod.render.chunk.build.task.ChunkTask;
 import net.vulkanmod.render.chunk.build.task.CompiledSection;
 import net.vulkanmod.render.chunk.build.task.SortTransparencyTask;
+import net.vulkanmod.render.chunk.build.task.TaskDispatcher;
 import net.vulkanmod.render.chunk.cull.QuadFacing;
 import net.vulkanmod.render.chunk.graph.GraphDirections;
 import net.vulkanmod.render.chunk.util.Util;
 import net.vulkanmod.render.vertex.TerrainRenderType;
-
-import java.util.Collection;
-import java.util.Set;
 
 public class RenderSection {
     private ChunkArea chunkArea;
@@ -31,10 +29,7 @@ public class RenderSection {
     public short inAreaIndex;
 
     public byte adjDirs;
-    public RenderSection
-            adjDown, adjUp,
-            adjNorth, adjSouth,
-            adjWest, adjEast;
+    public RenderSection adjDown, adjUp, adjNorth, adjSouth, adjWest, adjEast;
 
     private final CompileStatus compileStatus = new CompileStatus();
 
@@ -127,7 +122,6 @@ public class RenderSection {
                 addAdjDir(adjacent, direction);
             }
         }
-
     }
 
     public void resetAdjacent(int direction) {
@@ -188,7 +182,6 @@ public class RenderSection {
                 }
             }
         }
-
     }
 
     private void addAdjDir(RenderSection adjacent, int direction) {
@@ -217,19 +210,19 @@ public class RenderSection {
         }
     }
 
-    public boolean rebuildChunkAsync(TaskDispatcher dispatcher, RenderRegionBuilder renderRegionCache) {
+    public boolean rebuildChunkAsync(
+            TaskDispatcher dispatcher, RenderRegionBuilder renderRegionCache) {
         BuildTask chunkCompileTask = this.createCompileTask(renderRegionCache);
 
-        if (chunkCompileTask == null)
-            return false;
+        if (chunkCompileTask == null) return false;
 
         dispatcher.schedule(chunkCompileTask);
         return true;
     }
 
     // TODO: sync rebuild
-    public void rebuildChunkSync(TaskDispatcher dispatcher, RenderRegionBuilder renderRegionCache) {
-    }
+    public void rebuildChunkSync(
+            TaskDispatcher dispatcher, RenderRegionBuilder renderRegionCache) {}
 
     public BuildTask createCompileTask(RenderRegionBuilder renderRegionCache) {
         boolean flag = this.cancelTasks();
@@ -239,13 +232,13 @@ public class RenderSection {
         int secZ = zOffset >> 4;
         int secY = yOffset >> 4;
 
-        if (!ChunkStatusMap.INSTANCE.chunkRenderReady(secX, secZ))
-            return null;
+        if (!ChunkStatusMap.INSTANCE.chunkRenderReady(secX, secZ)) return null;
 
         RenderRegion renderRegion = renderRegionCache.createRegion(level, secX, secY, secZ);
 
         boolean flag1 = this.compileStatus.compiledSection == CompiledSection.UNCOMPILED;
-        this.compileStatus.buildTask = ChunkTask.createBuildTask(this, renderRegion, !flag1 || flag);
+        this.compileStatus.buildTask =
+                ChunkTask.createBuildTask(this, renderRegion, !flag1 || flag);
         return this.compileStatus.buildTask;
     }
 
@@ -293,7 +286,12 @@ public class RenderSection {
     public void resetDrawParameters(TerrainRenderType renderType) {
         for (int i = 0; i < QuadFacing.COUNT; ++i) {
             DrawBuffers drawBuffers = this.chunkArea.getDrawBuffers();
-            long ptr = DrawParametersBuffer.getParamsPtr(drawBuffers.getDrawParamsPtr(), this.inAreaIndex, renderType.ordinal(), i);
+            long ptr =
+                    DrawParametersBuffer.getParamsPtr(
+                            drawBuffers.getDrawParamsPtr(),
+                            this.inAreaIndex,
+                            renderType.ordinal(),
+                            i);
 
             AreaBuffer areaBuffer = drawBuffers.getAreaBuffer(renderType);
             int vertexOffset = DrawParametersBuffer.getVertexOffset(ptr);
@@ -369,7 +367,8 @@ public class RenderSection {
             sectionSet.addAll(fullSet);
 
             // TODO
-//            Minecraft.getInstance().levelRenderer.updateGlobalBlockEntities(toRemove, toAdd);
+            //            Minecraft.getInstance().levelRenderer.updateGlobalBlockEntities(toRemove,
+            // toAdd);
         }
     }
 
@@ -384,13 +383,14 @@ public class RenderSection {
     }
 
     private void resetDrawParameters() {
-        if (this.chunkArea == null)
-            return;
+        if (this.chunkArea == null) return;
 
         long basePtr = this.chunkArea.getDrawBuffers().getDrawParamsPtr();
         for (TerrainRenderType renderType : TerrainRenderType.VALUES) {
             for (QuadFacing facing : QuadFacing.VALUES) {
-                long ptr = DrawParametersBuffer.getParamsPtr(basePtr, this.inAreaIndex, renderType.ordinal(), facing.ordinal());
+                long ptr =
+                        DrawParametersBuffer.getParamsPtr(
+                                basePtr, this.inAreaIndex, renderType.ordinal(), facing.ordinal());
                 DrawParametersBuffer.resetParameters(ptr);
             }
         }
@@ -408,15 +408,13 @@ public class RenderSection {
 
     public boolean setLastFrame(short i) {
         boolean alreadySet = i == this.lastFrame;
-        if (!alreadySet)
-            this.lastFrame = i;
+        if (!alreadySet) this.lastFrame = i;
         return alreadySet;
     }
 
     public boolean setLastFrame2(short i) {
         boolean alreadySet = i == this.lastFrame2;
-        if (!alreadySet)
-            this.lastFrame2 = i;
+        if (!alreadySet) this.lastFrame2 = i;
         return alreadySet;
     }
 

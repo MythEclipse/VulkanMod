@@ -1,11 +1,11 @@
 package net.vulkanmod.render.chunk.build.light.smooth;
 
+import static net.vulkanmod.render.chunk.build.light.data.LightDataAccess.*;
+
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.core.BlockPos;
-import net.vulkanmod.render.chunk.util.SimpleDirection;
 import net.vulkanmod.render.chunk.build.light.data.LightDataAccess;
-
-import static net.vulkanmod.render.chunk.build.light.data.LightDataAccess.*;
+import net.vulkanmod.render.chunk.util.SimpleDirection;
 
 class AoFaceData {
     public final int[] lm = new int[4];
@@ -16,7 +16,8 @@ class AoFaceData {
 
     protected int flags;
 
-    public void initLightData(LightDataAccess cache, BlockPos pos, SimpleDirection direction, boolean offset) {
+    public void initLightData(
+            LightDataAccess cache, BlockPos pos, SimpleDirection direction, boolean offset) {
         final int oX = pos.getX();
         final int oY = pos.getY();
         final int oZ = pos.getZ();
@@ -208,8 +209,10 @@ class AoFaceData {
         return i & 0xFF;
     }
 
-    static int calculateCornerBrightness(int a, int b, int c, int d, boolean aem, boolean bem, boolean cem, boolean dem) {
-        // FIX: Normalize corner vectors correctly to the minimum non-zero value between each one to prevent
+    static int calculateCornerBrightness(
+            int a, int b, int c, int d, boolean aem, boolean bem, boolean cem, boolean dem) {
+        // FIX: Normalize corner vectors correctly to the minimum non-zero value between each one to
+        // prevent
         // strange issues
         if ((a == 0) || (b == 0) || (c == 0) || (d == 0)) {
             // Find the minimum value between all corners
@@ -222,8 +225,10 @@ class AoFaceData {
             d = Math.max(d, min);
         }
 
-        // FIX: Apply the fullbright lightmap from emissive blocks at the very end so it cannot influence
-        // the minimum lightmap and produce incorrect results (for example, sculk sensors in a dark room)
+        // FIX: Apply the fullbright lightmap from emissive blocks at the very end so it cannot
+        // influence
+        // the minimum lightmap and produce incorrect results (for example, sculk sensors in a dark
+        // room)
         if (aem) {
             a = LightTexture.FULL_BRIGHT;
         }

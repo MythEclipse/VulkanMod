@@ -1,13 +1,12 @@
 package net.vulkanmod.vulkan.memory.buffer.index;
 
+import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
+import java.nio.ShortBuffer;
 import net.vulkanmod.Initializer;
 import net.vulkanmod.vulkan.memory.MemoryTypes;
 import net.vulkanmod.vulkan.memory.buffer.IndexBuffer;
 import org.lwjgl.system.MemoryUtil;
-
-import java.nio.ByteBuffer;
-import java.nio.IntBuffer;
-import java.nio.ShortBuffer;
 
 public class AutoIndexBuffer {
     public static final int U16_MAX_VERTEX_COUNT = 65536;
@@ -29,15 +28,14 @@ public class AutoIndexBuffer {
 
         IndexBuffer.IndexType indexType = IndexBuffer.IndexType.UINT16;
 
-        if (vertexCount > U16_MAX_VERTEX_COUNT &&
-            (this.drawType == DrawType.QUADS || this.drawType == DrawType.LINES)) {
+        if (vertexCount > U16_MAX_VERTEX_COUNT
+                && (this.drawType == DrawType.QUADS || this.drawType == DrawType.LINES)) {
             indexType = IndexBuffer.IndexType.UINT32;
         }
 
         switch (this.drawType) {
             case QUADS -> {
-                if (indexType == IndexBuffer.IndexType.UINT16)
-                    buffer = genQuadIndices(vertexCount);
+                if (indexType == IndexBuffer.IndexType.UINT16) buffer = genQuadIndices(vertexCount);
                 else {
                     buffer = genIntQuadIndices(vertexCount);
                 }
@@ -46,7 +44,8 @@ public class AutoIndexBuffer {
             case TRIANGLE_STRIP -> buffer = genTriangleStripIndices(vertexCount);
             case LINES -> buffer = genLinesIndices(vertexCount);
             case DEBUG_LINE_STRIP -> buffer = genDebugLineStripIndices(vertexCount);
-            default -> throw new IllegalArgumentException("Unsupported drawType: %s".formatted(this.drawType));
+            default -> throw new IllegalArgumentException(
+                    "Unsupported drawType: %s".formatted(this.drawType));
         }
 
         int size = buffer.capacity();
@@ -59,7 +58,8 @@ public class AutoIndexBuffer {
     public void checkCapacity(int vertexCount) {
         if (vertexCount > this.vertexCount) {
             int newVertexCount = Math.max(this.vertexCount * 2, vertexCount);
-            Initializer.LOGGER.info("Reallocating AutoIndexBuffer from {} to {}", this.vertexCount, newVertexCount);
+            Initializer.LOGGER.info(
+                    "Reallocating AutoIndexBuffer from {} to {}", this.vertexCount, newVertexCount);
 
             this.indexBuffer.scheduleFree();
             createIndexBuffer(newVertexCount);

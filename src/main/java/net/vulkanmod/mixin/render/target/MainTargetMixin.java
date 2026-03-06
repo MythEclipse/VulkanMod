@@ -33,14 +33,34 @@ public class MainTargetMixin extends RenderTarget {
             this.width = i;
             this.height = j;
             if (this.useDepth) {
-                this.depthTexture = RenderSystem.getDevice().createTexture(() -> this.label + " / Depth", 15, TextureFormat.DEPTH32, i, j, 1, 1);
-                this.depthTextureView = RenderSystem.getDevice().createTextureView(this.depthTexture);
+                this.depthTexture =
+                        RenderSystem.getDevice()
+                                .createTexture(
+                                        () -> this.label + " / Depth",
+                                        15,
+                                        TextureFormat.DEPTH32,
+                                        i,
+                                        j,
+                                        1,
+                                        1);
+                this.depthTextureView =
+                        RenderSystem.getDevice().createTextureView(this.depthTexture);
             }
 
-            this.colorTexture = RenderSystem.getDevice().createTexture(() -> this.label + " / Color", 15, TextureFormat.RGBA8, i, j, 1, 1);
+            this.colorTexture =
+                    RenderSystem.getDevice()
+                            .createTexture(
+                                    () -> this.label + " / Color",
+                                    15,
+                                    TextureFormat.RGBA8,
+                                    i,
+                                    j,
+                                    1,
+                                    1);
             this.colorTextureView = RenderSystem.getDevice().createTextureView(this.colorTexture);
         } else {
-            throw new IllegalArgumentException("Window " + i + "x" + j + " size out of bounds (max. size: " + k + ")");
+            throw new IllegalArgumentException(
+                    "Window " + i + "x" + j + " size out of bounds (max. size: " + k + ")");
         }
     }
 

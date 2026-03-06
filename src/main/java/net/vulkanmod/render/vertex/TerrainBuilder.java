@@ -1,15 +1,13 @@
 package net.vulkanmod.render.vertex;
 
 import com.mojang.blaze3d.vertex.VertexFormat;
+import java.nio.ByteBuffer;
 import net.minecraft.world.level.block.state.BlockState;
 import net.vulkanmod.Initializer;
 import net.vulkanmod.render.PipelineManager;
 import net.vulkanmod.render.chunk.cull.QuadFacing;
-import net.vulkanmod.vulkan.memory.buffer.IndexBuffer;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.system.MemoryUtil;
-
-import java.nio.ByteBuffer;
 
 public class TerrainBuilder {
     private static final Logger LOGGER = Initializer.LOGGER;
@@ -42,7 +40,8 @@ public class TerrainBuilder {
 
         var bufferBuilders = new TerrainBufferBuilder[QuadFacing.COUNT];
         for (int i = 0; i < QuadFacing.COUNT; i++) {
-            bufferBuilders[i] = new TerrainBufferBuilder(size, this.format.getVertexSize(), this.vertexBuilder);
+            bufferBuilders[i] =
+                    new TerrainBufferBuilder(size, this.format.getVertexSize(), this.vertexBuilder);
         }
 
         this.bufferBuilders = bufferBuilders;
@@ -62,9 +61,17 @@ public class TerrainBuilder {
 
     private void resizeIndexBuffer(int i) {
         this.indexBufferPtr = ALLOCATOR.realloc(this.indexBufferPtr, i);
-        LOGGER.debug("Needed to grow index buffer: Old size {} bytes, new size {} bytes.", this.indexBufferCapacity, i);
+        LOGGER.debug(
+                "Needed to grow index buffer: Old size {} bytes, new size {} bytes.",
+                this.indexBufferCapacity,
+                i);
         if (this.indexBufferPtr == 0L) {
-            throw new OutOfMemoryError("Failed to resize buffer from " + this.indexBufferCapacity + " bytes to " + i + " bytes");
+            throw new OutOfMemoryError(
+                    "Failed to resize buffer from "
+                            + this.indexBufferCapacity
+                            + " bytes to "
+                            + i
+                            + " bytes");
         } else {
             this.indexBufferCapacity = i;
         }
@@ -129,7 +136,12 @@ public class TerrainBuilder {
             sequentialIndexing = true;
         }
 
-        return new DrawState(this.format.getVertexSize(), indexCount, indexType, this.indexOnly, sequentialIndexing);
+        return new DrawState(
+                this.format.getVertexSize(),
+                indexCount,
+                indexType,
+                this.indexOnly,
+                sequentialIndexing);
     }
 
     // TODO hardcoded index type size
@@ -168,11 +180,14 @@ public class TerrainBuilder {
         }
     }
 
-    public void setBlockAttributes(BlockState blockState) {
-    }
+    public void setBlockAttributes(BlockState blockState) {}
 
-    public record DrawState(int vertexSize, int indexCount, VertexFormat.IndexType indexType,
-                            boolean indexOnly, boolean sequentialIndex) {
+    public record DrawState(
+            int vertexSize,
+            int indexCount,
+            VertexFormat.IndexType indexType,
+            boolean indexOnly,
+            boolean sequentialIndex) {
 
         private int indexBufferSize() {
             return this.sequentialIndex ? 0 : this.indexCount * this.indexType.bytes;

@@ -1,11 +1,8 @@
 package net.vulkanmod.vulkan.shader.layout;
 
-import net.vulkanmod.vulkan.shader.Uniforms;
-import net.vulkanmod.vulkan.util.MappedBuffer;
-import org.apache.commons.lang3.Validate;
-import org.lwjgl.system.MemoryUtil;
-
 import java.util.function.Supplier;
+import net.vulkanmod.vulkan.util.MappedBuffer;
+import org.lwjgl.system.MemoryUtil;
 
 public class Vec1i extends Uniform {
     private Supplier<Integer> intSupplier;

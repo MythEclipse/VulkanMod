@@ -1,14 +1,15 @@
 package net.vulkanmod.render.chunk.build.light.smooth;
 
-import net.minecraft.core.BlockPos;
-import net.vulkanmod.render.chunk.util.SimpleDirection;
-import net.vulkanmod.render.chunk.build.light.data.LightDataAccess;
-
 import static net.vulkanmod.render.chunk.build.light.data.LightDataAccess.*;
+
+import net.minecraft.core.BlockPos;
+import net.vulkanmod.render.chunk.build.light.data.LightDataAccess;
+import net.vulkanmod.render.chunk.util.SimpleDirection;
 
 public class SubBlockAoFace extends AoFaceData {
 
-    public void initLightData(LightDataAccess cache, BlockPos pos, SimpleDirection direction, boolean offset) {
+    public void initLightData(
+            LightDataAccess cache, BlockPos pos, SimpleDirection direction, boolean offset) {
         final int oX = pos.getX();
         final int oY = pos.getY();
         final int oZ = pos.getZ();
@@ -17,7 +18,8 @@ public class SubBlockAoFace extends AoFaceData {
         final int y;
         final int z;
 
-        // if offset is true, requested face is outset hence light data is referring to adjacent block
+        // if offset is true, requested face is outset hence light data is referring to adjacent
+        // block
         if (offset) {
             x = oX + direction.getStepX();
             y = oY + direction.getStepY();
@@ -83,17 +85,14 @@ public class SubBlockAoFace extends AoFaceData {
         float c0ao = c0oc ? 0.2f : 1.0f;
         final boolean c0em;
 
-        if((f0c0 && f1c0) || (c0oc &&  d0co)) {
+        if ((f0c0 && f1c0) || (c0oc && d0co)) {
             c0ao = 1.6f;
-        }
-        else {
+        } else {
             c0ao += f0c0 ? 0.2f : 1.0f;
             c0ao += f1c0 ? 0.2f : 1.0f;
 
-            if(offset)
-                c0ao += d0co ? 0.2f : 1.0f;
-            else
-                c0ao += unpackFO(d0) ? 0.2f : 1.0f;
+            if (offset) c0ao += d0co ? 0.2f : 1.0f;
+            else c0ao += unpackFO(d0) ? 0.2f : 1.0f;
         }
 
         if (f0c0 && f1c0) {
@@ -115,17 +114,14 @@ public class SubBlockAoFace extends AoFaceData {
         float c1ao = c1oc ? 0.2f : 1.0f;
         final boolean c1em;
 
-        if((f1c1 && f2c1) || (c1oc &&  d1co)) {
+        if ((f1c1 && f2c1) || (c1oc && d1co)) {
             c1ao = 1.6f;
-        }
-        else {
+        } else {
             c1ao += f1c1 ? 0.2f : 1.0f;
             c1ao += f2c1 ? 0.2f : 1.0f;
 
-            if(offset)
-                c1ao += d1co ? 0.2f : 1.0f;
-            else
-                c1ao += unpackFO(d1) ? 0.2f : 1.0f;
+            if (offset) c1ao += d1co ? 0.2f : 1.0f;
+            else c1ao += unpackFO(d1) ? 0.2f : 1.0f;
         }
 
         if (f1c1 && f2c1) {
@@ -147,17 +143,14 @@ public class SubBlockAoFace extends AoFaceData {
         float c2ao = c2oc ? 0.2f : 1.0f;
         final boolean c2em;
 
-        if((f2c2 && f3c2) || (c2oc &&  d2co)) {
+        if ((f2c2 && f3c2) || (c2oc && d2co)) {
             c2ao = 1.6f;
-        }
-        else {
+        } else {
             c2ao += f2c2 ? 0.2f : 1.0f;
             c2ao += f3c2 ? 0.2f : 1.0f;
 
-            if(offset)
-                c2ao += d2co ? 0.2f : 1.0f;
-            else
-                c2ao += unpackFO(d2) ? 0.2f : 1.0f;
+            if (offset) c2ao += d2co ? 0.2f : 1.0f;
+            else c2ao += unpackFO(d2) ? 0.2f : 1.0f;
         }
 
         if (f2c2 && f3c2) {
@@ -179,17 +172,14 @@ public class SubBlockAoFace extends AoFaceData {
         float c3ao = c3oc ? 0.2f : 1.0f;
         final boolean c3em;
 
-        if((f3c3 && f0c3) || (c3oc &&  d3co)) {
+        if ((f3c3 && f0c3) || (c3oc && d3co)) {
             c3ao = 1.6f;
-        }
-        else {
+        } else {
             c3ao += f3c3 ? 0.2f : 1.0f;
             c3ao += f0c3 ? 0.2f : 1.0f;
 
-            if(offset)
-                c3ao += d3co ? 0.2f : 1.0f;
-            else
-                c3ao += unpackFO(d3) ? 0.2f : 1.0f;
+            if (offset) c3ao += d3co ? 0.2f : 1.0f;
+            else c3ao += unpackFO(d3) ? 0.2f : 1.0f;
         }
 
         if (f3c3 && f0c3) {
@@ -215,7 +205,8 @@ public class SubBlockAoFace extends AoFaceData {
         this.flags |= FaceDataFlags.HAS_LIGHT_DATA;
     }
 
-    public void calculateSelfOcclusion(LightDataAccess cache, BlockPos pos, SimpleDirection direction) {
+    public void calculateSelfOcclusion(
+            LightDataAccess cache, BlockPos pos, SimpleDirection direction) {
         final int x = pos.getX();
         final int y = pos.getY();
         final int z = pos.getZ();
@@ -244,7 +235,8 @@ public class SubBlockAoFace extends AoFaceData {
         ao[3] = c3ao;
     }
 
-    public void calculatePartialAlignedFace(LightDataAccess cache, BlockPos pos, SimpleDirection direction) {
+    public void calculatePartialAlignedFace(
+            LightDataAccess cache, BlockPos pos, SimpleDirection direction) {
         final int x = pos.getX();
         final int y = pos.getY();
         final int z = pos.getZ();

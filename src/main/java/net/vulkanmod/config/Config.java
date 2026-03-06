@@ -2,15 +2,14 @@ package net.vulkanmod.config;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import net.vulkanmod.config.video.VideoModeManager;
-import net.vulkanmod.config.video.VideoModeSet;
-
 import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
+import net.vulkanmod.config.video.VideoModeManager;
+import net.vulkanmod.config.video.VideoModeSet;
 
 public class Config {
     public VideoModeSet.VideoMode videoMode = VideoModeManager.getFirstAvailable().getVideoMode();
@@ -32,7 +31,7 @@ public class Config {
 
     public void write() {
 
-        if(!Files.exists(CONFIG_PATH.getParent())) {
+        if (!Files.exists(CONFIG_PATH.getParent())) {
             try {
                 Files.createDirectories(CONFIG_PATH);
             } catch (IOException e) {
@@ -49,10 +48,11 @@ public class Config {
 
     private static Path CONFIG_PATH;
 
-    private static final Gson GSON = new GsonBuilder()
-            .setPrettyPrinting()
-            .excludeFieldsWithModifiers(Modifier.PRIVATE)
-            .create();
+    private static final Gson GSON =
+            new GsonBuilder()
+                    .setPrettyPrinting()
+                    .excludeFieldsWithModifiers(Modifier.PRIVATE)
+                    .create();
 
     public static Config load(Path path) {
         Config config;
@@ -61,12 +61,10 @@ public class Config {
         if (Files.exists(path)) {
             try (FileReader fileReader = new FileReader(path.toFile())) {
                 config = GSON.fromJson(fileReader, Config.class);
-            }
-            catch (IOException exception) {
+            } catch (IOException exception) {
                 throw new RuntimeException(exception.getMessage());
             }
-        }
-        else {
+        } else {
             config = null;
         }
 

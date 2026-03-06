@@ -62,8 +62,7 @@ public class TintCache {
             }
 
             this.temp = new int[size];
-        }
-        else {
+        } else {
             for (Layer[] layers : layers.values()) {
                 for (Layer layer : layers) {
                     layer.invalidate();
@@ -145,8 +144,7 @@ public class TintCache {
             }
         }
 
-        if (needsBlur)
-            BoxBlur.blur(buffer, temp, SECTION_WIDTH, blendRadius);
+        if (needsBlur) BoxBlur.blur(buffer, temp, SECTION_WIDTH, blendRadius);
     }
 
     static class Layer {

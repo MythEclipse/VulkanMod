@@ -1,5 +1,9 @@
 package net.vulkanmod.vulkan.queue;
 
+import static org.lwjgl.system.MemoryStack.stackPush;
+import static org.lwjgl.vulkan.VK10.vkCmdCopyBuffer;
+import static org.lwjgl.vulkan.VK10.vkWaitForFences;
+
 import net.vulkanmod.vulkan.Synchronization;
 import net.vulkanmod.vulkan.Vulkan;
 import net.vulkanmod.vulkan.util.VUtil;
@@ -8,10 +12,6 @@ import org.lwjgl.vulkan.VkBufferCopy;
 import org.lwjgl.vulkan.VkCommandBuffer;
 import org.lwjgl.vulkan.VkDevice;
 
-import static org.lwjgl.system.MemoryStack.stackPush;
-import static org.lwjgl.vulkan.VK10.vkCmdCopyBuffer;
-import static org.lwjgl.vulkan.VK10.vkWaitForFences;
-
 public class TransferQueue extends Queue {
     private static final VkDevice DEVICE = Vulkan.getVkDevice();
 
@@ -19,7 +19,8 @@ public class TransferQueue extends Queue {
         super(stack, familyIndex);
     }
 
-    public long copyBufferCmd(long srcBuffer, long srcOffset, long dstBuffer, long dstOffset, long size) {
+    public long copyBufferCmd(
+            long srcBuffer, long srcOffset, long dstBuffer, long dstOffset, long size) {
 
         try (MemoryStack stack = stackPush()) {
 
@@ -39,7 +40,8 @@ public class TransferQueue extends Queue {
         }
     }
 
-    public void uploadBufferImmediate(long srcBuffer, long srcOffset, long dstBuffer, long dstOffset, long size) {
+    public void uploadBufferImmediate(
+            long srcBuffer, long srcOffset, long dstBuffer, long dstOffset, long size) {
 
         try (MemoryStack stack = stackPush()) {
             CommandPool.CommandBuffer commandBuffer = this.beginCommands();
@@ -57,7 +59,13 @@ public class TransferQueue extends Queue {
         }
     }
 
-    public static void uploadBufferCmd(VkCommandBuffer commandBuffer, long srcBuffer, long srcOffset, long dstBuffer, long dstOffset, long size) {
+    public static void uploadBufferCmd(
+            VkCommandBuffer commandBuffer,
+            long srcBuffer,
+            long srcOffset,
+            long dstBuffer,
+            long dstOffset,
+            long size) {
 
         try (MemoryStack stack = stackPush()) {
 
@@ -69,5 +77,4 @@ public class TransferQueue extends Queue {
             vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, copyRegion);
         }
     }
-
 }

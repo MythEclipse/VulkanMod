@@ -13,14 +13,14 @@ public class Token {
         COMMENT,
 
         // Symbols
-        LEFT_BRACE,   // {
-        RIGHT_BRACE,  // }
-        LEFT_PARENTHESIS,   // (
-        RIGHT_PARENTHESIS,  // )
-        COLON,    // :
-        SEMICOLON,    // ;
-        DOT,    // .
-        COMMA,    // ,
+        LEFT_BRACE, // {
+        RIGHT_BRACE, // }
+        LEFT_PARENTHESIS, // (
+        RIGHT_PARENTHESIS, // )
+        COLON, // :
+        SEMICOLON, // ;
+        DOT, // .
+        COMMA, // ,
 
         // Data Types
         TYPE,
@@ -41,9 +41,6 @@ public class Token {
 
     @Override
     public String toString() {
-        return "Token{" +
-               "type=" + type +
-               ", value='" + value + '\'' +
-               '}';
+        return "Token{" + "type=" + type + ", value='" + value + '\'' + '}';
     }
 }

@@ -1,7 +1,8 @@
 package net.vulkanmod.render.engine;
 
-import com.mojang.blaze3d.buffers.GpuBuffer;
+import static org.lwjgl.vulkan.VK10.*;
 
+import com.mojang.blaze3d.buffers.GpuBuffer;
 import java.nio.ByteBuffer;
 import java.util.function.Supplier;
 import net.fabricmc.api.EnvType;
@@ -12,8 +13,6 @@ import net.vulkanmod.vulkan.memory.MemoryTypes;
 import net.vulkanmod.vulkan.memory.buffer.Buffer;
 import org.jetbrains.annotations.Nullable;
 
-import static org.lwjgl.vulkan.VK10.*;
-
 @Environment(EnvType.CLIENT)
 public class VkGpuBuffer extends GpuBuffer {
     protected boolean closed;
@@ -21,7 +20,8 @@ public class VkGpuBuffer extends GpuBuffer {
 
     Buffer buffer;
 
-    protected VkGpuBuffer(VkDebugLabel glDebugLabel, @Nullable Supplier<String> supplier, int usage, long size) {
+    protected VkGpuBuffer(
+            VkDebugLabel glDebugLabel, @Nullable Supplier<String> supplier, int usage, long size) {
         super(usage, size);
         this.label = supplier;
 
@@ -45,11 +45,12 @@ public class VkGpuBuffer extends GpuBuffer {
             vkUsage |= VK_BUFFER_USAGE_UNIFORM_TEXEL_BUFFER_BIT;
         }
 
-        boolean mappable = (usage & GpuBuffer.USAGE_MAP_READ) != 0 |
-                           (usage & GpuBuffer.USAGE_MAP_WRITE) != 0 |
-                           (usage & GpuBuffer.USAGE_HINT_CLIENT_STORAGE) != 0;
+        boolean mappable =
+                (usage & GpuBuffer.USAGE_MAP_READ) != 0
+                        | (usage & GpuBuffer.USAGE_MAP_WRITE) != 0
+                        | (usage & GpuBuffer.USAGE_HINT_CLIENT_STORAGE) != 0;
 
-        MemoryType memoryType =  mappable ? MemoryTypes.HOST_MEM : MemoryTypes.GPU_MEM;
+        MemoryType memoryType = mappable ? MemoryTypes.HOST_MEM : MemoryTypes.GPU_MEM;
 
         this.buffer = new Buffer(vkUsage, memoryType);
         this.buffer.createBuffer(this.size());
@@ -104,8 +105,7 @@ public class VkGpuBuffer extends GpuBuffer {
 
         @Override
         public void close() {
-//            GlStateManager._glUnmapBuffer(this.target);
+            //            GlStateManager._glUnmapBuffer(this.target);
         }
     }
 }
-

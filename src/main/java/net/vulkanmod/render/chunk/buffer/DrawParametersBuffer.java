@@ -17,10 +17,17 @@ public abstract class DrawParametersBuffer {
     static final int FACINGS = 7;
 
     public static long allocateBuffer() {
-        int size = (int) (ChunkAreaManager.AREA_SIZE * TerrainRenderType.VALUES.length * QuadFacing.COUNT * DrawParametersBuffer.STRIDE);
+        int size =
+                (int)
+                        (ChunkAreaManager.AREA_SIZE
+                                * TerrainRenderType.VALUES.length
+                                * QuadFacing.COUNT
+                                * DrawParametersBuffer.STRIDE);
         long drawParamsPtr = MemoryUtil.nmemAlignedAlloc(32, size);
 
-        for (long ptr = drawParamsPtr; ptr < drawParamsPtr + size; ptr += DrawParametersBuffer.STRIDE) {
+        for (long ptr = drawParamsPtr;
+                ptr < drawParamsPtr + size;
+                ptr += DrawParametersBuffer.STRIDE) {
             DrawParametersBuffer.resetParameters(ptr);
         }
 
@@ -73,5 +80,4 @@ public abstract class DrawParametersBuffer {
     public static int getBaseInstance(long ptr) {
         return MemoryUtil.memGetInt(ptr + BASE_INSTANCE_OFFSET);
     }
-
 }

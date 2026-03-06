@@ -1,17 +1,16 @@
 package net.vulkanmod.vulkan.queue;
 
+import static org.lwjgl.system.MemoryStack.stackPush;
+import static org.lwjgl.vulkan.VK10.*;
+
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import java.nio.LongBuffer;
+import java.util.ArrayDeque;
+import java.util.List;
 import net.vulkanmod.vulkan.Vulkan;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.vulkan.*;
-
-import java.nio.LongBuffer;
-import java.util.ArrayDeque;
-import java.util.List;
-
-import static org.lwjgl.system.MemoryStack.stackPush;
-import static org.lwjgl.vulkan.VK10.*;
 
 public class CommandPool {
     long id;
@@ -33,7 +32,8 @@ public class CommandPool {
 
             LongBuffer pCommandPool = stack.mallocLong(1);
 
-            if (vkCreateCommandPool(Vulkan.getVkDevice(), poolInfo, null, pCommandPool) != VK_SUCCESS) {
+            if (vkCreateCommandPool(Vulkan.getVkDevice(), poolInfo, null, pCommandPool)
+                    != VK_SUCCESS) {
                 throw new RuntimeException("Failed to create command pool");
             }
 
@@ -82,8 +82,10 @@ public class CommandPool {
             LongBuffer pSemaphore = stack.mallocLong(1);
             vkCreateSemaphore(Vulkan.getVkDevice(), semaphoreCreateInfo, null, pSemaphore);
 
-            VkCommandBuffer vkCommandBuffer = new VkCommandBuffer(pCommandBuffer.get(i), Vulkan.getVkDevice());
-            CommandBuffer commandBuffer = new CommandBuffer(this, vkCommandBuffer, pFence.get(0), pSemaphore.get(0));
+            VkCommandBuffer vkCommandBuffer =
+                    new VkCommandBuffer(pCommandBuffer.get(i), Vulkan.getVkDevice());
+            CommandBuffer commandBuffer =
+                    new CommandBuffer(this, vkCommandBuffer, pFence.get(0), pSemaphore.get(0));
             commandBuffers.add(commandBuffer);
             availableCmdBuffers.add(commandBuffer);
         }
@@ -115,7 +117,8 @@ public class CommandPool {
         boolean submitted;
         boolean recording;
 
-        public CommandBuffer(CommandPool commandPool, VkCommandBuffer handle, long fence, long semaphore) {
+        public CommandBuffer(
+                CommandPool commandPool, VkCommandBuffer handle, long fence, long semaphore) {
             this.commandPool = commandPool;
             this.handle = handle;
             this.fence = fence;

@@ -9,7 +9,10 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 @Mixin(RenderSystem.class)
 public class RenderSystemMixin {
 
-    @Redirect(method = "flipFrame", at = @At(value = "INVOKE", target = "Lorg/lwjgl/glfw/GLFW;glfwSwapBuffers(J)V"), remap = false)
+    @Redirect(
+            method = "flipFrame",
+            at = @At(value = "INVOKE", target = "Lorg/lwjgl/glfw/GLFW;glfwSwapBuffers(J)V"),
+            remap = false)
     private static void endFrame(long window) {
         Renderer.getInstance().endFrame();
     }

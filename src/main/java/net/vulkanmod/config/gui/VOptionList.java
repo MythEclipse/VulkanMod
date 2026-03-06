@@ -2,6 +2,7 @@ package net.vulkanmod.config.gui;
 
 import com.mojang.blaze3d.opengl.GlStateManager;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import java.util.List;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.util.Mth;
@@ -11,8 +12,6 @@ import net.vulkanmod.config.gui.widget.VAbstractWidget;
 import net.vulkanmod.config.option.Option;
 import net.vulkanmod.vulkan.util.ColorUtil;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.List;
 
 public class VOptionList extends GuiElement {
     private final List<Entry> children = new ObjectArrayList<>();
@@ -73,7 +72,10 @@ public class VOptionList extends GuiElement {
     }
 
     protected void updateScrollingState(double mouseX, int button) {
-        this.scrolling = button == 0 && mouseX >= (double) this.getScrollbarPosition() && mouseX < (double) (this.getScrollbarPosition() + 6);
+        this.scrolling =
+                button == 0
+                        && mouseX >= (double) this.getScrollbarPosition()
+                        && mouseX < (double) (this.getScrollbarPosition() + 6);
     }
 
     protected float getScrollAmount() {
@@ -157,7 +159,8 @@ public class VOptionList extends GuiElement {
     }
 
     public boolean mouseScrolled(double mouseX, double mouseY, double xScroll, double yScroll) {
-        this.setScrollAmount(this.getScrollAmount() - yScroll * (double) this.totalItemHeight / 2.0);
+        this.setScrollAmount(
+                this.getScrollAmount() - yScroll * (double) this.totalItemHeight / 2.0);
         return true;
     }
 
@@ -177,8 +180,7 @@ public class VOptionList extends GuiElement {
     protected VOptionList.Entry getEntryAtPos(double x, double y) {
         int x0 = this.x;
 
-        if (x > this.getScrollbarPosition() || x < (double) x0)
-            return null;
+        if (x > this.getScrollbarPosition() || x < (double) x0) return null;
 
         for (var entry : this.children) {
             VAbstractWidget widget = entry.widget;
@@ -191,8 +193,7 @@ public class VOptionList extends GuiElement {
 
     @Override
     public void updateState(double mX, double mY) {
-        if (this.focused != null)
-            return;
+        if (this.focused != null) return;
 
         super.updateState(mX, mY);
     }
@@ -221,10 +222,20 @@ public class VOptionList extends GuiElement {
             int thickness = 3;
 
             int backgroundColor = ColorUtil.ARGB.pack(0.8f, 0.8f, 0.8f, 0.2f);
-            GuiRenderer.fill(scrollbarPosition, this.getY(), scrollbarPosition + thickness, this.getY() + height, backgroundColor);
+            GuiRenderer.fill(
+                    scrollbarPosition,
+                    this.getY(),
+                    scrollbarPosition + thickness,
+                    this.getY() + height,
+                    backgroundColor);
 
             int barColor = ColorUtil.ARGB.pack(0.3f, 0.0f, 0.0f, 0.6f);
-            GuiRenderer.fill(scrollbarPosition, barY, scrollbarPosition + thickness, barY + barHeight, barColor);
+            GuiRenderer.fill(
+                    scrollbarPosition,
+                    barY,
+                    scrollbarPosition + thickness,
+                    barY + barHeight,
+                    barColor);
         }
     }
 
@@ -233,17 +244,14 @@ public class VOptionList extends GuiElement {
     }
 
     public VAbstractWidget getHoveredWidget(double mouseX, double mouseY) {
-        if (this.focused != null)
-            return focused.widget;
+        if (this.focused != null) return focused.widget;
 
-        if (!this.isMouseOver(mouseX, mouseY))
-            return null;
+        if (!this.isMouseOver(mouseX, mouseY)) return null;
 
         for (VOptionList.Entry entry : this.children) {
             var widget = entry.widget;
 
-            if (widget == null || !widget.isMouseOver(mouseX, mouseY))
-                continue;
+            if (widget == null || !widget.isMouseOver(mouseX, mouseY)) continue;
             return widget;
         }
         return null;
@@ -285,22 +293,18 @@ public class VOptionList extends GuiElement {
         }
 
         public void render(int y, int mouseX, int mouseY, boolean updateState) {
-            if (widget == null)
-                return;
+            if (widget == null) return;
 
             widget.y = y;
 
-            if (updateState)
-                widget.updateState(mouseX, mouseY);
+            if (updateState) widget.updateState(mouseX, mouseY);
 
             widget.render(mouseX, mouseY);
         }
 
         public int getTotalHeight() {
-            if (widget != null)
-                return widget.height + margin;
-            else
-                return margin;
+            if (widget != null) return widget.height + margin;
+            else return margin;
         }
 
         @Override

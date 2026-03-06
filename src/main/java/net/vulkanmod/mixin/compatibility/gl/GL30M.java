@@ -35,7 +35,8 @@ public class GL30M {
      * @reason
      */
     @Overwrite(remap = false)
-    public static void glBindFramebuffer(@NativeType("GLenum") int target, @NativeType("GLuint") int framebuffer) {
+    public static void glBindFramebuffer(
+            @NativeType("GLenum") int target, @NativeType("GLuint") int framebuffer) {
         VkGlFramebuffer.bindFramebuffer(target, framebuffer);
     }
 
@@ -44,7 +45,12 @@ public class GL30M {
      * @reason
      */
     @Overwrite(remap = false)
-    public static void glFramebufferTexture2D(@NativeType("GLenum") int target, @NativeType("GLenum") int attachment, @NativeType("GLenum") int textarget, @NativeType("GLuint") int texture, @NativeType("GLint") int level) {
+    public static void glFramebufferTexture2D(
+            @NativeType("GLenum") int target,
+            @NativeType("GLenum") int attachment,
+            @NativeType("GLenum") int textarget,
+            @NativeType("GLuint") int texture,
+            @NativeType("GLint") int level) {
         VkGlFramebuffer.framebufferTexture2D(target, attachment, textarget, texture, level);
     }
 
@@ -53,8 +59,13 @@ public class GL30M {
      * @reason
      */
     @Overwrite(remap = false)
-    public static void glFramebufferRenderbuffer(@NativeType("GLenum") int target, @NativeType("GLenum") int attachment, @NativeType("GLenum") int renderbuffertarget, @NativeType("GLuint") int renderbuffer) {
-//        GL30C.glFramebufferRenderbuffer(target, attachment, renderbuffertarget, renderbuffer);
+    public static void glFramebufferRenderbuffer(
+            @NativeType("GLenum") int target,
+            @NativeType("GLenum") int attachment,
+            @NativeType("GLenum") int renderbuffertarget,
+            @NativeType("GLuint") int renderbuffer) {
+        //        GL30C.glFramebufferRenderbuffer(target, attachment, renderbuffertarget,
+        // renderbuffer);
     }
 
     /**
@@ -81,11 +92,22 @@ public class GL30M {
      * @reason
      */
     @Overwrite(remap = false)
-    public static void glBlitFramebuffer(@NativeType("GLint") int srcX0, @NativeType("GLint") int srcY0, @NativeType("GLint") int srcX1, @NativeType("GLint") int srcY1, @NativeType("GLint") int dstX0, @NativeType("GLint") int dstY0, @NativeType("GLint") int dstX1, @NativeType("GLint") int dstY1, @NativeType("GLbitfield") int mask, @NativeType("GLenum") int filter) {
-        VkGlFramebuffer.glBlitFramebuffer(srcX0, srcY0, srcX1, srcY1, dstX0, dstY0, dstX1, dstY1, mask, filter);
+    public static void glBlitFramebuffer(
+            @NativeType("GLint") int srcX0,
+            @NativeType("GLint") int srcY0,
+            @NativeType("GLint") int srcX1,
+            @NativeType("GLint") int srcY1,
+            @NativeType("GLint") int dstX0,
+            @NativeType("GLint") int dstY0,
+            @NativeType("GLint") int dstX1,
+            @NativeType("GLint") int dstY1,
+            @NativeType("GLbitfield") int mask,
+            @NativeType("GLenum") int filter) {
+        VkGlFramebuffer.glBlitFramebuffer(
+                srcX0, srcY0, srcX1, srcY1, dstX0, dstY0, dstX1, dstY1, mask, filter);
     }
 
-    //RENDER BUFFER
+    // RENDER BUFFER
 
     /**
      * @author
@@ -102,7 +124,8 @@ public class GL30M {
      * @reason
      */
     @Overwrite(remap = false)
-    public static void glBindRenderbuffer(@NativeType("GLenum") int target, @NativeType("GLuint") int framebuffer) {
+    public static void glBindRenderbuffer(
+            @NativeType("GLenum") int target, @NativeType("GLuint") int framebuffer) {
         VkGlRenderbuffer.bindRenderbuffer(target, framebuffer);
     }
 
@@ -111,7 +134,11 @@ public class GL30M {
      * @reason
      */
     @Overwrite(remap = false)
-    public static void glRenderbufferStorage(@NativeType("GLenum") int target, @NativeType("GLenum") int internalformat, @NativeType("GLsizei") int width, @NativeType("GLsizei") int height) {
+    public static void glRenderbufferStorage(
+            @NativeType("GLenum") int target,
+            @NativeType("GLenum") int internalformat,
+            @NativeType("GLsizei") int width,
+            @NativeType("GLsizei") int height) {
         VkGlRenderbuffer.renderbufferStorage(target, internalformat, width, height);
     }
 

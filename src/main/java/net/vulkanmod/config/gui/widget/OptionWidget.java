@@ -13,7 +13,8 @@ import net.vulkanmod.config.gui.render.GuiRenderer;
 import net.vulkanmod.config.option.Option;
 import net.vulkanmod.vulkan.util.ColorUtil;
 
-public abstract class OptionWidget<O extends Option<?>> extends VAbstractWidget implements NarratableEntry {
+public abstract class OptionWidget<O extends Option<?>> extends VAbstractWidget
+        implements NarratableEntry {
     public int controlX;
     public int controlWidth;
     private final Component name;
@@ -44,13 +45,15 @@ public abstract class OptionWidget<O extends Option<?>> extends VAbstractWidget 
 
         this.updateDisplayedValue();
 
-        this.controlHovered = mouseX >= this.controlX && mouseY >= this.y && mouseX < this.controlX + this.controlWidth && mouseY < this.y + this.height;
+        this.controlHovered =
+                mouseX >= this.controlX
+                        && mouseY >= this.y
+                        && mouseX < this.controlX + this.controlWidth
+                        && mouseY < this.y + this.height;
         this.renderWidget(mouseX, mouseY);
     }
 
-    public void updateState() {
-
-    }
+    public void updateState() {}
 
     public void renderWidget(double mouseX, double mouseY) {
         Minecraft minecraftClient = Minecraft.getInstance();
@@ -61,14 +64,24 @@ public abstract class OptionWidget<O extends Option<?>> extends VAbstractWidget 
         int yPadding = 0;
 
         int color = ColorUtil.ARGB.pack(0.0f, 0.0f, 0.0f, 0.45f);
-        GuiRenderer.fill(this.x - xPadding, this.y - yPadding, this.x + this.width + xPadding, this.y + this.height + yPadding, color);
+        GuiRenderer.fill(
+                this.x - xPadding,
+                this.y - yPadding,
+                this.x + this.width + xPadding,
+                this.y + this.height + yPadding,
+                color);
 
         this.renderHovering(0, 0);
 
         color = this.active ? 0xFFFFFFFF : 0xFFA0A0A0;
 
         Font textRenderer = minecraftClient.font;
-        GuiRenderer.drawString(textRenderer, this.getName().getVisualOrderText(), this.x + 8, this.y + (this.height - 8) / 2, color);
+        GuiRenderer.drawString(
+                textRenderer,
+                this.getName().getVisualOrderText(),
+                this.x + 8,
+                this.y + (this.height - 8) / 2,
+                color);
 
         this.renderControls(mouseX, mouseY);
     }
@@ -133,7 +146,12 @@ public abstract class OptionWidget<O extends Option<?>> extends VAbstractWidget 
 
     @Override
     public boolean isMouseOver(double mouseX, double mouseY) {
-        return this.active && this.visible && mouseX >= (double)this.x && mouseY >= (double)this.y && mouseX < (double)(this.x + this.width) && mouseY < (double)(this.y + this.height);
+        return this.active
+                && this.visible
+                && mouseX >= (double) this.x
+                && mouseY >= (double) this.y
+                && mouseX < (double) (this.x + this.width)
+                && mouseY < (double) (this.y + this.height);
     }
 
     @Override
@@ -147,7 +165,12 @@ public abstract class OptionWidget<O extends Option<?>> extends VAbstractWidget 
     }
 
     protected boolean clicked(double mouseX, double mouseY) {
-        return this.active && this.visible && mouseX >= (double)this.controlX && mouseY >= (double)this.y && mouseX < (double)(this.x + this.width) && mouseY < (double)(this.y + this.height);
+        return this.active
+                && this.visible
+                && mouseX >= (double) this.controlX
+                && mouseY >= (double) this.y
+                && mouseX < (double) (this.x + this.width)
+                && mouseY < (double) (this.y + this.height);
     }
 
     public Component getName() {
@@ -178,11 +201,9 @@ public abstract class OptionWidget<O extends Option<?>> extends VAbstractWidget 
     }
 
     @Override
-    public final void updateNarration(NarrationElementOutput narrationElementOutput) {
-    }
+    public final void updateNarration(NarrationElementOutput narrationElementOutput) {}
 
     public void playDownSound(SoundManager soundManager) {
         soundManager.play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0f));
     }
-
 }

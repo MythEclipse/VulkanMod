@@ -1,15 +1,14 @@
 package net.vulkanmod.gl;
 
+import static org.lwjgl.vulkan.VK10.*;
+
+import java.nio.ByteBuffer;
 import net.vulkanmod.vulkan.Vulkan;
 import net.vulkanmod.vulkan.shader.SPIRVUtils;
 import org.apache.commons.lang3.Validate;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.system.MemoryUtil;
-
-import java.nio.ByteBuffer;
-
-import static org.lwjgl.vulkan.VK10.*;
 
 public abstract class GlUtil {
 
@@ -21,7 +20,7 @@ public abstract class GlUtil {
         };
     }
 
-    //Created buffer will need to be freed
+    // Created buffer will need to be freed
     public static ByteBuffer RGBtoRGBA_buffer(ByteBuffer in) {
         Validate.isTrue(in.remaining() % 3 == 0, "Unexpected buffer stride");
 
@@ -29,7 +28,7 @@ public abstract class GlUtil {
         ByteBuffer out = MemoryUtil.memAlloc(outSize);
 
         int j = 0;
-        for (int i = 0; i < outSize; i+=4, j+=3) {
+        for (int i = 0; i < outSize; i += 4, j += 3) {
             out.put(i, in.get(j));
             out.put(i + 1, in.get(j + 1));
             out.put(i + 2, in.get(j + 2));
@@ -50,7 +49,7 @@ public abstract class GlUtil {
         long srcPtr = MemoryUtil.memAddress0(in);
 
         // TODO write in place (don't free the returned buffer in that case)
-        for (int i = 0; i < outSize ; i += 4) {
+        for (int i = 0; i < outSize; i += 4) {
             int color = MemoryUtil.memGetInt(srcPtr + i);
 
             color = net.vulkanmod.vulkan.util.ColorUtil.BGRAtoRGBA(color);
@@ -63,34 +62,33 @@ public abstract class GlUtil {
 
     public static int vulkanFormat(int glFormat, int type) {
         return switch (glFormat) {
-            case GL11.GL_RGBA, GL30.GL_RGBA8 ->
-                    switch (type) {
-                        case GL11.GL_UNSIGNED_BYTE -> VK_FORMAT_R8G8B8A8_UNORM;
-                        case GL11.GL_BYTE -> VK_FORMAT_R8G8B8A8_UNORM;
-                        case GL30.GL_UNSIGNED_INT_8_8_8_8, GL30.GL_UNSIGNED_INT_8_8_8_8_REV -> VK_FORMAT_R8G8B8A8_UNORM;
-                        default -> throw new IllegalStateException("Unexpected type: " + type);
-                    };
-            case GL30.GL_BGRA ->
-                    switch (type) {
-                        case GL11.GL_UNSIGNED_BYTE -> VK_FORMAT_B8G8R8A8_UNORM;
-                        case GL11.GL_BYTE -> VK_FORMAT_B8G8R8A8_UNORM;
-                        case GL30.GL_UNSIGNED_INT_8_8_8_8, GL30.GL_UNSIGNED_INT_8_8_8_8_REV -> VK_FORMAT_B8G8R8A8_UNORM;
-                        default -> throw new IllegalStateException("Unexpected type: " + type);
-                    };
-            case GL30.GL_UNSIGNED_INT_8_8_8_8_REV ->
-                    switch (type) {
-                        case GL11.GL_UNSIGNED_BYTE -> VK_FORMAT_R8G8B8A8_UINT;
-                        case GL11.GL_BYTE -> VK_FORMAT_R8G8B8A8_UNORM;
-                        default -> throw new IllegalStateException("Unexpected type: " + type);
-                    };
-            case GL11.GL_RED ->
-                    switch (type) {
-                        case GL11.GL_UNSIGNED_BYTE -> VK_FORMAT_R8_UNORM;
-                        default -> throw new IllegalStateException("Unexpected type: " + type);
-                    };
-            case GL11.GL_DEPTH_COMPONENT, GL30.GL_DEPTH_COMPONENT32,
-                 GL30.GL_DEPTH_COMPONENT32F, GL30.GL_DEPTH_COMPONENT24 ->
-                    Vulkan.getDefaultDepthFormat();
+            case GL11.GL_RGBA, GL30.GL_RGBA8 -> switch (type) {
+                case GL11.GL_UNSIGNED_BYTE -> VK_FORMAT_R8G8B8A8_UNORM;
+                case GL11.GL_BYTE -> VK_FORMAT_R8G8B8A8_UNORM;
+                case GL30.GL_UNSIGNED_INT_8_8_8_8,
+                        GL30.GL_UNSIGNED_INT_8_8_8_8_REV -> VK_FORMAT_R8G8B8A8_UNORM;
+                default -> throw new IllegalStateException("Unexpected type: " + type);
+            };
+            case GL30.GL_BGRA -> switch (type) {
+                case GL11.GL_UNSIGNED_BYTE -> VK_FORMAT_B8G8R8A8_UNORM;
+                case GL11.GL_BYTE -> VK_FORMAT_B8G8R8A8_UNORM;
+                case GL30.GL_UNSIGNED_INT_8_8_8_8,
+                        GL30.GL_UNSIGNED_INT_8_8_8_8_REV -> VK_FORMAT_B8G8R8A8_UNORM;
+                default -> throw new IllegalStateException("Unexpected type: " + type);
+            };
+            case GL30.GL_UNSIGNED_INT_8_8_8_8_REV -> switch (type) {
+                case GL11.GL_UNSIGNED_BYTE -> VK_FORMAT_R8G8B8A8_UINT;
+                case GL11.GL_BYTE -> VK_FORMAT_R8G8B8A8_UNORM;
+                default -> throw new IllegalStateException("Unexpected type: " + type);
+            };
+            case GL11.GL_RED -> switch (type) {
+                case GL11.GL_UNSIGNED_BYTE -> VK_FORMAT_R8_UNORM;
+                default -> throw new IllegalStateException("Unexpected type: " + type);
+            };
+            case GL11.GL_DEPTH_COMPONENT,
+                    GL30.GL_DEPTH_COMPONENT32,
+                    GL30.GL_DEPTH_COMPONENT32F,
+                    GL30.GL_DEPTH_COMPONENT24 -> Vulkan.getDefaultDepthFormat();
 
             default -> throw new IllegalStateException("Unexpected format: " + glFormat);
         };
@@ -100,8 +98,9 @@ public abstract class GlUtil {
     public static int vulkanFormat(int glInternalFormat) {
         return switch (glInternalFormat) {
             case GL30.GL_UNSIGNED_INT_8_8_8_8_REV -> VK_FORMAT_R8G8B8A8_UINT;
-            case GL11.GL_DEPTH_COMPONENT, GL30.GL_DEPTH_COMPONENT32F, GL30.GL_DEPTH_COMPONENT24 ->
-                    Vulkan.getDefaultDepthFormat();
+            case GL11.GL_DEPTH_COMPONENT,
+                    GL30.GL_DEPTH_COMPONENT32F,
+                    GL30.GL_DEPTH_COMPONENT24 -> Vulkan.getDefaultDepthFormat();
 
             default -> throw new IllegalStateException("Unexpected value: " + glInternalFormat);
         };

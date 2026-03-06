@@ -29,17 +29,13 @@ public abstract class VAbstractWidget extends GuiElement {
         this.renderWidget(mX, mY);
     }
 
-    public void renderWidget(double mX, double mY) {
-    }
+    public void renderWidget(double mX, double mY) {}
 
-    public void onClick(double mX, double mY) {
-    }
+    public void onClick(double mX, double mY) {}
 
-    public void onRelease(double mX, double mY) {
-    }
+    public void onRelease(double mX, double mY) {}
 
-    protected void onDrag(double mX, double mY, double f, double g) {
-    }
+    protected void onDrag(double mX, double mY, double f, double g) {}
 
     public void setActive(boolean active) {
         this.active = active;
@@ -49,12 +45,18 @@ public abstract class VAbstractWidget extends GuiElement {
         float hoverMultiplier = this.getHoverMultiplier(200);
 
         if (hoverMultiplier > 0.0f) {
-//            int color = ColorUtil.ARGB.pack(0.5f, 0.5f, 0.5f, hoverMultiplier * 0.2f);
+            //            int color = ColorUtil.ARGB.pack(0.5f, 0.5f, 0.5f, hoverMultiplier * 0.2f);
             int color = ColorUtil.ARGB.pack(0.3f, 0.0f, 0.0f, hoverMultiplier * 0.2f);
-//            int color = ColorUtil.ARGB.multiplyAlpha(VOptionScreen.RED, hoverMultiplier);
-            GuiRenderer.fill(this.x - xPadding, this.y - yPadding, this.x + this.width + xPadding, this.y + this.height + yPadding, color);
+            //            int color = ColorUtil.ARGB.multiplyAlpha(VOptionScreen.RED,
+            // hoverMultiplier);
+            GuiRenderer.fill(
+                    this.x - xPadding,
+                    this.y - yPadding,
+                    this.x + this.width + xPadding,
+                    this.y + this.height + yPadding,
+                    color);
 
-//            color = ColorUtil.ARGB.pack(1.0f, 1.0f, 1.0f, hoverMultiplier * 0.8f);
+            //            color = ColorUtil.ARGB.pack(1.0f, 1.0f, 1.0f, hoverMultiplier * 0.8f);
             color = ColorUtil.ARGB.pack(0.3f, 0.0f, 0.0f, hoverMultiplier * 0.8f);
 
             int x0 = this.x - xPadding;
@@ -78,7 +80,6 @@ public abstract class VAbstractWidget extends GuiElement {
                     return true;
                 }
             }
-
         }
         return false;
     }
@@ -86,10 +87,10 @@ public abstract class VAbstractWidget extends GuiElement {
     protected boolean clicked(double mX, double mY) {
         return this.active
                 && this.visible
-                && mX >= (double)this.getX()
-                && mY >= (double)this.getY()
-                && mX < (double)(this.getX() + this.getWidth())
-                && mY < (double)(this.getY() + this.getHeight());
+                && mX >= (double) this.getX()
+                && mY >= (double) this.getY()
+                && mX < (double) (this.getX() + this.getWidth())
+                && mY < (double) (this.getY() + this.getHeight());
     }
 
     @Override

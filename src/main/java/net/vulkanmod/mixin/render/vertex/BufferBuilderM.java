@@ -2,7 +2,6 @@ package net.vulkanmod.mixin.render.vertex;
 
 import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.core.Vec3i;
 import net.vulkanmod.interfaces.ExtendedVertexBuilder;
 import net.vulkanmod.mixin.matrix.PoseAccessor;
 import net.vulkanmod.render.util.MathUtil;
@@ -13,23 +12,33 @@ import org.lwjgl.system.MemoryUtil;
 import org.spongepowered.asm.mixin.*;
 
 @Mixin(BufferBuilder.class)
-public abstract class BufferBuilderM
-        implements VertexConsumer, ExtendedVertexBuilder {
+public abstract class BufferBuilderM implements VertexConsumer, ExtendedVertexBuilder {
 
     @Shadow private boolean fastFormat;
     @Shadow private boolean fullFormat;
     @Shadow private VertexFormat format;
 
-    @Shadow protected abstract long beginVertex();
+    @Shadow
+    protected abstract long beginVertex();
 
     @Shadow private int elementsToFill;
     @Shadow @Final private int initialElementsToFill;
 
-    @Shadow protected abstract long beginElement(VertexFormatElement vertexFormatElement);
+    @Shadow
+    protected abstract long beginElement(VertexFormatElement vertexFormatElement);
 
     private long ptr;
 
-    public void vertex(float x, float y, float z, int packedColor, float u, float v, int overlay, int light, int packedNormal) {
+    public void vertex(
+            float x,
+            float y,
+            float z,
+            int packedColor,
+            float u,
+            float v,
+            int overlay,
+            int light,
+            int packedNormal) {
         this.ptr = this.beginVertex();
 
         if (this.format == DefaultVertexFormat.NEW_ENTITY) {
@@ -47,8 +56,7 @@ public abstract class BufferBuilderM
             MemoryUtil.memPutInt(ptr + 28, light);
             MemoryUtil.memPutInt(ptr + 32, packedNormal);
 
-        }
-        else {
+        } else {
             this.elementsToFill = this.initialElementsToFill;
 
             this.position(x, y, z);
@@ -58,9 +66,8 @@ public abstract class BufferBuilderM
             this.light(light);
             this.fastNormal(packedNormal);
 
-//            throw new RuntimeException("unaccepted format: " + this.format);
+            //            throw new RuntimeException("unaccepted format: " + this.format);
         }
-
     }
 
     public void vertex(float x, float y, float z, float u, float v, int packedColor, int light) {
@@ -124,7 +131,18 @@ public abstract class BufferBuilderM
      * @author
      */
     @Overwrite
-    public void addVertex(float x, float y, float z, int color, float u, float v, int overlay, int light, float normalX, float normalY, float normalZ) {
+    public void addVertex(
+            float x,
+            float y,
+            float z,
+            int color,
+            float u,
+            float v,
+            int overlay,
+            int light,
+            float normalX,
+            float normalY,
+            float normalZ) {
         if (this.fastFormat) {
             long ptr = this.beginVertex();
             MemoryUtil.memPutFloat(ptr + 0, x);
@@ -149,18 +167,33 @@ public abstract class BufferBuilderM
             int temp = I32_SNorm.packNormal(normalX, normalY, normalZ);
             MemoryUtil.memPutInt(ptr + i + 4, temp);
         } else {
-            VertexConsumer.super.addVertex(x, y, z, color, u, v, overlay, light, normalX, normalY, normalZ);
+            VertexConsumer.super.addVertex(
+                    x, y, z, color, u, v, overlay, light, normalX, normalY, normalZ);
         }
     }
 
     @Override
-    public void putBulkData(PoseStack.Pose matrixEntry, BakedQuad quad, float[] brightness, float red, float green,
-                            float blue, float alpha, int[] lights, int overlay) {
+    public void putBulkData(
+            PoseStack.Pose matrixEntry,
+            BakedQuad quad,
+            float[] brightness,
+            float red,
+            float green,
+            float blue,
+            float alpha,
+            int[] lights,
+            int overlay) {
         org.joml.Vector3fc vector3fc = quad.direction().getUnitVec3f();
         Matrix4f matrix4f = matrixEntry.pose();
 
-        boolean trustedNormals = ((PoseAccessor)(Object)matrixEntry).trustedNormals();
-        int packedNormal = MathUtil.packTransformedNorm(matrixEntry.normal(), trustedNormals, vector3fc.x(), vector3fc.y(), vector3fc.z());
+        boolean trustedNormals = ((PoseAccessor) (Object) matrixEntry).trustedNormals();
+        int packedNormal =
+                MathUtil.packTransformedNorm(
+                        matrixEntry.normal(),
+                        trustedNormals,
+                        vector3fc.x(),
+                        vector3fc.y(),
+                        vector3fc.z());
         int lightEmission = quad.lightEmission();
 
         for (int k = 0; k < 4; k++) {
@@ -168,7 +201,9 @@ public abstract class BufferBuilderM
             long packedUV = quad.packedUV(k);
             float br = brightness[k];
             int color = ColorUtil.RGBA.pack(red * br, green * br, blue * br, alpha);
-            int light = net.minecraft.client.renderer.LightTexture.lightCoordsWithEmission(lights[k], lightEmission);
+            int light =
+                    net.minecraft.client.renderer.LightTexture.lightCoordsWithEmission(
+                            lights[k], lightEmission);
 
             float x = quadPos.x();
             float y = quadPos.y();
@@ -182,5 +217,4 @@ public abstract class BufferBuilderM
             this.vertex(tx, ty, tz, color, u, v, overlay, light, packedNormal);
         }
     }
-
 }

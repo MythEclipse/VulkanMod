@@ -15,8 +15,8 @@ public abstract class BoxBlur {
             int color;
             int r = 0, g = 0, b = 0;
 
-            //init accumulator
-            for(int x = 0; x < x0 + 1 + filterRadius; ++x) {
+            // init accumulator
+            for (int x = 0; x < x0 + 1 + filterRadius; ++x) {
                 color = src[getIdx(x, y, totalWidth)];
                 r += unpackR(color);
                 g += unpackG(color);
@@ -36,7 +36,7 @@ public abstract class BoxBlur {
                 g += unpackG(color);
                 b += unpackB(color);
 
-                //transpose
+                // transpose
                 dst[getIdx(y, x, totalWidth)] = packColor(r, g, b, div);
             }
         }
@@ -59,6 +59,9 @@ public abstract class BoxBlur {
     }
 
     public static int packColor(int r, int g, int b, int div) {
-        return 0xFF000000 | (((r / div) & 0xFF) << 16) | (((g / div) & 0xFF) << 8) | ((b / div) & 0xFF);
+        return 0xFF000000
+                | (((r / div) & 0xFF) << 16)
+                | (((g / div) & 0xFF) << 8)
+                | ((b / div) & 0xFF);
     }
 }

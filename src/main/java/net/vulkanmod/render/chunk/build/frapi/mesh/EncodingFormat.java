@@ -21,11 +21,13 @@ public final class EncodingFormat {
     public static final int TOTAL_STRIDE;
     private static final int DIRECTION_COUNT;
     private static final int NULLABLE_DIRECTION_COUNT;
-    private static final net.minecraft.client.renderer.chunk.ChunkSectionLayer[] NULLABLE_BLOCK_RENDER_LAYERS;
+    private static final net.minecraft.client.renderer.chunk.ChunkSectionLayer[]
+            NULLABLE_BLOCK_RENDER_LAYERS;
     private static final int NULLABLE_BLOCK_RENDER_LAYER_COUNT;
     private static final net.fabricmc.fabric.api.util.TriState[] TRI_STATES;
     private static final int TRI_STATE_COUNT;
-    private static final net.minecraft.client.renderer.item.ItemStackRenderState.FoilType[] NULLABLE_GLINTS;
+    private static final net.minecraft.client.renderer.item.ItemStackRenderState.FoilType[]
+            NULLABLE_GLINTS;
     private static final int NULLABLE_GLINT_COUNT;
     private static final net.fabricmc.fabric.api.renderer.v1.mesh.ShadeMode[] SHADE_MODES;
     private static final int SHADE_MODE_COUNT;
@@ -68,11 +70,11 @@ public final class EncodingFormat {
     private static final int SHADE_MODE_MASK;
     private static final int QUAD_ATLAS_MASK;
 
-    private EncodingFormat() {
-    }
+    private EncodingFormat() {}
 
     static {
-        com.mojang.blaze3d.vertex.VertexFormat format = com.mojang.blaze3d.vertex.DefaultVertexFormat.BLOCK;
+        com.mojang.blaze3d.vertex.VertexFormat format =
+                com.mojang.blaze3d.vertex.DefaultVertexFormat.BLOCK;
         VERTEX_X = 4;
         VERTEX_Y = 5;
         VERTEX_Z = 6;
@@ -87,11 +89,20 @@ public final class EncodingFormat {
         TOTAL_STRIDE = 4 + QUAD_STRIDE;
         DIRECTION_COUNT = net.minecraft.core.Direction.values().length;
         NULLABLE_DIRECTION_COUNT = DIRECTION_COUNT + 1;
-        NULLABLE_BLOCK_RENDER_LAYERS = (net.minecraft.client.renderer.chunk.ChunkSectionLayer[]) org.apache.commons.lang3.ArrayUtils.add(net.minecraft.client.renderer.chunk.ChunkSectionLayer.values(), (java.lang.Object) null);
+        NULLABLE_BLOCK_RENDER_LAYERS =
+                (net.minecraft.client.renderer.chunk.ChunkSectionLayer[])
+                        org.apache.commons.lang3.ArrayUtils.add(
+                                net.minecraft.client.renderer.chunk.ChunkSectionLayer.values(),
+                                (java.lang.Object) null);
         NULLABLE_BLOCK_RENDER_LAYER_COUNT = NULLABLE_BLOCK_RENDER_LAYERS.length;
         TRI_STATES = net.fabricmc.fabric.api.util.TriState.values();
         TRI_STATE_COUNT = TRI_STATES.length;
-        NULLABLE_GLINTS = (net.minecraft.client.renderer.item.ItemStackRenderState.FoilType[]) org.apache.commons.lang3.ArrayUtils.add(net.minecraft.client.renderer.item.ItemStackRenderState.FoilType.values(), (java.lang.Object) null);
+        NULLABLE_GLINTS =
+                (net.minecraft.client.renderer.item.ItemStackRenderState.FoilType[])
+                        org.apache.commons.lang3.ArrayUtils.add(
+                                net.minecraft.client.renderer.item.ItemStackRenderState.FoilType
+                                        .values(),
+                                (java.lang.Object) null);
         NULLABLE_GLINT_COUNT = NULLABLE_GLINTS.length;
         SHADE_MODES = net.fabricmc.fabric.api.renderer.v1.mesh.ShadeMode.values();
         SHADE_MODE_COUNT = SHADE_MODES.length;
@@ -101,7 +112,8 @@ public final class EncodingFormat {
         NULL_GLINT_INDEX = NULLABLE_GLINT_COUNT - 1;
         CULL_BIT_LENGTH = net.minecraft.util.Mth.ceillog2(NULLABLE_DIRECTION_COUNT);
         LIGHT_BIT_LENGTH = net.minecraft.util.Mth.ceillog2(DIRECTION_COUNT);
-        RENDER_LAYER_BIT_LENGTH = net.minecraft.util.Mth.ceillog2(NULLABLE_BLOCK_RENDER_LAYER_COUNT);
+        RENDER_LAYER_BIT_LENGTH =
+                net.minecraft.util.Mth.ceillog2(NULLABLE_BLOCK_RENDER_LAYER_COUNT);
         AO_BIT_LENGTH = net.minecraft.util.Mth.ceillog2(TRI_STATE_COUNT);
         GLINT_BIT_LENGTH = net.minecraft.util.Mth.ceillog2(NULLABLE_GLINT_COUNT);
         SHADE_MODE_BIT_LENGTH = net.minecraft.util.Mth.ceillog2(SHADE_MODE_COUNT);
@@ -128,7 +140,10 @@ public final class EncodingFormat {
         GLINT_MASK = bitMask(GLINT_BIT_LENGTH, GLINT_BIT_OFFSET);
         SHADE_MODE_MASK = bitMask(SHADE_MODE_BIT_LENGTH, SHADE_MODE_BIT_OFFSET);
         QUAD_ATLAS_MASK = bitMask(QUAD_ATLAS_BIT_LENGTH, QUAD_ATLAS_BIT_OFFSET);
-        com.google.common.base.Preconditions.checkArgument(TOTAL_BIT_LENGTH <= 32, "Indigo header encoding bit count (%s) exceeds integer bit length)", TOTAL_STRIDE);
+        com.google.common.base.Preconditions.checkArgument(
+                TOTAL_BIT_LENGTH <= 32,
+                "Indigo header encoding bit count (%s) exceeds integer bit length)",
+                TOTAL_STRIDE);
     }
 
     private static int bitMask(int bitLength, int bitOffset) {
@@ -136,19 +151,24 @@ public final class EncodingFormat {
     }
 
     static net.minecraft.core.Direction cullFace(int bits) {
-        return net.fabricmc.fabric.api.renderer.v1.model.ModelHelper.faceFromIndex((bits & CULL_MASK) >>> 0);
+        return net.fabricmc.fabric.api.renderer.v1.model.ModelHelper.faceFromIndex(
+                (bits & CULL_MASK) >>> 0);
     }
 
     static int cullFace(int bits, net.minecraft.core.Direction face) {
-        return (bits & (CULL_MASK ^ (-1))) | (net.fabricmc.fabric.api.renderer.v1.model.ModelHelper.toFaceIndex(face) << 0);
+        return (bits & (CULL_MASK ^ (-1)))
+                | (net.fabricmc.fabric.api.renderer.v1.model.ModelHelper.toFaceIndex(face) << 0);
     }
 
     static net.minecraft.core.Direction lightFace(int bits) {
-        return net.fabricmc.fabric.api.renderer.v1.model.ModelHelper.faceFromIndex((bits & LIGHT_MASK) >>> LIGHT_BIT_OFFSET);
+        return net.fabricmc.fabric.api.renderer.v1.model.ModelHelper.faceFromIndex(
+                (bits & LIGHT_MASK) >>> LIGHT_BIT_OFFSET);
     }
 
     static int lightFace(int bits, net.minecraft.core.Direction face) {
-        return (bits & (LIGHT_MASK ^ (-1))) | (net.fabricmc.fabric.api.renderer.v1.model.ModelHelper.toFaceIndex(face) << LIGHT_BIT_OFFSET);
+        return (bits & (LIGHT_MASK ^ (-1)))
+                | (net.fabricmc.fabric.api.renderer.v1.model.ModelHelper.toFaceIndex(face)
+                        << LIGHT_BIT_OFFSET);
     }
 
     static int normalFlags(int bits) {
@@ -156,7 +176,8 @@ public final class EncodingFormat {
     }
 
     static int normalFlags(int bits, int normalFlags) {
-        return (bits & (NORMALS_MASK ^ (-1))) | ((normalFlags << NORMALS_BIT_OFFSET) & NORMALS_MASK);
+        return (bits & (NORMALS_MASK ^ (-1)))
+                | ((normalFlags << NORMALS_BIT_OFFSET) & NORMALS_MASK);
     }
 
     static int geometryFlags(int bits) {
@@ -164,14 +185,16 @@ public final class EncodingFormat {
     }
 
     static int geometryFlags(int bits, int geometryFlags) {
-        return (bits & (GEOMETRY_MASK ^ (-1))) | ((geometryFlags << GEOMETRY_BIT_OFFSET) & GEOMETRY_MASK);
+        return (bits & (GEOMETRY_MASK ^ (-1)))
+                | ((geometryFlags << GEOMETRY_BIT_OFFSET) & GEOMETRY_MASK);
     }
 
     static net.minecraft.client.renderer.chunk.ChunkSectionLayer renderLayer(int bits) {
         return NULLABLE_BLOCK_RENDER_LAYERS[(bits & RENDER_LAYER_MASK) >>> RENDER_LAYER_BIT_OFFSET];
     }
 
-    static int renderLayer(int bits, net.minecraft.client.renderer.chunk.ChunkSectionLayer renderLayer) {
+    static int renderLayer(
+            int bits, net.minecraft.client.renderer.chunk.ChunkSectionLayer renderLayer) {
         int index = renderLayer == null ? NULL_RENDER_LAYER_INDEX : renderLayer.ordinal();
         return (bits & (RENDER_LAYER_MASK ^ (-1))) | (index << RENDER_LAYER_BIT_OFFSET);
     }
@@ -204,7 +227,8 @@ public final class EncodingFormat {
         return NULLABLE_GLINTS[(bits & GLINT_MASK) >>> GLINT_BIT_OFFSET];
     }
 
-    static int glint(int bits, net.minecraft.client.renderer.item.ItemStackRenderState.FoilType glint) {
+    static int glint(
+            int bits, net.minecraft.client.renderer.item.ItemStackRenderState.FoilType glint) {
         int index = glint == null ? NULL_GLINT_INDEX : glint.ordinal();
         return (bits & (GLINT_MASK ^ (-1))) | (index << GLINT_BIT_OFFSET);
     }

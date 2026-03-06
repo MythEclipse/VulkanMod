@@ -23,7 +23,8 @@ public class Attribute {
     }
 
     public GLSLParser.Node getNode() {
-        return new GLSLParser.Node("attribute", "layout(location = %d) %s %s %s;\n".formatted(location, ioType, type, id));
+        return new GLSLParser.Node(
+                "attribute",
+                "layout(location = %d) %s %s %s;\n".formatted(location, ioType, type, id));
     }
-
 }

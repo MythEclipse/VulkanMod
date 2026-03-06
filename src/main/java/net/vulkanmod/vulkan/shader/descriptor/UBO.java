@@ -1,12 +1,11 @@
 package net.vulkanmod.vulkan.shader.descriptor;
 
+import static org.lwjgl.vulkan.VK10.VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+
+import java.util.List;
 import net.vulkanmod.vulkan.memory.buffer.BufferSlice;
 import net.vulkanmod.vulkan.shader.layout.AlignedStruct;
 import net.vulkanmod.vulkan.shader.layout.Uniform;
-
-import java.util.List;
-
-import static org.lwjgl.vulkan.VK10.VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
 
 public class UBO extends AlignedStruct implements Descriptor {
     public final String name;
@@ -28,11 +27,15 @@ public class UBO extends AlignedStruct implements Descriptor {
 
     @Override
     public String toString() {
-        return "UBO{" +
-               "name='" + name + '\'' +
-               ", binding=" + binding +
-               ", useGlobalBuffer=" + useGlobalBuffer +
-               '}';
+        return "UBO{"
+                + "name='"
+                + name
+                + '\''
+                + ", binding="
+                + binding
+                + ", useGlobalBuffer="
+                + useGlobalBuffer
+                + '}';
     }
 
     public int getBinding() {

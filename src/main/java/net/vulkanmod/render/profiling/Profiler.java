@@ -4,9 +4,8 @@ import it.unimi.dsi.fastutil.longs.LongArrayFIFOQueue;
 import it.unimi.dsi.fastutil.longs.LongArrayList;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.vulkanmod.Initializer;
-
 import java.util.List;
+import net.vulkanmod.Initializer;
 
 public class Profiler {
     private static final boolean DEBUG = false;
@@ -26,9 +25,7 @@ public class Profiler {
     }
 
     public static void setActive(boolean b) {
-        if (!FORCE_ACTIVE)
-            ACTIVE = b;
-
+        if (!FORCE_ACTIVE) ACTIVE = b;
     }
 
     private final String name;
@@ -52,8 +49,7 @@ public class Profiler {
     }
 
     public void push(String s) {
-        if (!(ACTIVE))
-            return;
+        if (!(ACTIVE)) return;
 
         Node node = nodeMap.get(s);
 
@@ -67,8 +63,7 @@ public class Profiler {
         node.setParent(currentNode);
         node.children.clear();
 
-        if (node.parent == selectedNode)
-            currentFrameNodes.add(node);
+        if (node.parent == selectedNode) currentFrameNodes.add(node);
 
         currentNode = node;
 
@@ -82,12 +77,12 @@ public class Profiler {
     }
 
     public void pop() {
-        if (!(ACTIVE))
-            return;
+        if (!(ACTIVE)) return;
 
         if (nodeStack.isEmpty()) {
             if (DEBUG)
-                Initializer.LOGGER.error("Profiler %s: Pop called with no more nodes on the stack".formatted(name));
+                Initializer.LOGGER.error(
+                        "Profiler %s: Pop called with no more nodes on the stack".formatted(name));
 
             return;
         }
@@ -103,8 +98,7 @@ public class Profiler {
     }
 
     public void start() {
-        if (!(ACTIVE))
-            return;
+        if (!(ACTIVE)) return;
 
         if (!nodeStack.isEmpty()) {
             if (DEBUG)
@@ -126,11 +120,11 @@ public class Profiler {
     }
 
     public void end() {
-        if (!(ACTIVE))
-            return;
+        if (!(ACTIVE)) return;
 
         if (DEBUG && currentNode != mainNode) {
-            Initializer.LOGGER.error("Profiler %s: current node is not the main node".formatted(name));
+            Initializer.LOGGER.error(
+                    "Profiler %s: current node is not the main node".formatted(name));
         }
 
         this.pop();
@@ -231,7 +225,8 @@ public class Profiler {
         }
 
         public void updateResult() {
-            this.result.setValue((float) this.accumulatedDuration / this.values.size() * INV_CONVERSION);
+            this.result.setValue(
+                    (float) this.accumulatedDuration / this.values.size() * INV_CONVERSION);
         }
 
         void reset() {
@@ -244,7 +239,5 @@ public class Profiler {
         public String toString() {
             return this.name;
         }
-
     }
 }
-

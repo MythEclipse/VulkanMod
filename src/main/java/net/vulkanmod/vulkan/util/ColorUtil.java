@@ -13,7 +13,7 @@ public class ColorUtil {
     }
 
     public static int floatToInt(float f) {
-        return (int)(f * 255.0f) & 0xFF;
+        return (int) (f * 255.0f) & 0xFF;
     }
 
     public static float unpackColor(int c, int s) {
@@ -22,7 +22,8 @@ public class ColorUtil {
 
     public static class ARGB {
         public static int pack(float r, float g, float b, float a) {
-            int color = floatToInt(a) << 24 | floatToInt(r) << 16 | floatToInt(g) << 8 | floatToInt(b);
+            int color =
+                    floatToInt(a) << 24 | floatToInt(r) << 16 | floatToInt(g) << 8 | floatToInt(b);
 
             return color;
         }
@@ -64,7 +65,8 @@ public class ColorUtil {
 
     public static class RGBA {
         public static int pack(float r, float g, float b, float a) {
-            int color = floatToInt(a) << 24 | floatToInt(b) << 16 | floatToInt(g) << 8 | floatToInt(r);
+            int color =
+                    floatToInt(a) << 24 | floatToInt(b) << 16 | floatToInt(g) << 8 | floatToInt(r);
 
             return color;
         }
@@ -107,7 +109,9 @@ public class ColorUtil {
     interface ColorConsumer {
 
         void setRGBA_Buffer(MappedBuffer buffer, float r, float g, float b, float a);
+
         void setRGBA_Buffer(FloatBuffer buffer, float r, float g, float b, float a);
+
         void setRGBA_Buffer(ByteBuffer buffer, float r, float g, float b, float a);
 
         default void putColor(MappedBuffer buffer, float r, float g, float b, float a) {
@@ -175,6 +179,5 @@ public class ColorUtil {
             b = gamma(b);
             putColor(buffer, r, g, b, a);
         }
-
     }
 }

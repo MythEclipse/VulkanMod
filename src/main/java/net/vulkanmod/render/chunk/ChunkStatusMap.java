@@ -36,8 +36,7 @@ public class ChunkStatusMap {
         current |= flag;
         map.put(l, current);
 
-        if ((current & CHUNK_READY) == CHUNK_READY)
-            updateNeighbours(x, z);
+        if ((current & CHUNK_READY) == CHUNK_READY) updateNeighbours(x, z);
     }
 
     public void resetChunkStatus(int x, int z, byte flag) {
@@ -55,17 +54,14 @@ public class ChunkStatusMap {
             for (int z1 = z - 1; z1 <= z + 1; ++z1) {
                 if (checkNeighbours(x1, z1)) {
                     map.put(ChunkPos.asLong(x1, z1), ALL_FLAGS);
-                }
-                else {
+                } else {
                     long l = ChunkPos.asLong(x1, z1);
 
                     byte current = map.get(l);
                     byte n = (byte) (current & ~NEIGHBOURS_READY);
 
-                    if (current == 0b0)
-                        map.remove(l);
-                    else if (current != n)
-                        map.put(l, n);
+                    if (current == 0b0) map.remove(l);
+                    else if (current != n) map.put(l, n);
                 }
             }
         }
@@ -77,13 +73,12 @@ public class ChunkStatusMap {
             for (int z1 = z - 1; z1 <= z + 1; ++z1) {
                 flags &= map.get(ChunkPos.asLong(x1, z1));
 
-                if (flags != CHUNK_READY)
-                    return false;
+                if (flags != CHUNK_READY) return false;
             }
         }
         return true;
 
-//        return flags == CHUNK_READY;
+        //        return flags == CHUNK_READY;
     }
 
     public boolean chunkRenderReady(int x, int z) {
@@ -91,8 +86,5 @@ public class ChunkStatusMap {
         return status == ALL_FLAGS;
     }
 
-    public void reset() {
-
-    }
-
+    public void reset() {}
 }

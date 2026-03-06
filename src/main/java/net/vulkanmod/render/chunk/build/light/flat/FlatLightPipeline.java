@@ -1,27 +1,24 @@
 package net.vulkanmod.render.chunk.build.light.flat;
 
+import static net.vulkanmod.render.chunk.build.light.data.LightDataAccess.*;
+
+import java.util.Arrays;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.vulkanmod.render.chunk.util.SimpleDirection;
-import net.vulkanmod.render.model.quad.ModelQuadView;
-import net.vulkanmod.render.chunk.build.light.data.LightDataAccess;
 import net.vulkanmod.render.chunk.build.light.LightPipeline;
+import net.vulkanmod.render.chunk.build.light.data.LightDataAccess;
 import net.vulkanmod.render.chunk.build.light.data.QuadLightData;
+import net.vulkanmod.render.chunk.util.SimpleDirection;
 import net.vulkanmod.render.model.quad.ModelQuadFlags;
-
-import java.util.Arrays;
-
-import static net.vulkanmod.render.chunk.build.light.data.LightDataAccess.*;
+import net.vulkanmod.render.model.quad.ModelQuadView;
 
 /**
- * A light pipeline which implements "classic-style" lighting through simply using the light value of the adjacent
- * block to a face.
+ * A light pipeline which implements "classic-style" lighting through simply using the light value
+ * of the adjacent block to a face.
  */
 public class FlatLightPipeline implements LightPipeline {
-    /**
-     * The cache which light data will be accessed from.
-     */
+    /** The cache which light data will be accessed from. */
     private final LightDataAccess lightCache;
 
     public FlatLightPipeline(LightDataAccess lightCache) {
@@ -29,7 +26,13 @@ public class FlatLightPipeline implements LightPipeline {
     }
 
     @Override
-    public void calculate(ModelQuadView quad, BlockPos pos, QuadLightData out, Direction cullFace, Direction lightFace, boolean shade) {
+    public void calculate(
+            ModelQuadView quad,
+            BlockPos pos,
+            QuadLightData out,
+            Direction cullFace,
+            Direction lightFace,
+            boolean shade) {
         int lightmap;
 
         // To match vanilla behavior, use the cull face if it exists/is available
@@ -38,8 +41,11 @@ public class FlatLightPipeline implements LightPipeline {
         } else {
             int flags = quad.getFlags();
             // If the face is aligned, use the light data above it
-            // To match vanilla behavior, also treat the face as aligned if it is parallel and the block state is a full cube
-            if ((flags & ModelQuadFlags.IS_ALIGNED) != 0 || ((flags & ModelQuadFlags.IS_PARALLEL) != 0 && unpackFC(this.lightCache.get(pos)))) {
+            // To match vanilla behavior, also treat the face as aligned if it is parallel and the
+            // block state is a full cube
+            if ((flags & ModelQuadFlags.IS_ALIGNED) != 0
+                    || ((flags & ModelQuadFlags.IS_PARALLEL) != 0
+                            && unpackFC(this.lightCache.get(pos)))) {
                 lightmap = getLightmap(pos, lightFace);
             } else {
                 lightmap = getEmissiveLightmap(this.lightCache.get(pos));

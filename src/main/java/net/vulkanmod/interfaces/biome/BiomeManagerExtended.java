@@ -9,5 +9,4 @@ public interface BiomeManagerExtended {
     }
 
     long getBiomeZoomSeed();
-
 }

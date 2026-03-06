@@ -1,6 +1,9 @@
 package net.vulkanmod.render.profiling;
 
 import com.google.common.base.Strings;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -15,10 +18,6 @@ import net.vulkanmod.vulkan.VRenderSystem;
 import net.vulkanmod.vulkan.memory.MemoryManager;
 import net.vulkanmod.vulkan.util.ColorUtil;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
 public class ProfilerOverlay {
     private static final long POLL_PERIOD = 100000000;
 
@@ -30,7 +29,7 @@ public class ProfilerOverlay {
     private static float frametime;
 
     private static String buildStats;
-//    private static int node = -1;
+    //    private static int node = -1;
 
     private final Minecraft minecraft;
     private final Font font;
@@ -50,8 +49,8 @@ public class ProfilerOverlay {
     }
 
     public static void onKeyPress(int key) {
-//        int v = key - InputConstants.KEY_0;
-//        node = v >= 0 && v <= 15 ? v-1 : node;
+        //        int v = key - InputConstants.KEY_0;
+        //        node = v >= 0 && v <= 15 ? v-1 : node;
     }
 
     public void render(GuiGraphics guiGraphics) {
@@ -74,9 +73,12 @@ public class ProfilerOverlay {
                 int textWidth = this.font.width(line);
                 int yPosition = xOffset + lineHeight * i;
                 GuiRenderer.fill(
-                        1, yPosition - 1,
-                        xOffset + textWidth + 1, yPosition + lineHeight - 1,
-                        0, backgroundColor);
+                        1,
+                        yPosition - 1,
+                        xOffset + textWidth + 1,
+                        yPosition + lineHeight - 1,
+                        0,
+                        backgroundColor);
             }
         }
 
@@ -87,9 +89,7 @@ public class ProfilerOverlay {
             if (!Strings.isNullOrEmpty(line)) {
                 int yPosition = xOffset + lineHeight * i;
                 GuiRenderer.drawString(
-                        this.font, Component.literal(line),
-                        xOffset, yPosition,
-                        textColor, false);
+                        this.font, Component.literal(line), xOffset, yPosition, textColor, false);
             }
         }
     }
@@ -98,7 +98,11 @@ public class ProfilerOverlay {
         List<String> list = new ArrayList<>();
         list.add("");
         list.add("Profiler");
-        list.add("Version: %s %s ".formatted(Initializer.getVersion(), SharedConstants.getCurrentVersion().name()));
+        list.add(
+                "Version: %s %s "
+                        .formatted(
+                                Initializer.getVersion(),
+                                SharedConstants.getCurrentVersion().name()));
 
         this.updateResults();
 
@@ -138,23 +142,21 @@ public class ProfilerOverlay {
     }
 
     private void updateResults() {
-        if ((System.nanoTime() - lastPollTime) < POLL_PERIOD && lastResults != null)
-            return;
+        if ((System.nanoTime() - lastPollTime) < POLL_PERIOD && lastResults != null) return;
 
         Profiler.ProfilerResults results = Profiler.getMainProfiler().getProfilerResults();
-        if (results == null)
-            return;
+        if (results == null) return;
 
         frametime = results.getResult().value;
         lastResults = results;
         lastPollTime = System.nanoTime();
 
-        if (ChunkTask.BENCH)
-            buildStats = this.getBuildStats();
+        if (ChunkTask.BENCH) buildStats = this.getBuildStats();
     }
 
     private String getBuildStats() {
-        BuilderResources[] resourcesArray = WorldRenderer.getInstance().getTaskDispatcher().getResourcesArray();
+        BuilderResources[] resourcesArray =
+                WorldRenderer.getInstance().getTaskDispatcher().getResourcesArray();
         int totalTime = 0;
         int buildCount = 0;
 
@@ -163,7 +165,8 @@ public class ProfilerOverlay {
             buildCount += resources.getBuildCount();
         }
 
-        return String.format("Builders time: %dms avg %dms (%d builds)",
+        return String.format(
+                "Builders time: %dms avg %dms (%d builds)",
                 totalTime, totalTime / resourcesArray.length, buildCount);
     }
 }

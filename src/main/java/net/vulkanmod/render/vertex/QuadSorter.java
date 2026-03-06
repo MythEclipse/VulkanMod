@@ -27,7 +27,8 @@ public class QuadSorter {
     }
 
     public SortState getSortState() {
-        return new SortState(this.vertexCount, this.sortingPoints, this.distances, this.sortingPointsIndices);
+        return new SortState(
+                this.vertexCount, this.sortingPoints, this.distances, this.sortingPointsIndices);
     }
 
     public void restoreSortState(QuadSorter.SortState sortState) {
@@ -90,7 +91,8 @@ public class QuadSorter {
         this.sortingPointsIndices = new int[pointCount];
     }
 
-    public void putSortedQuadIndices(TerrainBufferBuilder bufferBuilder, VertexFormat.IndexType indexType) {
+    public void putSortedQuadIndices(
+            TerrainBufferBuilder bufferBuilder, VertexFormat.IndexType indexType) {
         float[] distances = this.distances;
         int[] sortingPointsIndices = this.sortingPointsIndices;
 
@@ -122,7 +124,8 @@ public class QuadSorter {
         }
     }
 
-    public void putSortedQuadIndices(TerrainBuilder bufferBuilder, VertexFormat.IndexType indexType) {
+    public void putSortedQuadIndices(
+            TerrainBuilder bufferBuilder, VertexFormat.IndexType indexType) {
         float[] distances = new float[this.sortingPoints.length];
         int[] sortingPoints = new int[this.sortingPoints.length];
 
@@ -172,7 +175,11 @@ public class QuadSorter {
         final float[] distances;
         final int[] sortingPointsIndices;
 
-        SortState(int vertexCount, Vector3f[] sortingPoints, float[] distances, int[] sortingPointsIndices) {
+        SortState(
+                int vertexCount,
+                Vector3f[] sortingPoints,
+                float[] distances,
+                int[] sortingPointsIndices) {
             this.vertexCount = vertexCount;
             this.sortingPoints = sortingPoints;
             this.distances = distances;

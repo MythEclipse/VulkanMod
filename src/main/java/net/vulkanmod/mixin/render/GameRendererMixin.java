@@ -13,8 +13,7 @@ public abstract class GameRendererMixin {
      */
     @Overwrite
     public float getDepthFar() {
-//        return this.getRenderDistance() * 4.0F;
+        //        return this.getRenderDistance() * 4.0F;
         return Float.POSITIVE_INFINITY;
     }
-
 }

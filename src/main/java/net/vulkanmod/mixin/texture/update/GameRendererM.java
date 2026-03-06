@@ -4,7 +4,6 @@ package net.vulkanmod.mixin.texture.update;
 @org.spongepowered.asm.mixin.Mixin({net.minecraft.client.renderer.GameRenderer.class})
 public abstract class GameRendererM {
 
-    @org.spongepowered.asm.mixin.Shadow
-    @org.spongepowered.asm.mixin.Final
+    @org.spongepowered.asm.mixin.Shadow @org.spongepowered.asm.mixin.Final
     net.minecraft.client.Minecraft minecraft;
 }

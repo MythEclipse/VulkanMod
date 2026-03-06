@@ -1,5 +1,8 @@
 package net.vulkanmod.render.chunk.build;
 
+import java.util.Arrays;
+import java.util.Map;
+import java.util.function.Function;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -21,17 +24,14 @@ import net.vulkanmod.render.chunk.build.color.TintCache;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
-import java.util.Map;
-import java.util.function.Function;
-
 public class RenderRegion implements BlockAndTintGetter {
     public static final int WIDTH = 3;
     public static final int SIZE = WIDTH * WIDTH * WIDTH;
 
     public static final int BOUNDARY_BLOCK_WIDTH = 2;
     public static final int REGION_BLOCK_WIDTH = 16 + BOUNDARY_BLOCK_WIDTH * 2;
-    public static final int BLOCK_COUNT = REGION_BLOCK_WIDTH * REGION_BLOCK_WIDTH * REGION_BLOCK_WIDTH;
+    public static final int BLOCK_COUNT =
+            REGION_BLOCK_WIDTH * REGION_BLOCK_WIDTH * REGION_BLOCK_WIDTH;
 
     public static final BlockState AIR_BLOCK_STATE = Blocks.AIR.defaultBlockState();
 
@@ -52,8 +52,15 @@ public class RenderRegion implements BlockAndTintGetter {
 
     private final Function<BlockPos, BlockState> blockStateGetter;
 
-    RenderRegion(Level level, int x, int y, int z, PalettedContainer<BlockState>[] blockData, DataLayer[][] lightData,
-                 BiomeData biomeData, Map<BlockPos, BlockEntity> blockEntityMap) {
+    RenderRegion(
+            Level level,
+            int x,
+            int y,
+            int z,
+            PalettedContainer<BlockState>[] blockData,
+            DataLayer[][] lightData,
+            BiomeData biomeData,
+            Map<BlockPos, BlockEntity> blockEntityMap) {
         this.level = level;
 
         this.minSecX = x - 1;
@@ -88,8 +95,7 @@ public class RenderRegion implements BlockAndTintGetter {
 
                     PalettedContainer<BlockState> container = blockDataContainers[idx];
 
-                    if (container == null)
-                        continue;
+                    if (container == null) continue;
 
                     int absBlockX = (x + minSecX) << 4;
                     int absBlockY = (y + minSecY) << 4;
@@ -103,25 +109,32 @@ public class RenderRegion implements BlockAndTintGetter {
                     int tMaxY = Math.min(maxY, absBlockY + 16);
                     int tMaxZ = Math.min(maxZ, absBlockZ + 16);
 
-                    loadSectionBlockStates(container, blockData,
-                                           tMinX, tMinY, tMinZ, tMaxX, tMaxY, tMaxZ);
-
+                    loadSectionBlockStates(
+                            container, blockData, tMinX, tMinY, tMinZ, tMaxX, tMaxY, tMaxZ);
                 }
             }
         }
     }
 
-    void loadSectionBlockStates(PalettedContainer<BlockState> container, BlockState[] blockStates,
-                                int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
+    void loadSectionBlockStates(
+            PalettedContainer<BlockState> container,
+            BlockState[] blockStates,
+            int minX,
+            int minY,
+            int minZ,
+            int maxX,
+            int maxY,
+            int maxZ) {
 
         for (int y = minY; y < maxY; ++y) {
             for (int z = minZ; z < maxZ; ++z) {
                 for (int x = minX; x < maxX; ++x) {
                     final int idx = getBlockIdx(x - this.minX, y - this.minY, z - this.minZ);
 
-                    blockStates[idx] = container != null ?
-                            container.get(x & 15, y & 15, z & 15)
-                            : Blocks.AIR.defaultBlockState();
+                    blockStates[idx] =
+                            container != null
+                                    ? container.get(x & 15, y & 15, z & 15)
+                                    : Blocks.AIR.defaultBlockState();
                 }
             }
         }
@@ -158,7 +171,9 @@ public class RenderRegion implements BlockAndTintGetter {
         int secZ = SectionPos.blockToSectionCoord(blockPos.getZ()) - this.minSecZ;
 
         DataLayer dataLayer = this.lightData[getSectionIdx(secX, secY, secZ)][lightLayer.ordinal()];
-        return dataLayer == null ? 0 : dataLayer.get(blockPos.getX() & 15, blockPos.getY() & 15, blockPos.getZ() & 15);
+        return dataLayer == null
+                ? 0
+                : dataLayer.get(blockPos.getX() & 15, blockPos.getY() & 15, blockPos.getZ() & 15);
     }
 
     public int getRawBrightness(BlockPos blockPos, int i) {
@@ -236,8 +251,7 @@ public class RenderRegion implements BlockAndTintGetter {
         BlockState blockState = null;
         if (y == 60) {
             blockState = Blocks.BARRIER.defaultBlockState();
-        }
-        else if (y == 70) {
+        } else if (y == 70) {
             blockState = DebugLevelSource.getBlockStateFor(x, z);
         }
 

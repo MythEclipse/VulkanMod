@@ -1,11 +1,10 @@
 package net.vulkanmod.render.model;
 
+import java.util.Set;
 import net.minecraft.core.Direction;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
-
-import java.util.Set;
 
 public class CubeModel {
 
@@ -19,7 +18,22 @@ public class CubeModel {
 
     Vertex[] vertices;
 
-    public void setVertices(int u, int v, float minX, float minY, float minZ, float dimX, float dimY, float dimZ, float growX, float growY, float growZ, boolean mirror, float uTexScale, float vTexScale, Set<Direction> set) {
+    public void setVertices(
+            int u,
+            int v,
+            float minX,
+            float minY,
+            float minZ,
+            float dimX,
+            float dimY,
+            float dimZ,
+            float growX,
+            float growY,
+            float growZ,
+            boolean mirror,
+            float uTexScale,
+            float vTexScale,
+            Set<Direction> set) {
         this.minX = minX;
         this.minY = minY;
         this.minZ = minZ;
@@ -42,26 +56,27 @@ public class CubeModel {
             minX = v1;
         }
 
-        this.vertices = new Vertex[]{
-                new Vertex(minX, minY, minZ, 0.0F, 0.0F),
-                new Vertex(s, minY, minZ,    0.0F, 8.0F),
-                new Vertex(s, t, minZ,       8.0F, 8.0F),
-                new Vertex(minX, t, minZ,    8.0F, 0.0F),
-                new Vertex(minX, minY, u1,    0.0F, 0.0F),
-                new Vertex(s, minY, u1,       0.0F, 8.0F),
-                new Vertex(s, t, u1,          8.0F, 8.0F),
-                new Vertex(minX, t, u1,       8.0F, 0.0F)
-        };
+        this.vertices =
+                new Vertex[] {
+                    new Vertex(minX, minY, minZ, 0.0F, 0.0F),
+                    new Vertex(s, minY, minZ, 0.0F, 8.0F),
+                    new Vertex(s, t, minZ, 8.0F, 8.0F),
+                    new Vertex(minX, t, minZ, 8.0F, 0.0F),
+                    new Vertex(minX, minY, u1, 0.0F, 0.0F),
+                    new Vertex(s, minY, u1, 0.0F, 8.0F),
+                    new Vertex(s, t, u1, 8.0F, 8.0F),
+                    new Vertex(minX, t, u1, 8.0F, 0.0F)
+                };
 
-        float w = (float)u;
-        float x = (float)u + dimZ;
-        float y = (float)u + dimZ + dimX;
-        float z = (float)u + dimZ + dimX + dimX;
-        float aa = (float)u + dimZ + dimX + dimZ;
-        float ab = (float)u + dimZ + dimX + dimZ + dimX;
-        float ac = (float)v;
-        float ad = (float)v + dimZ;
-        float ae = (float)v + dimZ + dimY;
+        float w = (float) u;
+        float x = (float) u + dimZ;
+        float y = (float) u + dimZ + dimX;
+        float z = (float) u + dimZ + dimX + dimX;
+        float aa = (float) u + dimZ + dimX + dimZ;
+        float ab = (float) u + dimZ + dimX + dimZ + dimX;
+        float ac = (float) v;
+        float ad = (float) v + dimZ;
+        float ae = (float) v + dimZ + dimY;
 
         Vertex vertex1 = this.vertices[0];
         Vertex vertex2 = this.vertices[1];
@@ -74,27 +89,87 @@ public class CubeModel {
 
         int idx = 0;
         if (set.contains(Direction.DOWN)) {
-            this.polygons[idx++] = new Polygon(new Vertex[]{vertex6, vertex5, vertex1, vertex2}, x, ac, y, ad, uTexScale, vTexScale, mirror, Direction.DOWN);
+            this.polygons[idx++] =
+                    new Polygon(
+                            new Vertex[] {vertex6, vertex5, vertex1, vertex2},
+                            x,
+                            ac,
+                            y,
+                            ad,
+                            uTexScale,
+                            vTexScale,
+                            mirror,
+                            Direction.DOWN);
         }
 
         if (set.contains(Direction.UP)) {
-            this.polygons[idx++] = new Polygon(new Vertex[]{vertex3, vertex4, vertex8, vertex7}, y, ad, z, ac, uTexScale, vTexScale, mirror, Direction.UP);
+            this.polygons[idx++] =
+                    new Polygon(
+                            new Vertex[] {vertex3, vertex4, vertex8, vertex7},
+                            y,
+                            ad,
+                            z,
+                            ac,
+                            uTexScale,
+                            vTexScale,
+                            mirror,
+                            Direction.UP);
         }
 
         if (set.contains(Direction.WEST)) {
-            this.polygons[idx++] = new Polygon(new Vertex[]{vertex1, vertex5, vertex8, vertex4}, w, ad, x, ae, uTexScale, vTexScale, mirror, Direction.WEST);
+            this.polygons[idx++] =
+                    new Polygon(
+                            new Vertex[] {vertex1, vertex5, vertex8, vertex4},
+                            w,
+                            ad,
+                            x,
+                            ae,
+                            uTexScale,
+                            vTexScale,
+                            mirror,
+                            Direction.WEST);
         }
 
         if (set.contains(Direction.NORTH)) {
-            this.polygons[idx++] = new Polygon(new Vertex[]{vertex2, vertex1, vertex4, vertex3}, x, ad, y, ae, uTexScale, vTexScale, mirror, Direction.NORTH);
+            this.polygons[idx++] =
+                    new Polygon(
+                            new Vertex[] {vertex2, vertex1, vertex4, vertex3},
+                            x,
+                            ad,
+                            y,
+                            ae,
+                            uTexScale,
+                            vTexScale,
+                            mirror,
+                            Direction.NORTH);
         }
 
         if (set.contains(Direction.EAST)) {
-            this.polygons[idx++] = new Polygon(new Vertex[]{vertex6, vertex2, vertex3, vertex7}, y, ad, aa, ae, uTexScale, vTexScale, mirror, Direction.EAST);
+            this.polygons[idx++] =
+                    new Polygon(
+                            new Vertex[] {vertex6, vertex2, vertex3, vertex7},
+                            y,
+                            ad,
+                            aa,
+                            ae,
+                            uTexScale,
+                            vTexScale,
+                            mirror,
+                            Direction.EAST);
         }
 
         if (set.contains(Direction.SOUTH)) {
-            this.polygons[idx] = new Polygon(new Vertex[]{vertex5, vertex6, vertex7, vertex8}, aa, ad, ab, ae, uTexScale, vTexScale, mirror, Direction.SOUTH);
+            this.polygons[idx] =
+                    new Polygon(
+                            new Vertex[] {vertex5, vertex6, vertex7, vertex8},
+                            aa,
+                            ad,
+                            ab,
+                            ae,
+                            uTexScale,
+                            vTexScale,
+                            mirror,
+                            Direction.SOUTH);
         }
     }
 
@@ -112,7 +187,16 @@ public class CubeModel {
 
     public record Polygon(Vertex[] vertices, Vector3fc normal) {
 
-        public Polygon(Vertex[] vertices, float u0, float v0, float u1, float v1, float uSize, float vSize, boolean mirror, Direction direction) {
+        public Polygon(
+                Vertex[] vertices,
+                float u0,
+                float v0,
+                float u1,
+                float v1,
+                float uSize,
+                float vSize,
+                boolean mirror,
+                Direction direction) {
             this(vertices, (mirror ? mirrorFacing(direction) : direction).getUnitVec3f());
 
             // This will force NaN if uSize or vSize are 0
@@ -177,5 +261,4 @@ public class CubeModel {
             return v;
         }
     }
-
 }

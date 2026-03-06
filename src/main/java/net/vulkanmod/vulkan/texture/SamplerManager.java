@@ -1,17 +1,16 @@
 package net.vulkanmod.vulkan.texture;
 
+import static net.vulkanmod.vulkan.Vulkan.getVkDevice;
+import static org.lwjgl.system.MemoryStack.stackPush;
+import static org.lwjgl.vulkan.VK10.*;
+
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
+import java.nio.LongBuffer;
 import net.vulkanmod.vulkan.device.DeviceManager;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.vulkan.VkSamplerCreateInfo;
 import org.lwjgl.vulkan.VkSamplerReductionModeCreateInfo;
-
-import java.nio.LongBuffer;
-
-import static net.vulkanmod.vulkan.Vulkan.getVkDevice;
-import static org.lwjgl.system.MemoryStack.stackPush;
-import static org.lwjgl.vulkan.VK10.*;
 
 public abstract class SamplerManager {
     public static final int ADDRESS_MODE_BITS = 2;
@@ -34,18 +33,51 @@ public abstract class SamplerManager {
         return getSampler(clamp, linearFiltering, maxLod, false, 0);
     }
 
-    public static long getSampler(boolean clamp, boolean linearFiltering, int maxLod, boolean anisotropy, int maxAnisotropy) {
-        int addressMode = clamp ? VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE : VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    public static long getSampler(
+            boolean clamp,
+            boolean linearFiltering,
+            int maxLod,
+            boolean anisotropy,
+            int maxAnisotropy) {
+        int addressMode =
+                clamp ? VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE : VK_SAMPLER_ADDRESS_MODE_REPEAT;
         int filter = linearFiltering ? VK_FILTER_LINEAR : VK_FILTER_NEAREST;
-        int mipmapMode = linearFiltering ? VK_SAMPLER_MIPMAP_MODE_LINEAR : VK_SAMPLER_MIPMAP_MODE_NEAREST;
+        int mipmapMode =
+                linearFiltering ? VK_SAMPLER_MIPMAP_MODE_LINEAR : VK_SAMPLER_MIPMAP_MODE_NEAREST;
 
-        return getSampler(addressMode, addressMode, filter, filter, mipmapMode, maxLod, anisotropy, maxAnisotropy, -1);
+        return getSampler(
+                addressMode,
+                addressMode,
+                filter,
+                filter,
+                mipmapMode,
+                maxLod,
+                anisotropy,
+                maxAnisotropy,
+                -1);
     }
 
-    public static long getSampler(int addressModeU, int addressModeV,
-                                  int minFilter, int magFilter, int mipmapMode, float maxLod,
-                                  boolean anisotropy, float maxAnisotropy, int reductionMode) {
-        SamplerInfo samplerInfo = new SamplerInfo(addressModeU, addressModeV, minFilter, magFilter, mipmapMode, maxLod, anisotropy, maxAnisotropy, reductionMode);
+    public static long getSampler(
+            int addressModeU,
+            int addressModeV,
+            int minFilter,
+            int magFilter,
+            int mipmapMode,
+            float maxLod,
+            boolean anisotropy,
+            float maxAnisotropy,
+            int reductionMode) {
+        SamplerInfo samplerInfo =
+                new SamplerInfo(
+                        addressModeU,
+                        addressModeV,
+                        minFilter,
+                        magFilter,
+                        mipmapMode,
+                        maxLod,
+                        anisotropy,
+                        maxAnisotropy,
+                        reductionMode);
 
         long sampler = SAMPLERS.getOrDefault(samplerInfo, 0L);
 
@@ -89,7 +121,8 @@ public abstract class SamplerManager {
 
             // Reduction Mode
             if (sampler.hasReductionMode()) {
-                VkSamplerReductionModeCreateInfo reductionModeInfo = VkSamplerReductionModeCreateInfo.calloc(stack);
+                VkSamplerReductionModeCreateInfo reductionModeInfo =
+                        VkSamplerReductionModeCreateInfo.calloc(stack);
                 reductionModeInfo.sType$Default();
                 reductionModeInfo.reductionMode(sampler.getReductionMode());
                 samplerInfo.pNext(reductionModeInfo.address());
@@ -117,15 +150,28 @@ public abstract class SamplerManager {
         final int maxAnisotropy;
 
         public SamplerInfo() {
-            this(VK_SAMPLER_ADDRESS_MODE_REPEAT, VK_SAMPLER_ADDRESS_MODE_REPEAT,
-                 VK_FILTER_NEAREST, VK_FILTER_NEAREST, VK_SAMPLER_MIPMAP_MODE_NEAREST,
-                 0, false, 0, -1);
+            this(
+                    VK_SAMPLER_ADDRESS_MODE_REPEAT,
+                    VK_SAMPLER_ADDRESS_MODE_REPEAT,
+                    VK_FILTER_NEAREST,
+                    VK_FILTER_NEAREST,
+                    VK_SAMPLER_MIPMAP_MODE_NEAREST,
+                    0,
+                    false,
+                    0,
+                    -1);
         }
 
-
-
-        public SamplerInfo(int addressModeU, int addressModeV, int minFilter, int magFilter, int mipmapMode,
-                           float maxLod, boolean anisotropy, float maxAnisotropy, int reductionMode) {
+        public SamplerInfo(
+                int addressModeU,
+                int addressModeV,
+                int minFilter,
+                int magFilter,
+                int mipmapMode,
+                float maxLod,
+                boolean anisotropy,
+                float maxAnisotropy,
+                int reductionMode) {
             this.maxLod = (int) maxLod;
             this.maxAnisotropy = (int) maxAnisotropy;
 
@@ -186,7 +232,9 @@ public abstract class SamplerManager {
             if (o == null || getClass() != o.getClass()) return false;
 
             SamplerInfo samplerInfo = (SamplerInfo) o;
-            return maxLod == samplerInfo.maxLod && maxAnisotropy == samplerInfo.maxAnisotropy && encodedState == samplerInfo.encodedState;
+            return maxLod == samplerInfo.maxLod
+                    && maxAnisotropy == samplerInfo.maxAnisotropy
+                    && encodedState == samplerInfo.encodedState;
         }
 
         @Override
@@ -197,5 +245,4 @@ public abstract class SamplerManager {
             return result;
         }
     }
-
 }

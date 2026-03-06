@@ -30,11 +30,13 @@ public class BiomeData {
         this.secZ = secZ;
     }
 
-    public void getBiomeData(Level level, LevelChunkSection chunkSection, int secX, int secY, int secZ) {
-        Biome defaultValue = level.registryAccess()
-                                  .lookupOrThrow(Registries.BIOME)
-                                  .getOrThrow(Biomes.PLAINS)
-                                  .value();
+    public void getBiomeData(
+            Level level, LevelChunkSection chunkSection, int secX, int secY, int secZ) {
+        Biome defaultValue =
+                level.registryAccess()
+                        .lookupOrThrow(Registries.BIOME)
+                        .getOrThrow(Biomes.PLAINS)
+                        .value();
 
         int baseIdx = getRelativeSectionIdx(secX, secY, secZ);
 
@@ -45,17 +47,13 @@ public class BiomeData {
                     int idx = baseIdx + relIdx;
 
                     if (chunkSection != null) {
-                        biomes[idx] = chunkSection.getNoiseBiome(x, y, z)
-                                                  .value();
-                    }
-                    else {
+                        biomes[idx] = chunkSection.getNoiseBiome(x, y, z).value();
+                    } else {
                         biomes[idx] = defaultValue;
                     }
-
                 }
             }
         }
-
     }
 
     public Biome getBiome(int blockX, int blockY, int blockZ) {
@@ -91,7 +89,10 @@ public class BiomeData {
             int cellIdx = baseSectionIdx + getRelativeIdx(cellX & 3, cellY & 3, cellZ & 3);
 
             Vector3f offset = getOffset(baseSectionIdx, cellX, cellY, cellZ);
-            float distance = Mth.square(fCellX + offset.x()) + Mth.square(fCellY + offset.y()) + Mth.square(fCellZ + offset.z());
+            float distance =
+                    Mth.square(fCellX + offset.x())
+                            + Mth.square(fCellY + offset.y())
+                            + Mth.square(fCellZ + offset.z());
 
             if (closestDistance > distance) {
                 closestCellIdx = cellIdx;
@@ -143,11 +144,11 @@ public class BiomeData {
     }
 
     private static int getRelativeSectionIdx(int x, int y, int z) {
-        return ((x * RenderRegion.WIDTH * RenderRegion.WIDTH) + (y * RenderRegion.WIDTH) + z) * BIOMES_PER_SECTION;
+        return ((x * RenderRegion.WIDTH * RenderRegion.WIDTH) + (y * RenderRegion.WIDTH) + z)
+                * BIOMES_PER_SECTION;
     }
 
     private static int getRelativeIdx(int x, int y, int z) {
         return (x * ZOOM_LENGTH * ZOOM_LENGTH) + (y * ZOOM_LENGTH) + z;
     }
-
 }

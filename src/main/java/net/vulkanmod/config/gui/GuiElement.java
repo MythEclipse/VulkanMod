@@ -1,7 +1,9 @@
 package net.vulkanmod.config.gui;
 
 /* JADX INFO: loaded from: VulkanMod_1.21.11-0.6.0.jar:net/vulkanmod/config/gui/GuiElement.class */
-public abstract class GuiElement implements net.minecraft.client.gui.components.events.GuiEventListener, net.minecraft.client.gui.narration.NarratableEntry {
+public abstract class GuiElement
+        implements net.minecraft.client.gui.components.events.GuiEventListener,
+                net.minecraft.client.gui.narration.NarratableEntry {
     protected int width;
     protected int height;
     public int x;
@@ -69,12 +71,16 @@ public abstract class GuiElement implements net.minecraft.client.gui.components.
     }
 
     @org.jetbrains.annotations.Nullable
-    public net.minecraft.client.gui.ComponentPath nextFocusPath(net.minecraft.client.gui.navigation.FocusNavigationEvent focusNavigationEvent) {
+    public net.minecraft.client.gui.ComponentPath nextFocusPath(
+            net.minecraft.client.gui.navigation.FocusNavigationEvent focusNavigationEvent) {
         return null;
     }
 
     public boolean isMouseOver(double mouseX, double mouseY) {
-        return mouseX >= ((double) this.x) && mouseY >= ((double) this.y) && mouseX <= ((double) (this.x + this.width)) && mouseY <= ((double) (this.y + this.height));
+        return mouseX >= ((double) this.x)
+                && mouseY >= ((double) this.y)
+                && mouseX <= ((double) (this.x + this.width))
+                && mouseY <= ((double) (this.y + this.height));
     }
 
     @org.jetbrains.annotations.Nullable
@@ -83,20 +89,21 @@ public abstract class GuiElement implements net.minecraft.client.gui.components.
     }
 
     public net.minecraft.client.gui.navigation.ScreenRectangle getRectangle() {
-        return new net.minecraft.client.gui.navigation.ScreenRectangle(this.x, this.y, this.width, this.height);
+        return new net.minecraft.client.gui.navigation.ScreenRectangle(
+                this.x, this.y, this.width, this.height);
     }
 
-    public void setFocused(boolean bl) {
-    }
+    public void setFocused(boolean bl) {}
 
     public boolean isFocused() {
         return false;
     }
 
-    public net.minecraft.client.gui.narration.NarratableEntry.NarrationPriority narrationPriority() {
+    public net.minecraft.client.gui.narration.NarratableEntry.NarrationPriority
+            narrationPriority() {
         return net.minecraft.client.gui.narration.NarratableEntry.NarrationPriority.NONE;
     }
 
-    public void updateNarration(net.minecraft.client.gui.narration.NarrationElementOutput narrationElementOutput) {
-    }
+    public void updateNarration(
+            net.minecraft.client.gui.narration.NarrationElementOutput narrationElementOutput) {}
 }

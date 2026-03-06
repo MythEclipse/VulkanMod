@@ -4,7 +4,8 @@ import it.unimi.dsi.fastutil.ints.Int2ReferenceOpenHashMap;
 
 public class VkGlShader {
     private static int ID_COUNTER = 1;
-    private static final Int2ReferenceOpenHashMap<VkGlShader> map = new Int2ReferenceOpenHashMap<>();
+    private static final Int2ReferenceOpenHashMap<VkGlShader> map =
+            new Int2ReferenceOpenHashMap<>();
     private static int boundTextureId = 0;
 
     public static int glCreateShader(int type) {
@@ -24,9 +25,7 @@ public class VkGlShader {
         shader.source = string;
     }
 
-    public static void glCompileShader(int i) {
-
-    }
+    public static void glCompileShader(int i) {}
 
     public static int glGetShaderi(int i, int j) {
         return 0;
@@ -41,5 +40,4 @@ public class VkGlShader {
         this.id = id;
         this.type = type;
     }
-
 }

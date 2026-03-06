@@ -1,9 +1,8 @@
 package net.vulkanmod.vulkan.memory.buffer;
 
+import java.nio.ByteBuffer;
 import net.vulkanmod.vulkan.memory.MemoryManager;
 import net.vulkanmod.vulkan.memory.MemoryType;
-
-import java.nio.ByteBuffer;
 
 public class Buffer {
     public final MemoryType type;
@@ -104,6 +103,5 @@ public class Buffer {
         return new BufferInfo(this.id, this.allocation, this.bufferSize, this.type.getType());
     }
 
-    public record BufferInfo(long id, long allocation, long bufferSize, MemoryType.Type type) {
-    }
+    public record BufferInfo(long id, long allocation, long bufferSize, MemoryType.Type type) {}
 }

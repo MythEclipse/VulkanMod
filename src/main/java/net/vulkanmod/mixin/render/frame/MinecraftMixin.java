@@ -22,20 +22,32 @@ public class MinecraftMixin {
         Renderer.clearAttachments(GL11.GL_DEPTH_BUFFER_BIT | GL11.GL_COLOR_BUFFER_BIT);
     }
 
-    @Redirect(method = "runTick", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/CommandEncoder;clearColorAndDepthTextures(Lcom/mojang/blaze3d/textures/GpuTexture;ILcom/mojang/blaze3d/textures/GpuTexture;D)V"))
-    private void redirectClear(CommandEncoder instance, GpuTexture gpuTexture, int i, GpuTexture gpuTexture2, double v) {
+    @Redirect(
+            method = "runTick",
+            at =
+                    @At(
+                            value = "INVOKE",
+                            target =
+                                    "Lcom/mojang/blaze3d/systems/CommandEncoder;clearColorAndDepthTextures(Lcom/mojang/blaze3d/textures/GpuTexture;ILcom/mojang/blaze3d/textures/GpuTexture;D)V"))
+    private void redirectClear(
+            CommandEncoder instance,
+            GpuTexture gpuTexture,
+            int i,
+            GpuTexture gpuTexture2,
+            double v) {
         // Remove framebuffer clear as it's not needed
 
         ImageUploadHelper.INSTANCE.submitCommands();
     }
 
-    @Redirect(method = "runTick", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/pipeline/RenderTarget;blitToScreen()V"))
-    private void removeBlit(RenderTarget instance) {
-    }
-
+    @Redirect(
+            method = "runTick",
+            at =
+                    @At(
+                            value = "INVOKE",
+                            target = "Lcom/mojang/blaze3d/pipeline/RenderTarget;blitToScreen()V"))
+    private void removeBlit(RenderTarget instance) {}
 
     @Redirect(method = "runTick", at = @At(value = "INVOKE", target = "Ljava/lang/Thread;yield()V"))
-    private void removeThreadYield() {
-    }
-
+    private void removeThreadYield() {}
 }

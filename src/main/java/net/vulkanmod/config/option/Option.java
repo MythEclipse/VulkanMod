@@ -1,11 +1,10 @@
 package net.vulkanmod.config.option;
 
-import net.minecraft.network.chat.Component;
-import net.vulkanmod.config.gui.widget.OptionWidget;
-
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import net.minecraft.network.chat.Component;
+import net.vulkanmod.config.gui.widget.OptionWidget;
 
 public abstract class Option<T> {
     protected final Component name;
@@ -25,7 +24,11 @@ public abstract class Option<T> {
     protected Runnable onChange;
     protected Supplier<Boolean> activationFn;
 
-    public Option(Component name, Consumer<T> setter, Supplier<T> getter, Function<T, Component> translator) {
+    public Option(
+            Component name,
+            Consumer<T> setter,
+            Supplier<T> getter,
+            Function<T, Component> translator) {
         this.name = name;
 
         this.onApply = setter;
@@ -79,15 +82,13 @@ public abstract class Option<T> {
     public void setNewValue(T t) {
         this.newValue = t;
 
-        if (onChange != null)
-            onChange.run();
+        if (onChange != null) onChange.run();
     }
 
     public void updateActiveState() {
         if (this.activationFn != null) {
             this.active = this.activationFn.get();
-        }
-        else {
+        } else {
             this.active = true;
         }
 

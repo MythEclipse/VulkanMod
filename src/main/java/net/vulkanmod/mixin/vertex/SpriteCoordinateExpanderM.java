@@ -12,18 +12,17 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-//TODO move
+// TODO move
 @Mixin(SpriteCoordinateExpander.class)
 public class SpriteCoordinateExpanderM implements ExtendedVertexBuilder {
     @Shadow @Final private TextureAtlasSprite sprite;
 
-    @Unique
-    private ExtendedVertexBuilder extDelegate;
-    @Unique
-    private boolean canUseFastVertex = false;
+    @Unique private ExtendedVertexBuilder extDelegate;
+    @Unique private boolean canUseFastVertex = false;
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void getExtBuilder(VertexConsumer vertexConsumer, TextureAtlasSprite textureAtlasSprite, CallbackInfo ci) {
+    private void getExtBuilder(
+            VertexConsumer vertexConsumer, TextureAtlasSprite textureAtlasSprite, CallbackInfo ci) {
         if (vertexConsumer instanceof ExtendedVertexBuilder) {
             this.extDelegate = (ExtendedVertexBuilder) vertexConsumer;
             this.canUseFastVertex = true;
@@ -36,7 +35,25 @@ public class SpriteCoordinateExpanderM implements ExtendedVertexBuilder {
     }
 
     @Override
-    public void vertex(float x, float y, float z, int packedColor, float u, float v, int overlay, int light, int packedNormal) {
-        this.extDelegate.vertex(x, y, z, packedColor, this.sprite.getU(u), this.sprite.getV(v), overlay, light, packedNormal);
+    public void vertex(
+            float x,
+            float y,
+            float z,
+            int packedColor,
+            float u,
+            float v,
+            int overlay,
+            int light,
+            int packedNormal) {
+        this.extDelegate.vertex(
+                x,
+                y,
+                z,
+                packedColor,
+                this.sprite.getU(u),
+                this.sprite.getV(v),
+                overlay,
+                light,
+                packedNormal);
     }
 }

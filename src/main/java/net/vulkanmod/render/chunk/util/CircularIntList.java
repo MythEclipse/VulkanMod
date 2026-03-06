@@ -1,8 +1,7 @@
 package net.vulkanmod.render.chunk.util;
 
-import org.apache.commons.lang3.Validate;
-
 import java.util.Iterator;
+import org.apache.commons.lang3.Validate;
 
 public class CircularIntList {
     private final int size;
@@ -28,11 +27,11 @@ public class CircularIntList {
         list[size + 1] = -1;
 
         int k = 1;
-        for(int i = startIndex; i < size; ++i) {
+        for (int i = startIndex; i < size; ++i) {
             list[k] = i;
             ++k;
         }
-        for(int i = 0; i < startIndex; ++i) {
+        for (int i = 0; i < startIndex; ++i) {
             list[k] = i;
             ++k;
         }

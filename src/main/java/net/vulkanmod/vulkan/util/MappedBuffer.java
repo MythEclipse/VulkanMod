@@ -1,8 +1,7 @@
 package net.vulkanmod.vulkan.util;
 
-import org.lwjgl.system.MemoryUtil;
-
 import java.nio.ByteBuffer;
+import org.lwjgl.system.MemoryUtil;
 
 public class MappedBuffer {
 
@@ -12,6 +11,7 @@ public class MappedBuffer {
     public static MappedBuffer createFromBuffer(ByteBuffer buffer) {
         return new MappedBuffer(buffer, MemoryUtil.memAddress0(buffer));
     }
+
     MappedBuffer(ByteBuffer buffer, long ptr) {
         this.buffer = buffer;
         this.ptr = ptr;

@@ -7,6 +7,8 @@ public class SystemInfo {
 
     static {
         CentralProcessor centralProcessor = new oshi.SystemInfo().getHardware().getProcessor();
-        cpuInfo = String.format("%s", centralProcessor.getProcessorIdentifier().getName()).replaceAll("\\s+", " ");
+        cpuInfo =
+                String.format("%s", centralProcessor.getProcessorIdentifier().getName())
+                        .replaceAll("\\s+", " ");
     }
 }

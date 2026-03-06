@@ -1,5 +1,8 @@
 package net.vulkanmod.gl;
 
+import static org.lwjgl.vulkan.VK11.VK_ATTACHMENT_LOAD_OP_LOAD;
+import static org.lwjgl.vulkan.VK11.VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
 import it.unimi.dsi.fastutil.ints.Int2ReferenceOpenHashMap;
 import net.vulkanmod.vulkan.Renderer;
 import net.vulkanmod.vulkan.VRenderSystem;
@@ -10,13 +13,11 @@ import net.vulkanmod.vulkan.texture.VulkanImage;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
 
-import static org.lwjgl.vulkan.VK11.VK_ATTACHMENT_LOAD_OP_LOAD;
-import static org.lwjgl.vulkan.VK11.VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-
 public class VkGlFramebuffer {
     private static int idCounter = 1;
 
-    private static final Int2ReferenceOpenHashMap<VkGlFramebuffer> map = new Int2ReferenceOpenHashMap<>();
+    private static final Int2ReferenceOpenHashMap<VkGlFramebuffer> map =
+            new Int2ReferenceOpenHashMap<>();
     private static VkGlFramebuffer boundFramebuffer;
     private static VkGlFramebuffer readFramebuffer;
 
@@ -82,7 +83,6 @@ public class VkGlFramebuffer {
                 readFramebuffer = glFramebuffer;
             }
         }
-
     }
 
     public static void deleteFramebuffer(int id) {
@@ -92,14 +92,14 @@ public class VkGlFramebuffer {
 
         boundFramebuffer = map.remove(id);
 
-        if (boundFramebuffer == null)
-            throw new NullPointerException("bound framebuffer is null");
+        if (boundFramebuffer == null) throw new NullPointerException("bound framebuffer is null");
 
         boundFramebuffer.cleanUp(true);
         boundFramebuffer = null;
     }
 
-    public static void framebufferTexture2D(int target, int attachment, int texTarget, int texture, int level) {
+    public static void framebufferTexture2D(
+            int target, int attachment, int texTarget, int texture, int level) {
         if (attachment != GL30.GL_COLOR_ATTACHMENT0 && attachment != GL30.GL_DEPTH_ATTACHMENT) {
             throw new UnsupportedOperationException();
         }
@@ -115,23 +115,41 @@ public class VkGlFramebuffer {
         VkGlFramebuffer.beginRendering(boundFramebuffer);
     }
 
-    public static void framebufferRenderbuffer(int target, int attachment, int renderbuffertarget, int renderbuffer) {
-        if (boundFramebuffer == null)
-            return;
+    public static void framebufferRenderbuffer(
+            int target, int attachment, int renderbuffertarget, int renderbuffer) {
+        if (boundFramebuffer == null) return;
 
         boundFramebuffer.setAttachmentRenderbuffer(attachment, renderbuffer);
         boundFramebuffer.create();
         VkGlFramebuffer.beginRendering(boundFramebuffer);
     }
 
-    public static void glBlitFramebuffer(int srcX0, int srcY0, int srcX1, int srcY1, int dstX0, int dstY0, int dstX1,
-                                         int dstY1, int mask, int filter) {
+    public static void glBlitFramebuffer(
+            int srcX0,
+            int srcY0,
+            int srcX1,
+            int srcY1,
+            int dstX0,
+            int dstY0,
+            int dstX1,
+            int dstY1,
+            int mask,
+            int filter) {
         // TODO: add missing parameters
-        ImageUtil.blitFramebuffer(boundFramebuffer.colorAttachment, srcX0, srcY0, srcX1, srcY1, dstX0, dstY0, dstX1, dstY1);
+        ImageUtil.blitFramebuffer(
+                boundFramebuffer.colorAttachment,
+                srcX0,
+                srcY0,
+                srcX1,
+                srcY1,
+                dstX0,
+                dstY0,
+                dstX1,
+                dstY1);
     }
 
     public static int glCheckFramebufferStatus(int target) {
-        //TODO
+        // TODO
         return GL30.GL_FRAMEBUFFER_COMPLETE;
     }
 
@@ -193,8 +211,7 @@ public class VkGlFramebuffer {
     }
 
     public void setAttachmentImage(int attachment, VulkanImage image) {
-        if (image == null)
-            throw new NullPointerException("Image is null");
+        if (image == null) throw new NullPointerException("Image is null");
 
         switch (attachment) {
             case (GL30.GL_COLOR_ATTACHMENT0) -> this.setColorAttachment(image);
@@ -211,14 +228,13 @@ public class VkGlFramebuffer {
     }
 
     void setDepthAttachment(VulkanImage image) {
-        //TODO check if texture is in depth format
+        // TODO check if texture is in depth format
         this.depthAttachment = image;
     }
 
     public void create() {
         // Cannot create without color attachment
-        if (this.colorAttachment == null)
-            return;
+        if (this.colorAttachment == null) return;
 
         if (this.framebuffer != null) {
             this.cleanUp(false);
@@ -227,17 +243,18 @@ public class VkGlFramebuffer {
         boolean hasDepthImage = this.depthAttachment != null;
         VulkanImage depthImage = this.depthAttachment;
 
-        this.framebuffer = Framebuffer.builder(this.colorAttachment, depthImage, this.colorAttachmentMipLevel)
-                                      .build();
+        this.framebuffer =
+                Framebuffer.builder(this.colorAttachment, depthImage, this.colorAttachmentMipLevel)
+                        .build();
         RenderPass.Builder builder = RenderPass.builder(this.framebuffer);
 
         builder.getColorAttachmentInfo()
-               .setLoadOp(VK_ATTACHMENT_LOAD_OP_LOAD)
-               .setFinalLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+                .setLoadOp(VK_ATTACHMENT_LOAD_OP_LOAD)
+                .setFinalLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
         if (hasDepthImage) {
             builder.getDepthAttachmentInfo()
-                   .setOps(VK_ATTACHMENT_LOAD_OP_LOAD, VK_ATTACHMENT_LOAD_OP_LOAD);
+                    .setOps(VK_ATTACHMENT_LOAD_OP_LOAD, VK_ATTACHMENT_LOAD_OP_LOAD);
         }
 
         this.renderPass = builder.build();

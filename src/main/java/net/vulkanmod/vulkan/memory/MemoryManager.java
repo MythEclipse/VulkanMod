@@ -1,7 +1,14 @@
 package net.vulkanmod.vulkan.memory;
 
+import static org.lwjgl.system.MemoryStack.stackPush;
+import static org.lwjgl.util.vma.Vma.*;
+import static org.lwjgl.vulkan.VK10.*;
+
 import it.unimi.dsi.fastutil.longs.Long2ReferenceOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import java.nio.LongBuffer;
+import java.util.List;
+import java.util.function.Consumer;
 import net.vulkanmod.Initializer;
 import net.vulkanmod.render.chunk.buffer.AreaBuffer;
 import net.vulkanmod.vulkan.Vulkan;
@@ -20,14 +27,6 @@ import org.lwjgl.util.vma.VmaBudget;
 import org.lwjgl.vulkan.VkBufferCreateInfo;
 import org.lwjgl.vulkan.VkImageCreateInfo;
 
-import java.nio.LongBuffer;
-import java.util.List;
-import java.util.function.Consumer;
-
-import static org.lwjgl.system.MemoryStack.stackPush;
-import static org.lwjgl.util.vma.Vma.*;
-import static org.lwjgl.vulkan.VK10.*;
-
 public class MemoryManager {
     private static final boolean DEBUG = false;
     public static final long BYTES_IN_MB = 1024 * 1024;
@@ -35,8 +34,10 @@ public class MemoryManager {
     private static MemoryManager INSTANCE;
     private static final long ALLOCATOR = Vulkan.getAllocator();
 
-    private static final Long2ReferenceOpenHashMap<Buffer> buffers = new Long2ReferenceOpenHashMap<>();
-    private static final Long2ReferenceOpenHashMap<VulkanImage> images = new Long2ReferenceOpenHashMap<>();
+    private static final Long2ReferenceOpenHashMap<Buffer> buffers =
+            new Long2ReferenceOpenHashMap<>();
+    private static final Long2ReferenceOpenHashMap<VulkanImage> images =
+            new Long2ReferenceOpenHashMap<>();
 
     static int Frames;
 
@@ -45,13 +46,15 @@ public class MemoryManager {
 
     private int currentFrame = 0;
 
-    private final ObjectArrayList<Buffer.BufferInfo>[] freeableBuffers = new ObjectArrayList[Frames];
+    private final ObjectArrayList<Buffer.BufferInfo>[] freeableBuffers =
+            new ObjectArrayList[Frames];
     private final ObjectArrayList<VulkanImage>[] freeableImages = new ObjectArrayList[Frames];
 
     private final ObjectArrayList<Runnable>[] frameOps = new ObjectArrayList[Frames];
-    private final ObjectArrayList<Pair<AreaBuffer, Integer>>[] segmentsToFree = new ObjectArrayList[Frames];
+    private final ObjectArrayList<Pair<AreaBuffer, Integer>>[] segmentsToFree =
+            new ObjectArrayList[Frames];
 
-    //debug
+    // debug
     private ObjectArrayList<StackTraceElement[]>[] stackTraces;
 
     public static MemoryManager getInstance() {
@@ -101,11 +104,13 @@ public class MemoryManager {
             this.doFrameOps(frame);
         }
 
-//        buffers.values().forEach(buffer -> freeBuffer(buffer.getId(), buffer.getAllocation()));
-//        images.values().forEach(image -> image.doFree(this));
+        //        buffers.values().forEach(buffer -> freeBuffer(buffer.getId(),
+        // buffer.getAllocation()));
+        //        images.values().forEach(image -> image.doFree(this));
     }
 
-    public void createBuffer(long size, int usage, int properties, LongBuffer pBuffer, PointerBuffer pBufferMemory) {
+    public void createBuffer(
+            long size, int usage, int properties, LongBuffer pBuffer, PointerBuffer pBufferMemory) {
         try (MemoryStack stack = stackPush()) {
 
             VkBufferCreateInfo bufferInfo = VkBufferCreateInfo.calloc(stack);
@@ -116,15 +121,23 @@ public class MemoryManager {
             VmaAllocationCreateInfo allocationInfo = VmaAllocationCreateInfo.calloc(stack);
             allocationInfo.requiredFlags(properties);
 
-            int result = vmaCreateBuffer(ALLOCATOR, bufferInfo, allocationInfo, pBuffer, pBufferMemory, null);
+            int result =
+                    vmaCreateBuffer(
+                            ALLOCATOR, bufferInfo, allocationInfo, pBuffer, pBufferMemory, null);
             if (result != VK_SUCCESS) {
-                Initializer.LOGGER.info(String.format("Failed to create buffer with size: %.3f MB", ((float) size / BYTES_IN_MB)));
-                Initializer.LOGGER.info(String.format("Tracked Device Memory used: %d/%d MB", getAllocatedDeviceMemoryMB(), getDeviceMemoryMB()));
+                Initializer.LOGGER.info(
+                        String.format(
+                                "Failed to create buffer with size: %.3f MB",
+                                ((float) size / BYTES_IN_MB)));
+                Initializer.LOGGER.info(
+                        String.format(
+                                "Tracked Device Memory used: %d/%d MB",
+                                getAllocatedDeviceMemoryMB(), getDeviceMemoryMB()));
                 Initializer.LOGGER.info(getHeapStats());
 
-                throw new RuntimeException("Failed to create buffer: %s".formatted(VkResult.decode(result)));
+                throw new RuntimeException(
+                        "Failed to create buffer: %s".formatted(VkResult.decode(result)));
             }
-
         }
     }
 
@@ -141,8 +154,7 @@ public class MemoryManager {
 
             if ((properties & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT) != 0) {
                 deviceMemory += size;
-            }
-            else {
+            } else {
                 nativeMemory += size;
             }
 
@@ -150,10 +162,18 @@ public class MemoryManager {
         }
     }
 
-    public void createImage(int width, int height, int arrayLayers, int mipLevels,
-                            int format, int tiling, int usage, int flags,
-                            int memProperties,
-                            LongBuffer pTextureImage, PointerBuffer pTextureImageMemory) {
+    public void createImage(
+            int width,
+            int height,
+            int arrayLayers,
+            int mipLevels,
+            int format,
+            int tiling,
+            int usage,
+            int flags,
+            int memProperties,
+            LongBuffer pTextureImage,
+            PointerBuffer pTextureImageMemory) {
         try (MemoryStack stack = stackPush()) {
             VkImageCreateInfo imageInfo = VkImageCreateInfo.calloc(stack);
             imageInfo.sType(VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO);
@@ -169,20 +189,30 @@ public class MemoryManager {
             imageInfo.usage(usage);
             imageInfo.samples(VK_SAMPLE_COUNT_1_BIT);
             imageInfo.flags(flags);
-//            imageInfo.sharingMode(VK_SHARING_MODE_CONCURRENT);
+            //            imageInfo.sharingMode(VK_SHARING_MODE_CONCURRENT);
             imageInfo.pQueueFamilyIndices(
-                    stack.ints(Queue.getQueueFamilies().graphicsFamily, Queue.getQueueFamilies().computeFamily));
+                    stack.ints(
+                            Queue.getQueueFamilies().graphicsFamily,
+                            Queue.getQueueFamilies().computeFamily));
 
             VmaAllocationCreateInfo allocationInfo = VmaAllocationCreateInfo.calloc(stack);
             allocationInfo.requiredFlags(memProperties);
 
-            int result = vmaCreateImage(ALLOCATOR, imageInfo, allocationInfo, pTextureImage, pTextureImageMemory, null);
+            int result =
+                    vmaCreateImage(
+                            ALLOCATOR,
+                            imageInfo,
+                            allocationInfo,
+                            pTextureImage,
+                            pTextureImageMemory,
+                            null);
             if (result != VK_SUCCESS) {
-                Initializer.LOGGER.info(String.format("Failed to create image with size: %dx%d", width, height));
+                Initializer.LOGGER.info(
+                        String.format("Failed to create image with size: %dx%d", width, height));
 
-                throw new RuntimeException("Failed to create image: %s".formatted(VkResult.decode(result)));
+                throw new RuntimeException(
+                        "Failed to create image: %s".formatted(VkResult.decode(result)));
             }
-
         }
     }
 
@@ -221,8 +251,7 @@ public class MemoryManager {
 
         if (bufferInfo.type() == MemoryType.Type.DEVICE_LOCAL) {
             deviceMemory -= bufferInfo.bufferSize();
-        }
-        else {
+        } else {
             nativeMemory -= bufferInfo.bufferSize();
         }
 
@@ -243,8 +272,7 @@ public class MemoryManager {
 
         freeableBuffers[currentFrame].add(bufferInfo);
 
-        if (DEBUG)
-            stackTraces[currentFrame].add(new Throwable().getStackTrace());
+        if (DEBUG) stackTraces[currentFrame].add(new Throwable().getStackTrace());
     }
 
     public synchronized void addToFreeable(VulkanImage image) {
@@ -272,8 +300,7 @@ public class MemoryManager {
 
         bufferList.clear();
 
-        if (DEBUG)
-            stackTraces[frame].clear();
+        if (DEBUG) stackTraces[frame].clear();
     }
 
     private void freeImages(int frame) {
@@ -323,7 +350,8 @@ public class MemoryManager {
 
     public String getHeapStats() {
         try (MemoryStack stack = MemoryStack.stackPush()) {
-            VmaBudget.Buffer vmaBudgets = VmaBudget.calloc(DeviceManager.memoryProperties.memoryHeapCount(), stack);
+            VmaBudget.Buffer vmaBudgets =
+                    VmaBudget.calloc(DeviceManager.memoryProperties.memoryHeapCount(), stack);
 
             vmaGetHeapBudgets(ALLOCATOR, vmaBudgets);
 
@@ -331,7 +359,8 @@ public class MemoryManager {
             long usage = vmaBudget.usage();
             long budget = vmaBudget.budget();
 
-            return String.format("Device Memory Heap Usage: %d/%dMB", bytesInMb(usage), bytesInMb(budget));
+            return String.format(
+                    "Device Memory Heap Usage: %d/%dMB", bytesInMb(usage), bytesInMb(budget));
         }
     }
 }

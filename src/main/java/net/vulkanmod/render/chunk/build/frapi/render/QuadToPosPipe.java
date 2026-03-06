@@ -1,11 +1,10 @@
 package net.vulkanmod.render.chunk.build.frapi.render;
 
+import java.util.function.Consumer;
 import net.fabricmc.fabric.api.renderer.v1.mesh.QuadView;
 import org.joml.Matrix4fc;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
-
-import java.util.function.Consumer;
 
 public class QuadToPosPipe implements Consumer<QuadView> {
     private final Consumer<Vector3fc> posConsumer;

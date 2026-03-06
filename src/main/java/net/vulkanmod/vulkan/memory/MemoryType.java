@@ -1,10 +1,9 @@
 package net.vulkanmod.vulkan.memory;
 
+import java.nio.ByteBuffer;
 import net.vulkanmod.vulkan.memory.buffer.Buffer;
 import org.lwjgl.vulkan.VkMemoryHeap;
 import org.lwjgl.vulkan.VkMemoryType;
-
-import java.nio.ByteBuffer;
 
 public abstract class MemoryType {
     final Type type;
@@ -19,14 +18,15 @@ public abstract class MemoryType {
 
     public abstract void createBuffer(Buffer buffer, long size);
 
-    public abstract void copyToBuffer(Buffer buffer, ByteBuffer src, long size, long srcOffset, long dstOffset);
+    public abstract void copyToBuffer(
+            Buffer buffer, ByteBuffer src, long size, long srcOffset, long dstOffset);
 
     public abstract void copyFromBuffer(Buffer buffer, long bufferSize, ByteBuffer byteBuffer);
 
     public abstract boolean mappable();
 
     public Type getType() {
-       return this.type;
+        return this.type;
     }
 
     public enum Type {

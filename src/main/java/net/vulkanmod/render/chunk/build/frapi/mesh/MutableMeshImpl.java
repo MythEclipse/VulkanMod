@@ -17,32 +17,33 @@
 package net.vulkanmod.render.chunk.build.frapi.mesh;
 
 import java.util.function.Consumer;
-
 import net.fabricmc.fabric.api.renderer.v1.mesh.Mesh;
 import net.fabricmc.fabric.api.renderer.v1.mesh.MutableMesh;
 import net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView;
 import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
 
 /**
- * Our implementation of {@link MutableMesh}, mainly used for optimized mesh creation.
- * Not much to it - mainly it just needs to grow the int[] array as quads are appended
- * and maintain/provide a properly-configured {@link MutableQuadView} instance.
- * All the encoding and other work is handled in the quad base classes.
- * The one interesting bit is in {@link #emitter}.
+ * Our implementation of {@link MutableMesh}, mainly used for optimized mesh creation. Not much to
+ * it - mainly it just needs to grow the int[] array as quads are appended and maintain/provide a
+ * properly-configured {@link MutableQuadView} instance. All the encoding and other work is handled
+ * in the quad base classes. The one interesting bit is in {@link #emitter}.
  */
 public class MutableMeshImpl extends MeshImpl implements MutableMesh {
-    private final MutableQuadViewImpl emitter = new MutableQuadViewImpl() {
-        @Override
-        protected void emitDirectly() {
-            // Necessary because the validity of geometry is not encoded; reading mesh data always
-            // uses QuadViewImpl#load(), which assumes valid geometry. Built immutable meshes
-            // should also have valid geometry for better performance.
-            computeGeometry();
-            limit += EncodingFormat.TOTAL_STRIDE;
-            ensureCapacity(EncodingFormat.TOTAL_STRIDE);
-            baseIndex = limit;
-        }
-    };
+    private final MutableQuadViewImpl emitter =
+            new MutableQuadViewImpl() {
+                @Override
+                protected void emitDirectly() {
+                    // Necessary because the validity of geometry is not encoded; reading mesh data
+                    // always
+                    // uses QuadViewImpl#load(), which assumes valid geometry. Built immutable
+                    // meshes
+                    // should also have valid geometry for better performance.
+                    computeGeometry();
+                    limit += EncodingFormat.TOTAL_STRIDE;
+                    ensureCapacity(EncodingFormat.TOTAL_STRIDE);
+                    baseIndex = limit;
+                }
+            };
 
     public MutableMeshImpl() {
         data = new int[8 * EncodingFormat.TOTAL_STRIDE];

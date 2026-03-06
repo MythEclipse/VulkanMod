@@ -85,7 +85,6 @@
     "texture.image.NativeImageAccessor",
     "texture.update.GameRendererM",
     "texture.update.MLightTexture",
-    "texture.update.MSpriteContents",
     "texture.update.MTextureManager",
     "util.ScreenshotMixin",
 

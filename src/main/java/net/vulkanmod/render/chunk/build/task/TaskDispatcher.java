@@ -1,6 +1,7 @@
 package net.vulkanmod.render.chunk.build.task;
 
 import com.google.common.collect.Queues;
+import java.util.Queue;
 import net.vulkanmod.render.chunk.ChunkArea;
 import net.vulkanmod.render.chunk.ChunkAreaManager;
 import net.vulkanmod.render.chunk.RenderSection;
@@ -11,8 +12,6 @@ import net.vulkanmod.render.chunk.build.thread.BuilderResources;
 import net.vulkanmod.render.chunk.build.thread.ThreadBuilderPack;
 import net.vulkanmod.render.vertex.TerrainRenderType;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.Queue;
 
 public class TaskDispatcher {
     private final Queue<CompileResult> compileResults = Queues.newLinkedBlockingDeque();
@@ -59,8 +58,7 @@ public class TaskDispatcher {
 
         for (int i = 0; i < n; i++) {
             BuilderResources builderResources = new BuilderResources();
-            Thread thread = new Thread(() -> runTaskThread(builderResources),
-                                       "Builder-" + i);
+            Thread thread = new Thread(() -> runTaskThread(builderResources), "Builder-" + i);
             thread.setPriority(Thread.NORM_PRIORITY);
 
             this.threads[i] = thread;
@@ -84,21 +82,18 @@ public class TaskDispatcher {
                     this.idleThreads--;
                 }
 
-            if (task == null)
-                continue;
+            if (task == null) continue;
 
             task.runTask(builderResources);
         }
     }
 
     public void schedule(ChunkTask chunkTask) {
-        if (chunkTask == null)
-            return;
+        if (chunkTask == null) return;
 
         if (chunkTask.highPriority) {
             this.highPriorityTasks.offer(chunkTask);
-        }
-        else {
+        } else {
             this.lowPriorityTasks.offer(chunkTask);
         }
 
@@ -111,15 +106,13 @@ public class TaskDispatcher {
     private ChunkTask pollTask() {
         ChunkTask task = this.highPriorityTasks.poll();
 
-        if (task == null)
-            task = this.lowPriorityTasks.poll();
+        if (task == null) task = this.lowPriorityTasks.poll();
 
         return task;
     }
 
     public void stopThreads() {
-        if (this.stopThreads)
-            return;
+        if (this.stopThreads) return;
 
         this.stopThreads = true;
 
@@ -134,7 +127,6 @@ public class TaskDispatcher {
                 throw new RuntimeException(e);
             }
         }
-
     }
 
     public boolean updateSections() {
@@ -160,8 +152,7 @@ public class TaskDispatcher {
         // Check if area has been dismissed before uploading
         ChunkAreaManager chunkAreaManager = WorldRenderer.getInstance().getChunkAreaManager();
         if (chunkAreaManager.getChunkArea(renderArea.index) != renderArea) {
-            compileResult.renderedLayers.values()
-                                        .forEach(UploadBuffer::release);
+            compileResult.renderedLayers.values().forEach(UploadBuffer::release);
             return;
         }
 
@@ -172,16 +163,15 @@ public class TaskDispatcher {
 
                 if (uploadBuffer != null) {
                     drawBuffers.upload(section, uploadBuffer, renderType);
-                }
-                else {
+                } else {
                     section.resetDrawParameters(renderType);
                 }
             }
 
             compileResult.updateSection();
-        }
-        else {
-            UploadBuffer uploadBuffer = compileResult.renderedLayers.get(TerrainRenderType.TRANSLUCENT);
+        } else {
+            UploadBuffer uploadBuffer =
+                    compileResult.renderedLayers.get(TerrainRenderType.TRANSLUCENT);
             drawBuffers.upload(section, uploadBuffer, TerrainRenderType.TRANSLUCENT);
         }
     }

@@ -1,13 +1,13 @@
 package net.vulkanmod.mixin.render.block;
 
-import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.model.geom.builders.UVPair;
+import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
 import net.vulkanmod.render.chunk.build.frapi.helper.NormalHelper;
 import net.vulkanmod.render.chunk.cull.QuadFacing;
-import net.vulkanmod.render.model.quad.ModelQuadView;
 import net.vulkanmod.render.model.quad.ModelQuadFlags;
+import net.vulkanmod.render.model.quad.ModelQuadView;
 import org.joml.Vector3fc;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -35,10 +35,21 @@ public class BakedQuadM implements ModelQuadView {
     private QuadFacing facing;
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void onInit(Vector3fc pos0, Vector3fc pos1, Vector3fc pos2, Vector3fc pos3,
-                        long uv0, long uv1, long uv2, long uv3,
-                        int tintIndex, Direction face, TextureAtlasSprite sprite,
-                        boolean shade, int lightEmission, CallbackInfo ci) {
+    private void onInit(
+            Vector3fc pos0,
+            Vector3fc pos1,
+            Vector3fc pos2,
+            Vector3fc pos3,
+            long uv0,
+            long uv1,
+            long uv2,
+            long uv3,
+            int tintIndex,
+            Direction face,
+            TextureAtlasSprite sprite,
+            boolean shade,
+            int lightEmission,
+            CallbackInfo ci) {
         this.flags = ModelQuadFlags.getQuadFlags(this, face);
         int packedNormal = NormalHelper.computePackedNormal(this);
         this.normal = packedNormal;

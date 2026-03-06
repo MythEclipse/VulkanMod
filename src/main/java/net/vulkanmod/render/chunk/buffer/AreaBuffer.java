@@ -1,6 +1,7 @@
 package net.vulkanmod.render.chunk.buffer;
 
 import it.unimi.dsi.fastutil.ints.Int2ReferenceOpenHashMap;
+import java.nio.ByteBuffer;
 import net.vulkanmod.Initializer;
 import net.vulkanmod.render.chunk.util.Util;
 import net.vulkanmod.vulkan.memory.*;
@@ -8,8 +9,6 @@ import net.vulkanmod.vulkan.memory.buffer.Buffer;
 import net.vulkanmod.vulkan.memory.buffer.IndexBuffer;
 import net.vulkanmod.vulkan.memory.buffer.VertexBuffer;
 import org.apache.logging.log4j.Logger;
-
-import java.nio.ByteBuffer;
 
 public class AreaBuffer {
     private static final boolean DEBUG = false;
@@ -53,8 +52,7 @@ public class AreaBuffer {
     }
 
     public Segment allocateSegment(int size) {
-        if (DEBUG && size % elementSize != 0)
-            throw new RuntimeException("Unaligned buffer");
+        if (DEBUG && size % elementSize != 0) throw new RuntimeException("Unaligned buffer");
 
         Segment segment = findSegment(size);
 
@@ -64,8 +62,7 @@ public class AreaBuffer {
 
             if (segment.next != null) {
                 s1.bindNext(segment.next);
-            } else
-                this.last = s1;
+            } else this.last = s1;
 
             segment.bindNext(s1);
 
@@ -85,7 +82,7 @@ public class AreaBuffer {
     public void freeSegment(int offset) {
         if (offset != -1) {
             // Need to delay segment freeing since it might be still used by prev frames in flight
-//            this.setSegmentFree(oldOffset);
+            //            this.setSegmentFree(oldOffset);
             MemoryManager.getInstance().addToFreeSegment(this, offset);
         }
     }
@@ -93,11 +90,12 @@ public class AreaBuffer {
     public void upload(Segment segment, ByteBuffer byteBuffer, int offset) {
         int size = byteBuffer.remaining();
 
-        if (DEBUG && size % elementSize != 0)
-            throw new RuntimeException("Unaligned buffer");
+        if (DEBUG && size % elementSize != 0) throw new RuntimeException("Unaligned buffer");
 
         if (size + offset > segment.size) {
-            throw new RuntimeException("trying to upload %d at offset %d, but segment size is %d".formatted(size, offset, segment.size));
+            throw new RuntimeException(
+                    "trying to upload %d at offset %d, but segment size is %d"
+                            .formatted(size, offset, segment.size));
         }
 
         Buffer dst = this.buffer;
@@ -109,8 +107,7 @@ public class AreaBuffer {
 
         int size = byteBuffer.remaining();
 
-        if (DEBUG && size % elementSize != 0)
-            throw new RuntimeException("Unaligned buffer");
+        if (DEBUG && size % elementSize != 0) throw new RuntimeException("Unaligned buffer");
 
         Segment segment = findSegment(size);
 
@@ -120,8 +117,7 @@ public class AreaBuffer {
 
             if (segment.next != null) {
                 s1.bindNext(segment.next);
-            } else
-                this.last = s1;
+            } else this.last = s1;
 
             segment.bindNext(s1);
 
@@ -147,8 +143,7 @@ public class AreaBuffer {
         Segment segment1 = this.first;
         while (segment1 != null) {
             if (segment1.isFree() && segment1.size >= size) {
-                if (segment == null || segment1.size < segment.size)
-                    segment = segment1;
+                if (segment == null || segment1.size < segment.size) segment = segment1;
             }
 
             segment1 = segment1.next;
@@ -167,11 +162,12 @@ public class AreaBuffer {
         int minIncrement = this.size >> 3;
         minIncrement = (int) Util.align(minIncrement, this.elementSize);
 
-//        int increment = Math.max(minIncrement, uploadSize << 1);
+        //        int increment = Math.max(minIncrement, uploadSize << 1);
         int increment = Math.max(minIncrement, uploadSize);
 
         if (increment < uploadSize)
-            throw new RuntimeException(String.format("Size increment %d < %d (Upload size)", increment, uploadSize));
+            throw new RuntimeException(
+                    String.format("Size increment %d < %d (Upload size)", increment, uploadSize));
 
         int newSize = oldSize + increment;
 
@@ -181,15 +177,14 @@ public class AreaBuffer {
         UploadManager.INSTANCE.copyBuffer(this.buffer, dst);
 
         // TODO: moving only used segments causes corruption
-//        moveUsedSegments(dst);
+        //        moveUsedSegments(dst);
 
         this.buffer.scheduleFree();
         this.buffer = dst;
 
         if (last.isFree()) {
             last.size += increment;
-        }
-        else {
+        } else {
             int offset = last.offset + last.size;
             Segment segment = new Segment(offset, newSize - offset);
             segments++;
@@ -199,8 +194,7 @@ public class AreaBuffer {
             last = segment;
         }
 
-        if (DEBUG)
-            checkSegments();
+        if (DEBUG) checkSegments();
 
         return last;
     }
@@ -229,7 +223,8 @@ public class AreaBuffer {
                         this.first = segment;
                         segment.prev = null;
                     } else {
-                        UploadManager.INSTANCE.copyBuffer(this.buffer, srcOffset, dst, dstOffset, uploadSize);
+                        UploadManager.INSTANCE.copyBuffer(
+                                this.buffer, srcOffset, dst, dstOffset, uploadSize);
 
                         dstOffset += uploadSize;
                     }
@@ -272,8 +267,7 @@ public class AreaBuffer {
     public void setSegmentFree(int offset) {
         Segment segment = usedSegments.remove(offset * elementSize);
 
-        if (segment == null)
-            return;
+        if (segment == null) return;
 
         this.used -= segment.size;
 
@@ -341,7 +335,8 @@ public class AreaBuffer {
             }
 
             if (segment.prev != prev) {
-                LOGGER.error(String.format("expected previous segment not matching (segment %d)", i));
+                LOGGER.error(
+                        String.format("expected previous segment not matching (segment %d)", i));
             }
 
             if (!segment.isFree()) {
@@ -357,24 +352,35 @@ public class AreaBuffer {
             if (next != null) {
                 int offset = segment.offset + segment.size;
                 if (offset != next.offset)
-                    LOGGER.error(String.format("expected offset %d but got %d (segment %d)", offset, next.offset, i));
+                    LOGGER.error(
+                            String.format(
+                                    "expected offset %d but got %d (segment %d)",
+                                    offset, next.offset, i));
 
                 if (next.prev != segment)
                     LOGGER.error(String.format("segment pointer not correct (segment %d)", i));
 
             } else {
                 if (segment != this.last)
-                    LOGGER.error(String.format("segment has no next pointer and it's not last (segment %d)", i));
+                    LOGGER.error(
+                            String.format(
+                                    "segment has no next pointer and it's not last (segment %d)",
+                                    i));
                 else {
                     int segmentEnd = segment.offset + segment.size;
                     if (segment.offset + segment.size != this.size)
-                        LOGGER.error(String.format("last segment end (%d) does not match buffer size (%d)", segmentEnd, this.size));
+                        LOGGER.error(
+                                String.format(
+                                        "last segment end (%d) does not match buffer size (%d)",
+                                        segmentEnd, this.size));
 
                     // Check segmentation
                     if (segment.offset != this.used)
-                        LOGGER.error(String.format("last segment offset (%d) does not match buffer used size (%d)", segmentEnd, this.size));
+                        LOGGER.error(
+                                String.format(
+                                        "last segment offset (%d) does not match buffer used size (%d)",
+                                        segmentEnd, this.size));
                 }
-
             }
 
             prev = segment;
@@ -382,8 +388,7 @@ public class AreaBuffer {
             i++;
         }
 
-        if (i != this.segments)
-            LOGGER.error("Count do not match segments");
+        if (i != this.segments) LOGGER.error("Count do not match segments");
 
         if (usedSegments != this.usedSegments.size())
             LOGGER.error("Counted used segment do not match used segments map size");
@@ -429,7 +434,6 @@ public class AreaBuffer {
             this.next = s;
             s.prev = this;
         }
-
     }
 
     public enum Usage {
@@ -442,5 +446,4 @@ public class AreaBuffer {
             usage = i;
         }
     }
-
 }

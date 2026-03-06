@@ -15,9 +15,16 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(FogRenderer.class)
 public class FogRendererMixin {
-    @Inject(method = "setupFog", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;clamp(FFF)F"))
-    private void onSetupFog(Camera camera, int i, DeltaTracker deltaTracker, float f,
-                            ClientLevel clientLevel, CallbackInfoReturnable<Vector4f> cir) {
+    @Inject(
+            method = "setupFog",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;clamp(FFF)F"))
+    private void onSetupFog(
+            Camera camera,
+            int i,
+            DeltaTracker deltaTracker,
+            float f,
+            ClientLevel clientLevel,
+            CallbackInfoReturnable<Vector4f> cir) {
         Vector4f fogColor = cir.getReturnValue();
         if (fogColor == null) {
             return;
@@ -27,10 +34,17 @@ public class FogRendererMixin {
     }
 
     @Inject(method = "updateBuffer", at = @At("HEAD"))
-    private static void onUpdateBuffer(java.nio.ByteBuffer buffer, int position, Vector4f fogColor,
-                                       float environmentalStart, float environmentalEnd,
-                                       float renderDistanceStart, float renderDistanceEnd,
-                                       float skyEnd, float cloudEnd, CallbackInfo ci) {
+    private static void onUpdateBuffer(
+            java.nio.ByteBuffer buffer,
+            int position,
+            Vector4f fogColor,
+            float environmentalStart,
+            float environmentalEnd,
+            float renderDistanceStart,
+            float renderDistanceEnd,
+            float skyEnd,
+            float cloudEnd,
+            CallbackInfo ci) {
         FogData fogData = VRenderSystem.fogData;
         fogData.environmentalStart = environmentalStart;
         fogData.environmentalEnd = environmentalEnd;

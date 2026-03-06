@@ -7,5 +7,4 @@ public class PushConstants extends AlignedStruct {
     protected PushConstants(List<Uniform.Info> infoList, int size) {
         super(infoList, size);
     }
-
 }

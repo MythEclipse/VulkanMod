@@ -25,13 +25,10 @@ public class VertexMultiConsumersM {
         @Shadow @Final private VertexConsumer first;
         @Shadow @Final private VertexConsumer second;
 
-        @Unique
-        private ExtendedVertexBuilder firstExt;
-        @Unique
-        private ExtendedVertexBuilder secondExt;
+        @Unique private ExtendedVertexBuilder firstExt;
+        @Unique private ExtendedVertexBuilder secondExt;
 
-        @Unique
-        private boolean canUseFastVertex = false;
+        @Unique private boolean canUseFastVertex = false;
 
         @Override
         public boolean canUseFastVertex() {
@@ -39,9 +36,11 @@ public class VertexMultiConsumersM {
         }
 
         @Inject(method = "<init>", at = @At("RETURN"))
-        private void checkDelegates(VertexConsumer vertexConsumer, VertexConsumer vertexConsumer2, CallbackInfo ci) {
-            this.canUseFastVertex = (ExtendedVertexBuilder.of(this.first) != null)
-                    && (ExtendedVertexBuilder.of(this.second) != null);
+        private void checkDelegates(
+                VertexConsumer vertexConsumer, VertexConsumer vertexConsumer2, CallbackInfo ci) {
+            this.canUseFastVertex =
+                    (ExtendedVertexBuilder.of(this.first) != null)
+                            && (ExtendedVertexBuilder.of(this.second) != null);
 
             if (this.canUseFastVertex) {
                 this.firstExt = ExtendedVertexBuilder.of(this.first);
@@ -50,7 +49,16 @@ public class VertexMultiConsumersM {
         }
 
         @Override
-        public void vertex(float x, float y, float z, int packedColor, float u, float v, int overlay, int light, int packedNormal) {
+        public void vertex(
+                float x,
+                float y,
+                float z,
+                int packedColor,
+                float u,
+                float v,
+                int overlay,
+                int light,
+                int packedNormal) {
             this.firstExt.vertex(x, y, z, packedColor, u, v, overlay, light, packedNormal);
             this.secondExt.vertex(x, y, z, packedColor, u, v, overlay, light, packedNormal);
         }
@@ -60,8 +68,7 @@ public class VertexMultiConsumersM {
     public static class MultipleM implements ExtendedVertexBuilder {
         @Shadow @Final private VertexConsumer[] delegates;
 
-        @Unique
-        private boolean canUseFastVertex = false;
+        @Unique private boolean canUseFastVertex = false;
 
         @Override
         public boolean canUseFastVertex() {
@@ -81,24 +88,34 @@ public class VertexMultiConsumersM {
         }
 
         @Override
-        public void vertex(float x, float y, float z, int packedColor, float u, float v, int overlay, int light, int packedNormal) {
+        public void vertex(
+                float x,
+                float y,
+                float z,
+                int packedColor,
+                float u,
+                float v,
+                int overlay,
+                int light,
+                int packedNormal) {
             for (VertexConsumer vertexConsumer : this.delegates) {
-                ExtendedVertexBuilder extendedVertexBuilder = (ExtendedVertexBuilder) vertexConsumer;
+                ExtendedVertexBuilder extendedVertexBuilder =
+                        (ExtendedVertexBuilder) vertexConsumer;
 
-                extendedVertexBuilder.vertex(x, y, z, packedColor, u, v, overlay, light, packedNormal);
+                extendedVertexBuilder.vertex(
+                        x, y, z, packedColor, u, v, overlay, light, packedNormal);
             }
         }
     }
 
     @Mixin(SheetedDecalTextureGenerator.class)
-    public static abstract class SheetDecalM implements ExtendedVertexBuilder {
+    public abstract static class SheetDecalM implements ExtendedVertexBuilder {
         @Shadow @Final private VertexConsumer delegate;
         @Shadow @Final private Matrix3f normalInversePose;
         @Shadow @Final private Matrix4f cameraInversePose;
         @Shadow @Final private float textureScale;
 
-        @Unique
-        private boolean canUseFastVertex = false;
+        @Unique private boolean canUseFastVertex = false;
 
         private Vector3f normal = new Vector3f();
         private Vector4f position = new Vector4f();
@@ -109,21 +126,32 @@ public class VertexMultiConsumersM {
         }
 
         @Inject(method = "<init>", at = @At("RETURN"))
-        private void checkDelegates(VertexConsumer vertexConsumer, PoseStack.Pose pose, float f, CallbackInfo ci) {
+        private void checkDelegates(
+                VertexConsumer vertexConsumer, PoseStack.Pose pose, float f, CallbackInfo ci) {
             this.canUseFastVertex = (ExtendedVertexBuilder.of(this.delegate) != null);
         }
 
         @Override
-        public void vertex(float x, float y, float z, int packedColor, float u, float v, int overlay, int light, int packedNormal) {
+        public void vertex(
+                float x,
+                float y,
+                float z,
+                int packedColor,
+                float u,
+                float v,
+                int overlay,
+                int light,
+                int packedNormal) {
             float nx = I32_SNorm.unpackX(packedNormal);
             float ny = I32_SNorm.unpackY(packedNormal);
             float nz = I32_SNorm.unpackZ(packedNormal);
 
             normal.set(nx, ny, nz);
-            position.set(x, y , z, 1.0f);
+            position.set(x, y, z, 1.0f);
 
             this.normalInversePose.transform(normal);
-            Direction direction = Direction.getApproximateNearest(normal.x(), normal.y(), normal.z());
+            Direction direction =
+                    Direction.getApproximateNearest(normal.x(), normal.y(), normal.z());
             this.cameraInversePose.transform(position);
             position.rotateY(3.1415927F);
             position.rotateX(-1.5707964F);

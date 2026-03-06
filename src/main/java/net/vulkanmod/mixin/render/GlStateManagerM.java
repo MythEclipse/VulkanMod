@@ -3,6 +3,7 @@ package net.vulkanmod.mixin.render;
 import com.mojang.blaze3d.opengl.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.jtracy.Plot;
+import java.nio.ByteBuffer;
 import net.vulkanmod.gl.*;
 import net.vulkanmod.vulkan.Renderer;
 import net.vulkanmod.vulkan.VRenderSystem;
@@ -10,11 +11,9 @@ import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.Shadow;
-
-import java.nio.ByteBuffer;
 
 @Mixin(GlStateManager.class)
 public class GlStateManagerM {
@@ -56,7 +55,6 @@ public class GlStateManagerM {
     public static void _blendFuncSeparate(int i, int j, int k, int l) {
         RenderSystem.assertOnRenderThread();
         VRenderSystem.blendFuncSeparate(i, j, k, l);
-
     }
 
     /**
@@ -92,7 +90,10 @@ public class GlStateManagerM {
     /**
      * @author
      */
-    @Redirect(method = "_viewport", at = @At(value = "INVOKE", target = "Lorg/lwjgl/opengl/GL11;glViewport(IIII)V"), remap = false)
+    @Redirect(
+            method = "_viewport",
+            at = @At(value = "INVOKE", target = "Lorg/lwjgl/opengl/GL11;glViewport(IIII)V"),
+            remap = false)
     private static void _viewport(int x, int y, int width, int height) {
         Renderer.setViewport(x, y, width, height);
     }
@@ -105,7 +106,7 @@ public class GlStateManagerM {
         Renderer.setScissor(x, y, width, height);
     }
 
-    //TODO
+    // TODO
     /**
      * @author
      */
@@ -118,18 +119,38 @@ public class GlStateManagerM {
      * @author
      */
     @Overwrite(remap = false)
-    public static void _texImage2D(int target, int level, int internalFormat, int width, int height, int border, int format, int type, @Nullable ByteBuffer pixels) {
+    public static void _texImage2D(
+            int target,
+            int level,
+            int internalFormat,
+            int width,
+            int height,
+            int border,
+            int format,
+            int type,
+            @Nullable ByteBuffer pixels) {
         RenderSystem.assertOnRenderThread();
-        VkGlTexture.texImage2D(target, level, internalFormat, width, height, border, format, type, pixels);
+        VkGlTexture.texImage2D(
+                target, level, internalFormat, width, height, border, format, type, pixels);
     }
 
     /**
      * @author
      */
     @Overwrite(remap = false)
-    public static void _texSubImage2D(int target, int level, int offsetX, int offsetY, int width, int height, int format, int type, long pixels) {
+    public static void _texSubImage2D(
+            int target,
+            int level,
+            int offsetX,
+            int offsetY,
+            int width,
+            int height,
+            int format,
+            int type,
+            long pixels) {
         RenderSystem.assertOnRenderThread();
-        VkGlTexture.texSubImage2D(target, level, offsetX, offsetY, width, height, format, type, pixels);
+        VkGlTexture.texSubImage2D(
+                target, level, offsetX, offsetY, width, height, format, type, pixels);
     }
 
     /**
@@ -161,7 +182,7 @@ public class GlStateManagerM {
      */
     @Overwrite(remap = false)
     public static void _pixelStore(int pname, int param) {
-        //Used during upload to set copy offsets
+        // Used during upload to set copy offsets
         RenderSystem.assertOnRenderThread();
         VkGlTexture.pixelStoreI(pname, param);
     }
@@ -299,7 +320,6 @@ public class GlStateManagerM {
     public static void _depthMask(boolean bl) {
         RenderSystem.assertOnRenderThread();
         VRenderSystem.depthMask(bl);
-
     }
 
     /**
@@ -437,8 +457,8 @@ public class GlStateManagerM {
      */
     @Overwrite(remap = false)
     public static void _glUseProgram(int i) {
-//        RenderSystem.assertOnRenderThread();
-//        GL20.glUseProgram(i);
+        //        RenderSystem.assertOnRenderThread();
+        //        GL20.glUseProgram(i);
     }
 
     /**
@@ -446,8 +466,8 @@ public class GlStateManagerM {
      */
     @Overwrite(remap = false)
     public static int glCreateProgram() {
-//        RenderSystem.assertOnRenderThread();
-//        return GL20.glCreateProgram();
+        //        RenderSystem.assertOnRenderThread();
+        //        return GL20.glCreateProgram();
         return 0;
     }
 
@@ -456,7 +476,7 @@ public class GlStateManagerM {
      */
     @Overwrite(remap = false)
     public static void glDeleteProgram(int i) {
-//        RenderSystem.assertOnRenderThread();
-//        GL20.glDeleteProgram(i);
+        //        RenderSystem.assertOnRenderThread();
+        //        GL20.glDeleteProgram(i);
     }
 }

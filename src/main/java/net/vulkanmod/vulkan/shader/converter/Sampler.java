@@ -15,7 +15,9 @@ public class Sampler {
     }
 
     public GLSLParser.Node getNode() {
-        return new GLSLParser.Node("sampler", "layout(binding = %d) uniform %s %s;\n".formatted(binding, type.name, id));
+        return new GLSLParser.Node(
+                "sampler",
+                "layout(binding = %d) uniform %s %s;\n".formatted(binding, type.name, id));
     }
 
     public enum Type {

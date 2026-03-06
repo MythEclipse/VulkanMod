@@ -5,7 +5,8 @@ import net.vulkanmod.vulkan.shader.Pipeline;
 
 public class VkGlProgram {
     private static int ID_COUNTER = 1;
-    private static final Int2ReferenceOpenHashMap<VkGlProgram> map = new Int2ReferenceOpenHashMap<>();
+    private static final Int2ReferenceOpenHashMap<VkGlProgram> map =
+            new Int2ReferenceOpenHashMap<>();
     private static int boundProgramId = 0;
     private static VkGlProgram boundProgram;
 
@@ -35,7 +36,6 @@ public class VkGlProgram {
         if (boundProgram == null) {
             throw new NullPointerException("bound texture is null");
         }
-
     }
 
     int id;

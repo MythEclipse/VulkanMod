@@ -8,8 +8,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 public class TimerQueryM {
 
     @Overwrite
-    public void beginProfile() {
-    }
+    public void beginProfile() {}
 
     @Overwrite
     public TimerQuery.FrameProfile endProfile() {

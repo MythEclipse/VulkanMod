@@ -1,9 +1,8 @@
 package net.vulkanmod.vulkan.shader.layout;
 
+import java.util.function.Supplier;
 import net.vulkanmod.vulkan.util.MappedBuffer;
 import org.lwjgl.system.MemoryUtil;
-
-import java.util.function.Supplier;
 
 public class Vec1f extends Uniform {
     private Supplier<Float> floatSupplier;

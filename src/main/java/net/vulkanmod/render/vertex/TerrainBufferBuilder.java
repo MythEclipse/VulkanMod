@@ -3,7 +3,8 @@ package net.vulkanmod.render.vertex;
 /* JADX INFO: loaded from: VulkanMod_1.21.11-0.6.0.jar:net/vulkanmod/render/vertex/TerrainBufferBuilder.class */
 public class TerrainBufferBuilder implements com.mojang.blaze3d.vertex.VertexConsumer {
     private static final org.apache.logging.log4j.Logger LOGGER = net.vulkanmod.Initializer.LOGGER;
-    private static final org.lwjgl.system.MemoryUtil.MemoryAllocator ALLOCATOR = org.lwjgl.system.MemoryUtil.getAllocator(false);
+    private static final org.lwjgl.system.MemoryUtil.MemoryAllocator ALLOCATOR =
+            org.lwjgl.system.MemoryUtil.getAllocator(false);
     private int capacity;
     private int vertexSize;
     protected long bufferPtr;
@@ -12,7 +13,8 @@ public class TerrainBufferBuilder implements com.mojang.blaze3d.vertex.VertexCon
     private long elementPtr;
     private net.vulkanmod.render.vertex.VertexBuilder vertexBuilder;
 
-    public TerrainBufferBuilder(int size, int vertexSize, net.vulkanmod.render.vertex.VertexBuilder vertexBuilder) {
+    public TerrainBufferBuilder(
+            int size, int vertexSize, net.vulkanmod.render.vertex.VertexBuilder vertexBuilder) {
         this.bufferPtr = ALLOCATOR.malloc(size);
         this.capacity = size;
         this.vertexSize = vertexSize;
@@ -33,9 +35,13 @@ public class TerrainBufferBuilder implements com.mojang.blaze3d.vertex.VertexCon
 
     private void resize(int i) {
         this.bufferPtr = ALLOCATOR.realloc(this.bufferPtr, i);
-        LOGGER.debug("Needed to grow BufferBuilder buffer: Old size {} bytes, new size {} bytes.", java.lang.Integer.valueOf(this.capacity), java.lang.Integer.valueOf(i));
+        LOGGER.debug(
+                "Needed to grow BufferBuilder buffer: Old size {} bytes, new size {} bytes.",
+                java.lang.Integer.valueOf(this.capacity),
+                java.lang.Integer.valueOf(i));
         if (this.bufferPtr == 0) {
-            throw new java.lang.OutOfMemoryError("Failed to resize buffer from " + this.capacity + " bytes to " + i + " bytes");
+            throw new java.lang.OutOfMemoryError(
+                    "Failed to resize buffer from " + this.capacity + " bytes to " + i + " bytes");
         }
         this.capacity = i;
     }
@@ -45,14 +51,14 @@ public class TerrainBufferBuilder implements com.mojang.blaze3d.vertex.VertexCon
         this.vertices++;
     }
 
-    public void vertex(float x, float y, float z, int color, float u, float v, int light, int packedNormal) {
+    public void vertex(
+            float x, float y, float z, int color, float u, float v, int light, int packedNormal) {
         long ptr = this.bufferPtr + ((long) this.nextElementByte);
         this.vertexBuilder.vertex(ptr, x, y, z, color, u, v, light, packedNormal);
         endVertex();
     }
 
-    public void end() {
-    }
+    public void end() {}
 
     public void clear() {
         this.nextElementByte = 0;
@@ -64,7 +70,8 @@ public class TerrainBufferBuilder implements com.mojang.blaze3d.vertex.VertexCon
     }
 
     public java.nio.ByteBuffer getBuffer() {
-        return org.lwjgl.system.MemoryUtil.memByteBuffer(this.bufferPtr, this.vertices * this.vertexSize);
+        return org.lwjgl.system.MemoryUtil.memByteBuffer(
+                this.bufferPtr, this.vertices * this.vertexSize);
     }
 
     public long getPtr() {

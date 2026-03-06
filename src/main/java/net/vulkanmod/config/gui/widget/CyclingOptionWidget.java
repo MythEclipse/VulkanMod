@@ -61,8 +61,7 @@ public class CyclingOptionWidget extends OptionWidget<CyclingOption<?>> {
         int color = ColorUtil.ARGB.pack(1.0f, 1.0f, 1.0f, 0.4f);
         int activeColor = ColorUtil.ARGB.pack(1.0f, 1.0f, 1.0f, 1.0f);
 
-        if (barWidth <= 0)
-            return;
+        if (barWidth <= 0) return;
 
         for (int i = 0; i < count; i++) {
             int x0 = this.controlX + margin + i * (barWidth + padding);
@@ -84,21 +83,16 @@ public class CyclingOptionWidget extends OptionWidget<CyclingOption<?>> {
     public void onClick(double mouseX, double mouseY) {
         if (leftButton.isHovered(mouseX, mouseY)) {
             option.prevValue();
-        }
-        else if (rightButton.isHovered(mouseX, mouseY)) {
+        } else if (rightButton.isHovered(mouseX, mouseY)) {
             option.nextValue();
         }
     }
 
     @Override
-    public void onRelease(double mouseX, double mouseY) {
-
-    }
+    public void onRelease(double mouseX, double mouseY) {}
 
     @Override
-    protected void onDrag(double mouseX, double mouseY, double deltaX, double deltaY) {
-
-    }
+    protected void onDrag(double mouseX, double mouseY, double deltaX, double deltaY) {}
 
     @Override
     public void setFocused(boolean bl) {
@@ -144,11 +138,9 @@ public class CyclingOptionWidget extends OptionWidget<CyclingOption<?>> {
             int color;
             if (this.isHovered(mouseX, mouseY) && this.active) {
                 color = HOVERED_COLOR;
-            }
-            else if (this.active) {
+            } else if (this.active) {
                 color = ACTIVE_COLOR;
-            }
-            else {
+            } else {
                 color = INACTIVE_COLOR;
             }
 
@@ -159,22 +151,23 @@ public class CyclingOptionWidget extends OptionWidget<CyclingOption<?>> {
 
             float[][] vertices;
             if (this.direction == Direction.LEFT) {
-                vertices = new float[][]{
-                        {xC - w, yC},
-                        {xC + w, yC + h},
-                        {xC + w, yC - h},
-                };
-            }
-            else {
-                vertices = new float[][]{
-                        {xC + w, yC},
-                        {xC - w, yC - h},
-                        {xC - w, yC + h},
-                };
+                vertices =
+                        new float[][] {
+                            {xC - w, yC},
+                            {xC + w, yC + h},
+                            {xC + w, yC - h},
+                        };
+            } else {
+                vertices =
+                        new float[][] {
+                            {xC + w, yC},
+                            {xC - w, yC - h},
+                            {xC - w, yC + h},
+                        };
             }
 
-
-            GuiRenderer.submitPolygon(CustomRenderPipelines.GUI_TRIANGLES, TextureSetup.noTexture(), vertices, color);
+            GuiRenderer.submitPolygon(
+                    CustomRenderPipelines.GUI_TRIANGLES, TextureSetup.noTexture(), vertices, color);
         }
 
         enum Direction {
@@ -182,5 +175,4 @@ public class CyclingOptionWidget extends OptionWidget<CyclingOption<?>> {
             RIGHT
         }
     }
-
 }

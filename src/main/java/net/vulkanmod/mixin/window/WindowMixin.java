@@ -1,13 +1,15 @@
 package net.vulkanmod.mixin.window;
 
+import static org.lwjgl.glfw.GLFW.*;
+
 import com.mojang.blaze3d.TracyFrameCapture;
 import com.mojang.blaze3d.platform.*;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.vulkanmod.Initializer;
 import net.vulkanmod.config.Config;
 import net.vulkanmod.config.Platform;
-import net.vulkanmod.config.video.VideoModeManager;
 import net.vulkanmod.config.option.Options;
+import net.vulkanmod.config.video.VideoModeManager;
 import net.vulkanmod.config.video.VideoModeSet;
 import net.vulkanmod.config.video.WindowMode;
 import net.vulkanmod.vulkan.Renderer;
@@ -24,8 +26,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import static org.lwjgl.glfw.GLFW.*;
 
 @Mixin(Window.class)
 public abstract class WindowMixin {
@@ -48,26 +48,52 @@ public abstract class WindowMixin {
     @Shadow private int framebufferWidth;
     @Shadow private int framebufferHeight;
 
-    @Shadow public abstract int getWidth();
+    @Shadow
+    public abstract int getWidth();
 
-    @Shadow public abstract int getHeight();
+    @Shadow
+    public abstract int getHeight();
 
-    @Shadow protected abstract void updateFullscreen(boolean bl, @Nullable TracyFrameCapture tracyFrameCapture);
+    @Shadow
+    protected abstract void updateFullscreen(
+            boolean bl, @Nullable TracyFrameCapture tracyFrameCapture);
 
-    @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lorg/lwjgl/glfw/GLFW;glfwWindowHint(II)V"))
-    private void redirect(int hint, int value) { }
+    @Redirect(
+            method = "<init>",
+            at = @At(value = "INVOKE", target = "Lorg/lwjgl/glfw/GLFW;glfwWindowHint(II)V"))
+    private void redirect(int hint, int value) {}
 
-    @Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lorg/lwjgl/glfw/GLFW;glfwCreateWindow(IILjava/lang/CharSequence;JJ)J"))
-    private void vulkanHint(WindowEventHandler windowEventHandler, ScreenManager screenManager, DisplayData displayData, String string, String string2, CallbackInfo ci) {
+    @Inject(
+            method = "<init>",
+            at =
+                    @At(
+                            value = "INVOKE",
+                            target =
+                                    "Lorg/lwjgl/glfw/GLFW;glfwCreateWindow(IILjava/lang/CharSequence;JJ)J"))
+    private void vulkanHint(
+            WindowEventHandler windowEventHandler,
+            ScreenManager screenManager,
+            DisplayData displayData,
+            String string,
+            String string2,
+            CallbackInfo ci) {
         GLFW.glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
-        //Fix Gnome Client-Side Decorators
-        boolean b = (Platform.isGnome() | Platform.isWeston() | Platform.isGeneric()) && Platform.isWayLand();
+        // Fix Gnome Client-Side Decorators
+        boolean b =
+                (Platform.isGnome() | Platform.isWeston() | Platform.isGeneric())
+                        && Platform.isWayLand();
         GLFW.glfwWindowHint(GLFW_DECORATED, (b ? GLFW_FALSE : GLFW_TRUE));
     }
 
     @Inject(method = "<init>", at = @At(value = "RETURN"))
-    private void getHandle(WindowEventHandler windowEventHandler, ScreenManager screenManager, DisplayData displayData, String string, String string2, CallbackInfo ci) {
+    private void getHandle(
+            WindowEventHandler windowEventHandler,
+            ScreenManager screenManager,
+            DisplayData displayData,
+            String string,
+            String string2,
+            CallbackInfo ci) {
         VRenderSystem.setWindow(this.handle);
     }
 
@@ -94,7 +120,7 @@ public abstract class WindowMixin {
      */
     @Overwrite
     public void updateDisplay(@Nullable TracyFrameCapture tracyFrameCapture) {
-        RenderSystem.flipFrame((Window) ((Object)this), tracyFrameCapture);
+        RenderSystem.flipFrame((Window) ((Object) this), tracyFrameCapture);
 
         if (Options.fullscreenDirty) {
             Options.fullscreenDirty = false;
@@ -121,12 +147,11 @@ public abstract class WindowMixin {
 
                 if (set != null) {
                     supported = set.hasRefreshRate(videoMode.refreshRate);
-                }
-                else {
+                } else {
                     supported = false;
                 }
 
-                if(!supported) {
+                if (!supported) {
                     LOGGER.error("Resolution not supported, using first available as fallback");
                     videoMode = VideoModeManager.getFirstAvailable().getVideoMode();
                 }
@@ -142,12 +167,18 @@ public abstract class WindowMixin {
                 this.y = 0;
                 this.width = videoMode.width;
                 this.height = videoMode.height;
-                GLFW.glfwSetWindowMonitor(this.handle, monitor, this.x, this.y, this.width, this.height, videoMode.refreshRate);
+                GLFW.glfwSetWindowMonitor(
+                        this.handle,
+                        monitor,
+                        this.x,
+                        this.y,
+                        this.width,
+                        this.height,
+                        videoMode.refreshRate);
 
                 this.wasOnFullscreen = true;
             }
-        }
-        else if (config.windowMode == WindowMode.WINDOWED_FULLSCREEN.mode) {
+        } else if (config.windowMode == WindowMode.WINDOWED_FULLSCREEN.mode) {
             VideoModeSet.VideoMode videoMode = VideoModeManager.getOsVideoMode();
 
             if (!this.wasOnFullscreen) {
@@ -189,16 +220,16 @@ public abstract class WindowMixin {
             int prevWidth = this.getWidth();
             int prevHeight = this.getHeight();
 
-            if(width > 0 && height > 0) {
+            if (width > 0 && height > 0) {
                 this.framebufferWidth = width;
                 this.framebufferHeight = height;
-//                if (this.framebufferWidth != prevWidth || this.framebufferHeight != prevHeight) {
-//                    this.eventHandler.resizeDisplay();
-//                }
+                //                if (this.framebufferWidth != prevWidth || this.framebufferHeight
+                // != prevHeight) {
+                //                    this.eventHandler.resizeDisplay();
+                //                }
 
                 Renderer.scheduleSwapChainUpdate();
             }
-
         }
     }
 
@@ -211,8 +242,6 @@ public abstract class WindowMixin {
         this.width = width;
         this.height = height;
 
-        if(width > 0 && height > 0)
-            Renderer.scheduleSwapChainUpdate();
+        if (width > 0 && height > 0) Renderer.scheduleSwapChainUpdate();
     }
-
 }

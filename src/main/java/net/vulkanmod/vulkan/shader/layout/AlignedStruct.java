@@ -1,9 +1,8 @@
 package net.vulkanmod.vulkan.shader.layout;
 
-import net.vulkanmod.vulkan.shader.descriptor.UBO;
-
 import java.util.ArrayList;
 import java.util.List;
+import net.vulkanmod.vulkan.shader.descriptor.UBO;
 
 public abstract class AlignedStruct {
 
@@ -17,8 +16,7 @@ public abstract class AlignedStruct {
 
         this.size = size;
 
-        if (infoList == null)
-            return;
+        if (infoList == null) return;
 
         for (Uniform.Info info : infoList) {
             Uniform uniform = Uniform.createField(info);
@@ -66,7 +64,7 @@ public abstract class AlignedStruct {
         }
 
         public UBO buildUBO(String name, int binding, int stages) {
-            //offset is expressed in floats/ints
+            // offset is expressed in floats/ints
             return new UBO(name, binding, stages, this.currentOffset * 4, this.uniforms);
         }
 
@@ -77,7 +75,5 @@ public abstract class AlignedStruct {
 
             return new PushConstants(this.uniforms, this.currentOffset * 4);
         }
-
     }
-
 }

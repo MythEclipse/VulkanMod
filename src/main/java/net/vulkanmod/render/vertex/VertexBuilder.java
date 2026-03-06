@@ -3,7 +3,16 @@ package net.vulkanmod.render.vertex;
 import org.lwjgl.system.MemoryUtil;
 
 public interface VertexBuilder {
-    void vertex(long ptr, float x, float y, float z, int color, float u, float v, int light, int packedNormal);
+    void vertex(
+            long ptr,
+            float x,
+            float y,
+            float z,
+            int color,
+            float u,
+            float v,
+            int light,
+            int packedNormal);
 
     void position(long ptr, float x, float y, float z);
 
@@ -20,7 +29,16 @@ public interface VertexBuilder {
     class DefaultVertexBuilder implements VertexBuilder {
         private static final int VERTEX_SIZE = 32;
 
-        public void vertex(long ptr, float x, float y, float z, int color, float u, float v, int light, int packedNormal) {
+        public void vertex(
+                long ptr,
+                float x,
+                float y,
+                float z,
+                int color,
+                float u,
+                float v,
+                int light,
+                int packedNormal) {
             MemoryUtil.memPutFloat(ptr + 0, x);
             MemoryUtil.memPutFloat(ptr + 4, y);
             MemoryUtil.memPutFloat(ptr + 8, z);
@@ -38,29 +56,19 @@ public interface VertexBuilder {
 
         // TODO
         @Override
-        public void position(long ptr, float x, float y, float z) {
-
-        }
+        public void position(long ptr, float x, float y, float z) {}
 
         @Override
-        public void color(long ptr, int color) {
-
-        }
+        public void color(long ptr, int color) {}
 
         @Override
-        public void uv(long ptr, float u, float v) {
-
-        }
+        public void uv(long ptr, float u, float v) {}
 
         @Override
-        public void light(long ptr, int light) {
-
-        }
+        public void light(long ptr, int light) {}
 
         @Override
-        public void normal(long ptr, int normal) {
-
-        }
+        public void normal(long ptr, int normal) {}
 
         @Override
         public int getStride() {
@@ -77,7 +85,16 @@ public interface VertexBuilder {
 
         public static final float UV_CONV_MUL = 32768.0f;
 
-        public void vertex(long ptr, float x, float y, float z, int color, float u, float v, int light, int packedNormal) {
+        public void vertex(
+                long ptr,
+                float x,
+                float y,
+                float z,
+                int color,
+                float u,
+                float v,
+                int light,
+                int packedNormal) {
             final short sX = (short) (x * POS_CONV_MUL + POS_OFFSET_CONV);
             final short sY = (short) (y * POS_CONV_MUL + POS_OFFSET_CONV);
             final short sZ = (short) (z * POS_CONV_MUL + POS_OFFSET_CONV);
@@ -124,14 +141,11 @@ public interface VertexBuilder {
         }
 
         @Override
-        public void normal(long ptr, int normal) {
-
-        }
+        public void normal(long ptr, int normal) {}
 
         @Override
         public int getStride() {
             return VERTEX_SIZE;
         }
     }
-
 }

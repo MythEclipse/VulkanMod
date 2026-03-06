@@ -1,7 +1,6 @@
 package net.vulkanmod.config.video;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-
 import java.util.List;
 
 public class VideoModeSet {
@@ -44,13 +43,23 @@ public class VideoModeSet {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (o == null || getClass() != o.getClass())
-            return false;
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
         VideoModeSet that = (VideoModeSet) o;
-        return width == that.width && height == that.height && bitDepth == that.bitDepth && refreshRates.equals(that.refreshRates);
+        return width == that.width
+                && height == that.height
+                && bitDepth == that.bitDepth
+                && refreshRates.equals(that.refreshRates);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = width;
+        result = 31 * result + height;
+        result = 31 * result + bitDepth;
+        result = 31 * result + refreshRates.hashCode();
+        return result;
     }
 
     public VideoMode getVideoMode(int refresh) {
@@ -83,13 +92,19 @@ public class VideoModeSet {
 
         @Override
         public String toString() {
-            return "VideoMode[" +
-                    "width=" + width + ", " +
-                    "height=" + height + ", " +
-                    "bitDepth=" + bitDepth + ", " +
-                    "refreshRate=" + refreshRate + ']';
+            return "VideoMode["
+                    + "width="
+                    + width
+                    + ", "
+                    + "height="
+                    + height
+                    + ", "
+                    + "bitDepth="
+                    + bitDepth
+                    + ", "
+                    + "refreshRate="
+                    + refreshRate
+                    + ']';
         }
-
-        }
-
+    }
 }

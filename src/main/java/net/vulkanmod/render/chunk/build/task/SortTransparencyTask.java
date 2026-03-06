@@ -39,7 +39,10 @@ public class SortTransparencyTask extends ChunkTask {
         bufferBuilder.begin();
         bufferBuilder.restoreSortState(transparencyState);
 
-        bufferBuilder.setupQuadSorting(x - (float) this.section.xOffset(), y - (float) this.section.yOffset(), z - (float) this.section.zOffset());
+        bufferBuilder.setupQuadSorting(
+                x - (float) this.section.xOffset(),
+                y - (float) this.section.yOffset(),
+                z - (float) this.section.zOffset());
         TerrainBuilder.DrawState drawState = bufferBuilder.endDrawing();
 
         CompileResult compileResult = new CompileResult(this.section, false);

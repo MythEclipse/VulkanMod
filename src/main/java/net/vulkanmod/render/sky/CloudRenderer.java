@@ -2,7 +2,9 @@ package net.vulkanmod.render.sky;
 
 /* JADX INFO: loaded from: VulkanMod_1.21.11-0.6.0.jar:net/vulkanmod/render/sky/CloudRenderer.class */
 public class CloudRenderer {
-    private static final net.minecraft.resources.Identifier TEXTURE_LOCATION = net.minecraft.resources.Identifier.withDefaultNamespace("textures/environment/clouds.png");
+    private static final net.minecraft.resources.Identifier TEXTURE_LOCATION =
+            net.minecraft.resources.Identifier.withDefaultNamespace(
+                    "textures/environment/clouds.png");
     private static final int DIR_NEG_Y_BIT = 1;
     private static final int DIR_POS_Y_BIT = 2;
     private static final int DIR_NEG_X_BIT = 4;
@@ -30,7 +32,14 @@ public class CloudRenderer {
         this.cloudGrid = createCloudGrid(TEXTURE_LOCATION);
     }
 
-    public void renderClouds(float cloudHeight, int cloudColor, double camX, double camY, double camZ, long gameTime, float partialTicks) {
+    public void renderClouds(
+            float cloudHeight,
+            int cloudColor,
+            double camX,
+            double camY,
+            double camZ,
+            long gameTime,
+            float partialTicks) {
         byte yState;
         net.minecraft.client.Minecraft minecraft = net.minecraft.client.Minecraft.getInstance();
         float timeOffset = (gameTime % (((long) this.cloudGrid.width) * 400)) + partialTicks;
@@ -46,7 +55,11 @@ public class CloudRenderer {
         } else {
             yState = 2;
         }
-        if (centerCellX != this.prevCloudX || centerCellZ != this.prevCloudZ || minecraft.options.getCloudsType() != this.prevCloudsType || this.prevCloudY != yState || this.cloudBuffer == null) {
+        if (centerCellX != this.prevCloudX
+                || centerCellZ != this.prevCloudZ
+                || minecraft.options.getCloudsType() != this.prevCloudsType
+                || this.prevCloudY != yState
+                || this.cloudBuffer == null) {
             this.prevCloudX = centerCellX;
             this.prevCloudZ = centerCellZ;
             this.prevCloudsType = minecraft.options.getCloudsType();
@@ -59,7 +72,12 @@ public class CloudRenderer {
                 this.cloudBuffer.close();
             }
             resetBuffer();
-            com.mojang.blaze3d.vertex.MeshData cloudsMesh = buildClouds(com.mojang.blaze3d.vertex.Tesselator.getInstance(), centerCellX, centerCellZ, centerY);
+            com.mojang.blaze3d.vertex.MeshData cloudsMesh =
+                    buildClouds(
+                            com.mojang.blaze3d.vertex.Tesselator.getInstance(),
+                            centerCellX,
+                            centerCellZ,
+                            centerY);
             if (cloudsMesh == null) {
                 return;
             }
@@ -73,7 +91,8 @@ public class CloudRenderer {
         float yTranslation = (float) centerY;
         float zTranslation = (float) (centerZ - ((double) (centerCellZ * 12)));
         net.vulkanmod.vulkan.Renderer.getInstance().getMainPass().rebindMainTarget();
-        org.joml.Matrix4fStack poseStack = com.mojang.blaze3d.systems.RenderSystem.getModelViewStack();
+        org.joml.Matrix4fStack poseStack =
+                com.mojang.blaze3d.systems.RenderSystem.getModelViewStack();
         poseStack.pushMatrix();
         poseStack.translate(-xTranslation, yTranslation, -zTranslation);
         net.vulkanmod.vulkan.VRenderSystem.applyModelViewMatrix(poseStack);
@@ -83,7 +102,8 @@ public class CloudRenderer {
         float g = net.vulkanmod.vulkan.util.ColorUtil.ARGB.unpackG(cloudColor);
         float b = net.vulkanmod.vulkan.util.ColorUtil.ARGB.unpackB(cloudColor);
         net.vulkanmod.vulkan.VRenderSystem.setShaderColor(r, g, b, 0.8f);
-        net.vulkanmod.vulkan.shader.GraphicsPipeline pipeline = net.vulkanmod.render.PipelineManager.getCloudsPipeline();
+        net.vulkanmod.vulkan.shader.GraphicsPipeline pipeline =
+                net.vulkanmod.render.PipelineManager.getCloudsPipeline();
         net.vulkanmod.vulkan.VRenderSystem.enableBlend();
         net.vulkanmod.vulkan.VRenderSystem.blendFuncSeparate(770, 771, 1, 0);
         net.vulkanmod.vulkan.VRenderSystem.enableDepthTest();
@@ -123,56 +143,85 @@ public class CloudRenderer {
         }
     }
 
-    private com.mojang.blaze3d.vertex.MeshData buildClouds(com.mojang.blaze3d.vertex.Tesselator tesselator, int centerCellX, int centerCellZ, double cloudY) {
-        com.mojang.blaze3d.vertex.BufferBuilder bufferBuilder = tesselator.begin(com.mojang.blaze3d.vertex.VertexFormat.Mode.QUADS, com.mojang.blaze3d.vertex.DefaultVertexFormat.POSITION_COLOR);
-        int cloudRange = java.lang.Math.min(((java.lang.Integer) net.minecraft.client.Minecraft.getInstance().options.cloudRange().get()).intValue(), 128) * 16;
+    private com.mojang.blaze3d.vertex.MeshData buildClouds(
+            com.mojang.blaze3d.vertex.Tesselator tesselator,
+            int centerCellX,
+            int centerCellZ,
+            double cloudY) {
+        com.mojang.blaze3d.vertex.BufferBuilder bufferBuilder =
+                tesselator.begin(
+                        com.mojang.blaze3d.vertex.VertexFormat.Mode.QUADS,
+                        com.mojang.blaze3d.vertex.DefaultVertexFormat.POSITION_COLOR);
+        int cloudRange =
+                java.lang.Math.min(
+                                ((java.lang.Integer)
+                                                net.minecraft.client.Minecraft.getInstance()
+                                                        .options
+                                                        .cloudRange()
+                                                        .get())
+                                        .intValue(),
+                                128)
+                        * 16;
         int renderDistance = net.minecraft.util.Mth.ceil(cloudRange / 12.0f);
         boolean insideClouds = this.prevCloudY == 2;
         if (this.prevCloudsType == net.minecraft.client.CloudStatus.FANCY) {
             for (int cellX = -renderDistance; cellX < renderDistance; cellX++) {
                 for (int cellZ = -renderDistance; cellZ < renderDistance; cellZ++) {
-                    int cellIdx = this.cloudGrid.getWrappedIdx(centerCellX + cellX, centerCellZ + cellZ);
+                    int cellIdx =
+                            this.cloudGrid.getWrappedIdx(centerCellX + cellX, centerCellZ + cellZ);
                     byte renderFaces = this.cloudGrid.renderFaces[cellIdx];
                     int baseColor = this.cloudGrid.pixels[cellIdx];
                     float x = cellX * 12;
                     float z = cellZ * 12;
                     if ((renderFaces & 2) != 0 && cloudY <= 0.0d) {
-                        int color = net.vulkanmod.vulkan.util.ColorUtil.ARGB.multiplyRGB(baseColor, 1.0f);
+                        int color =
+                                net.vulkanmod.vulkan.util.ColorUtil.ARGB.multiplyRGB(
+                                        baseColor, 1.0f);
                         putVertex(bufferBuilder, x + 12.0f, 4.0f, z + 12.0f, color);
                         putVertex(bufferBuilder, x + 12.0f, 4.0f, z + 0.0f, color);
                         putVertex(bufferBuilder, x + 0.0f, 4.0f, z + 0.0f, color);
                         putVertex(bufferBuilder, x + 0.0f, 4.0f, z + 12.0f, color);
                     }
                     if ((renderFaces & 1) != 0 && cloudY >= -4.0d) {
-                        int color2 = net.vulkanmod.vulkan.util.ColorUtil.ARGB.multiplyRGB(baseColor, 0.7f);
+                        int color2 =
+                                net.vulkanmod.vulkan.util.ColorUtil.ARGB.multiplyRGB(
+                                        baseColor, 0.7f);
                         putVertex(bufferBuilder, x + 0.0f, 0.0f, z + 12.0f, color2);
                         putVertex(bufferBuilder, x + 0.0f, 0.0f, z + 0.0f, color2);
                         putVertex(bufferBuilder, x + 12.0f, 0.0f, z + 0.0f, color2);
                         putVertex(bufferBuilder, x + 12.0f, 0.0f, z + 12.0f, color2);
                     }
                     if ((renderFaces & 8) != 0 && (x < 1.0f || insideClouds)) {
-                        int color3 = net.vulkanmod.vulkan.util.ColorUtil.ARGB.multiplyRGB(baseColor, 0.9f);
+                        int color3 =
+                                net.vulkanmod.vulkan.util.ColorUtil.ARGB.multiplyRGB(
+                                        baseColor, 0.9f);
                         putVertex(bufferBuilder, x + 12.0f, 4.0f, z + 12.0f, color3);
                         putVertex(bufferBuilder, x + 12.0f, 0.0f, z + 12.0f, color3);
                         putVertex(bufferBuilder, x + 12.0f, 0.0f, z + 0.0f, color3);
                         putVertex(bufferBuilder, x + 12.0f, 4.0f, z + 0.0f, color3);
                     }
                     if ((renderFaces & 4) != 0 && (x > -1.0f || insideClouds)) {
-                        int color4 = net.vulkanmod.vulkan.util.ColorUtil.ARGB.multiplyRGB(baseColor, 0.9f);
+                        int color4 =
+                                net.vulkanmod.vulkan.util.ColorUtil.ARGB.multiplyRGB(
+                                        baseColor, 0.9f);
                         putVertex(bufferBuilder, x + 0.0f, 4.0f, z + 0.0f, color4);
                         putVertex(bufferBuilder, x + 0.0f, 0.0f, z + 0.0f, color4);
                         putVertex(bufferBuilder, x + 0.0f, 0.0f, z + 12.0f, color4);
                         putVertex(bufferBuilder, x + 0.0f, 4.0f, z + 12.0f, color4);
                     }
                     if ((renderFaces & 32) != 0 && (z < 1.0f || insideClouds)) {
-                        int color5 = net.vulkanmod.vulkan.util.ColorUtil.ARGB.multiplyRGB(baseColor, 0.8f);
+                        int color5 =
+                                net.vulkanmod.vulkan.util.ColorUtil.ARGB.multiplyRGB(
+                                        baseColor, 0.8f);
                         putVertex(bufferBuilder, x + 0.0f, 4.0f, z + 12.0f, color5);
                         putVertex(bufferBuilder, x + 0.0f, 0.0f, z + 12.0f, color5);
                         putVertex(bufferBuilder, x + 12.0f, 0.0f, z + 12.0f, color5);
                         putVertex(bufferBuilder, x + 12.0f, 4.0f, z + 12.0f, color5);
                     }
                     if ((renderFaces & 16) != 0 && (z > -1.0f || insideClouds)) {
-                        int color6 = net.vulkanmod.vulkan.util.ColorUtil.ARGB.multiplyRGB(baseColor, 0.8f);
+                        int color6 =
+                                net.vulkanmod.vulkan.util.ColorUtil.ARGB.multiplyRGB(
+                                        baseColor, 0.8f);
                         putVertex(bufferBuilder, x + 12.0f, 4.0f, z + 0.0f, color6);
                         putVertex(bufferBuilder, x + 12.0f, 0.0f, z + 0.0f, color6);
                         putVertex(bufferBuilder, x + 0.0f, 0.0f, z + 0.0f, color6);
@@ -183,13 +232,17 @@ public class CloudRenderer {
         } else {
             for (int cellX2 = -renderDistance; cellX2 < renderDistance; cellX2++) {
                 for (int cellZ2 = -renderDistance; cellZ2 < renderDistance; cellZ2++) {
-                    int cellIdx2 = this.cloudGrid.getWrappedIdx(centerCellX + cellX2, centerCellZ + cellZ2);
+                    int cellIdx2 =
+                            this.cloudGrid.getWrappedIdx(
+                                    centerCellX + cellX2, centerCellZ + cellZ2);
                     byte renderFaces2 = this.cloudGrid.renderFaces[cellIdx2];
                     int baseColor2 = this.cloudGrid.pixels[cellIdx2];
                     float x2 = cellX2 * 12;
                     float z2 = cellZ2 * 12;
                     if ((renderFaces2 & 1) != 0) {
-                        int color7 = net.vulkanmod.vulkan.util.ColorUtil.ARGB.multiplyRGB(baseColor2, 1.0f);
+                        int color7 =
+                                net.vulkanmod.vulkan.util.ColorUtil.ARGB.multiplyRGB(
+                                        baseColor2, 1.0f);
                         putVertex(bufferBuilder, x2 + 0.0f, 0.0f, z2 + 12.0f, color7);
                         putVertex(bufferBuilder, x2 + 0.0f, 0.0f, z2 + 0.0f, color7);
                         putVertex(bufferBuilder, x2 + 12.0f, 0.0f, z2 + 0.0f, color7);
@@ -201,22 +254,35 @@ public class CloudRenderer {
         return bufferBuilder.build();
     }
 
-    private static void putVertex(com.mojang.blaze3d.vertex.BufferBuilder bufferBuilder, float x, float y, float z, int color) {
+    private static void putVertex(
+            com.mojang.blaze3d.vertex.BufferBuilder bufferBuilder,
+            float x,
+            float y,
+            float z,
+            int color) {
         bufferBuilder.addVertex(x, y, z).setColor(color);
     }
 
-    private static net.vulkanmod.render.sky.CloudRenderer.CloudGrid createCloudGrid(net.minecraft.resources.Identifier textureLocation) {
-        net.minecraft.server.packs.resources.ResourceManager resourceManager = net.minecraft.client.Minecraft.getInstance().getResourceManager();
+    private static net.vulkanmod.render.sky.CloudRenderer.CloudGrid createCloudGrid(
+            net.minecraft.resources.Identifier textureLocation) {
+        net.minecraft.server.packs.resources.ResourceManager resourceManager =
+                net.minecraft.client.Minecraft.getInstance().getResourceManager();
         try {
-            net.minecraft.server.packs.resources.Resource resource = resourceManager.getResourceOrThrow(textureLocation);
+            net.minecraft.server.packs.resources.Resource resource =
+                    resourceManager.getResourceOrThrow(textureLocation);
             java.io.InputStream inputStream = resource.open();
             try {
-                com.mojang.blaze3d.platform.NativeImage image = com.mojang.blaze3d.platform.NativeImage.read(inputStream);
+                com.mojang.blaze3d.platform.NativeImage image =
+                        com.mojang.blaze3d.platform.NativeImage.read(inputStream);
                 int width = image.getWidth();
                 int height = image.getHeight();
-                org.apache.commons.lang3.Validate.isTrue(width == height, "Image width and height must be the same", new java.lang.Object[0]);
+                org.apache.commons.lang3.Validate.isTrue(
+                        width == height,
+                        "Image width and height must be the same",
+                        new java.lang.Object[0]);
                 int[] pixels = image.getPixelsABGR();
-                net.vulkanmod.render.sky.CloudRenderer.CloudGrid cloudGrid = new net.vulkanmod.render.sky.CloudRenderer.CloudGrid(pixels, width);
+                net.vulkanmod.render.sky.CloudRenderer.CloudGrid cloudGrid =
+                        new net.vulkanmod.render.sky.CloudRenderer.CloudGrid(pixels, width);
                 if (inputStream != null) {
                     inputStream.close();
                 }
@@ -288,7 +354,8 @@ public class CloudRenderer {
         }
 
         int getWrappedIdx(int x, int z) {
-            return getIdx(java.lang.Math.floorMod(x, this.width), java.lang.Math.floorMod(z, this.width));
+            return getIdx(
+                    java.lang.Math.floorMod(x, this.width), java.lang.Math.floorMod(z, this.width));
         }
 
         int getIdx(int x, int z) {

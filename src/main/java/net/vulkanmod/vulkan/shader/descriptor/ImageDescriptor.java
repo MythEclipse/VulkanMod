@@ -1,9 +1,9 @@
 package net.vulkanmod.vulkan.shader.descriptor;
 
+import static org.lwjgl.vulkan.VK10.*;
+
 import net.vulkanmod.vulkan.texture.VTextureSelector;
 import net.vulkanmod.vulkan.texture.VulkanImage;
-
-import static org.lwjgl.vulkan.VK10.*;
 
 public class ImageDescriptor implements Descriptor {
 
@@ -22,11 +22,20 @@ public class ImageDescriptor implements Descriptor {
         this(binding, type, name, imageIdx, false);
     }
 
-    public ImageDescriptor(int binding, String type, String name, int imageIdx, boolean isStorageImage) {
-        this(binding, type, name, imageIdx, isStorageImage ? VK_DESCRIPTOR_TYPE_STORAGE_IMAGE : VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
+    public ImageDescriptor(
+            int binding, String type, String name, int imageIdx, boolean isStorageImage) {
+        this(
+                binding,
+                type,
+                name,
+                imageIdx,
+                isStorageImage
+                        ? VK_DESCRIPTOR_TYPE_STORAGE_IMAGE
+                        : VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
     }
 
-    public ImageDescriptor(int binding, String type, String name, int imageIdx, int descriptorType) {
+    public ImageDescriptor(
+            int binding, String type, String name, int imageIdx, int descriptorType) {
         this.binding = binding;
         this.qualifier = type;
         this.name = name;
@@ -40,7 +49,10 @@ public class ImageDescriptor implements Descriptor {
 
         boolean isStorageImage = isStorageImage();
         this.useSampler = !isStorageImage;
-        setLayout(isStorageImage ? VK_IMAGE_LAYOUT_GENERAL : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+        setLayout(
+                isStorageImage
+                        ? VK_IMAGE_LAYOUT_GENERAL
+                        : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
     }
 
     @Override
@@ -82,10 +94,8 @@ public class ImageDescriptor implements Descriptor {
     public long getImageView(VulkanImage image) {
         long view;
 
-        if (mipLevel == -1)
-            view = image.getImageView();
-        else
-            view = image.getLevelImageView(mipLevel);
+        if (mipLevel == -1) view = image.getImageView();
+        else view = image.getLevelImageView(mipLevel);
 
         return view;
     }
@@ -109,6 +119,5 @@ public class ImageDescriptor implements Descriptor {
         public boolean isCurrentState(long imageView, long sampler) {
             return this.imageView == imageView && this.sampler == sampler;
         }
-
     }
 }

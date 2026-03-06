@@ -26,8 +26,7 @@ public class OptionPage {
         boolean changed = false;
         for (var block : this.optionBlocks) {
             for (var option : block.options()) {
-                if (option.isChanged())
-                    changed = true;
+                if (option.isChanged()) changed = true;
             }
         }
         return changed;

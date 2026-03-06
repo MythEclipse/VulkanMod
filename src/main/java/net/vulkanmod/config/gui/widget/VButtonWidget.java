@@ -1,14 +1,12 @@
 package net.vulkanmod.config.gui.widget;
 
+import java.util.function.Consumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.vulkanmod.config.gui.render.GuiRenderer;
-import net.vulkanmod.vulkan.VRenderSystem;
 import net.vulkanmod.vulkan.util.ColorUtil;
-
-import java.util.function.Consumer;
 
 public class VButtonWidget extends VAbstractWidget {
     boolean selected = false;
@@ -16,7 +14,13 @@ public class VButtonWidget extends VAbstractWidget {
 
     float alpha = 1.0f;
 
-    public VButtonWidget(int x, int y, int width, int height, Component message, Consumer<VButtonWidget> onPress) {
+    public VButtonWidget(
+            int x,
+            int y,
+            int width,
+            int height,
+            Component message,
+            Consumer<VButtonWidget> onPress) {
         this.setPosition(x, y, width, height);
 
         this.message = message;
@@ -31,7 +35,12 @@ public class VButtonWidget extends VAbstractWidget {
         int yPadding = 0;
 
         int color = ColorUtil.ARGB.pack(0.0f, 0.0f, 0.0f, this.active ? 0.45f : 0.3f);
-        GuiRenderer.fill(this.x - xPadding, this.y - yPadding, this.x + this.width + xPadding, this.y + this.height + yPadding, color);
+        GuiRenderer.fill(
+                this.x - xPadding,
+                this.y - yPadding,
+                this.x + this.width + xPadding,
+                this.y + this.height + yPadding,
+                color);
 
         if (this.active) {
             this.renderHovering(0, 0);
@@ -42,11 +51,16 @@ public class VButtonWidget extends VAbstractWidget {
             GuiRenderer.fillBox(this.x, this.y, (int) 1.5f, this.height, color);
 
             color = ColorUtil.ARGB.pack(0.3f, 0.0f, 0.0f, 0.2f);
-            GuiRenderer.fillBox(this.x, this.y, this.width, this.height,  color);
+            GuiRenderer.fillBox(this.x, this.y, this.width, this.height, color);
         }
 
         int j = this.active ? 0xFFFFFF : 0xA0A0A0;
-        GuiRenderer.drawCenteredString(textRenderer, this.message, this.x + this.width / 2, this.y + (this.height - 8) / 2, j | Mth.ceil(this.alpha * 255.0f) << 24);
+        GuiRenderer.drawCenteredString(
+                textRenderer,
+                this.message,
+                this.x + this.width / 2,
+                this.y + (this.height - 8) / 2,
+                j | Mth.ceil(this.alpha * 255.0f) << 24);
     }
 
     public void setSelected(boolean selected) {
@@ -56,5 +70,4 @@ public class VButtonWidget extends VAbstractWidget {
     public void onClick(double mX, double mY) {
         this.onPress.accept(this);
     }
-
 }

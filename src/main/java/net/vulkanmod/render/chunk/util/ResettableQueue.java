@@ -1,9 +1,8 @@
 package net.vulkanmod.render.chunk.util;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.Iterator;
 import java.util.function.Consumer;
+import org.jetbrains.annotations.NotNull;
 
 public class ResettableQueue<T> implements Iterable<T> {
     T[] queue;
@@ -72,34 +71,35 @@ public class ResettableQueue<T> implements Iterable<T> {
     }
 
     public Iterator<T> iterator(boolean reverseOrder) {
-        return reverseOrder ? new Iterator<>() {
-            int pos = ResettableQueue.this.limit - 1;
-            final int limit = -1;
+        return reverseOrder
+                ? new Iterator<>() {
+                    int pos = ResettableQueue.this.limit - 1;
+                    final int limit = -1;
 
-            @Override
-            public boolean hasNext() {
-                return pos > limit;
-            }
+                    @Override
+                    public boolean hasNext() {
+                        return pos > limit;
+                    }
 
-            @Override
-            public T next() {
-                return queue[pos--];
-            }
-        }
+                    @Override
+                    public T next() {
+                        return queue[pos--];
+                    }
+                }
                 : new Iterator<>() {
-            int pos = 0;
-            final int limit = ResettableQueue.this.limit;
+                    int pos = 0;
+                    final int limit = ResettableQueue.this.limit;
 
-            @Override
-            public boolean hasNext() {
-                return pos < limit;
-            }
+                    @Override
+                    public boolean hasNext() {
+                        return pos < limit;
+                    }
 
-            @Override
-            public T next() {
-                return queue[pos++];
-            }
-        };
+                    @Override
+                    public T next() {
+                        return queue[pos++];
+                    }
+                };
     }
 
     @NotNull
@@ -113,6 +113,5 @@ public class ResettableQueue<T> implements Iterable<T> {
         for (int i = 0; i < this.limit; ++i) {
             action.accept(this.queue[i]);
         }
-
     }
 }

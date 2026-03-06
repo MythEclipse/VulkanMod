@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(Main.class)
 public class MainMixin {
 
-    @Inject(method = "main", at=@At("HEAD"))
+    @Inject(method = "main", at = @At("HEAD"))
     private static void inj1(String[] strings, CallbackInfo ci) {
         // Increase stack size to 256 KB to prevent out of stack error on nvidia driver
         Configuration.STACK_SIZE.set(256);

@@ -12,14 +12,30 @@ public class VkSampler extends com.mojang.blaze3d.textures.GpuSampler {
     private boolean closed;
     private final long id;
 
-    public VkSampler(com.mojang.blaze3d.textures.AddressMode addressModeU, com.mojang.blaze3d.textures.AddressMode addressModeV, com.mojang.blaze3d.textures.FilterMode minFilter, com.mojang.blaze3d.textures.FilterMode magFilter, int maxAnisotropy, java.util.OptionalDouble maxLod) {
+    public VkSampler(
+            com.mojang.blaze3d.textures.AddressMode addressModeU,
+            com.mojang.blaze3d.textures.AddressMode addressModeV,
+            com.mojang.blaze3d.textures.FilterMode minFilter,
+            com.mojang.blaze3d.textures.FilterMode magFilter,
+            int maxAnisotropy,
+            java.util.OptionalDouble maxLod) {
         this.addressModeU = addressModeU;
         this.addressModeV = addressModeV;
         this.minFilter = minFilter;
         this.magFilter = magFilter;
         this.maxAnisotropy = maxAnisotropy;
         this.maxLod = maxLod.isPresent() ? (byte) maxLod.getAsDouble() : 1000.0f;
-        this.id = net.vulkanmod.vulkan.texture.SamplerManager.getSampler(net.vulkanmod.render.engine.VkConst.of(addressModeU), net.vulkanmod.render.engine.VkConst.of(addressModeV), net.vulkanmod.render.engine.VkConst.of(minFilter), net.vulkanmod.render.engine.VkConst.of(magFilter), 1, this.maxLod, maxAnisotropy > 1, maxAnisotropy, -1);
+        this.id =
+                net.vulkanmod.vulkan.texture.SamplerManager.getSampler(
+                        net.vulkanmod.render.engine.VkConst.of(addressModeU),
+                        net.vulkanmod.render.engine.VkConst.of(addressModeV),
+                        net.vulkanmod.render.engine.VkConst.of(minFilter),
+                        net.vulkanmod.render.engine.VkConst.of(magFilter),
+                        1,
+                        this.maxLod,
+                        maxAnisotropy > 1,
+                        maxAnisotropy,
+                        -1);
     }
 
     public long getId() {

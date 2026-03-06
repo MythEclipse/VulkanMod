@@ -17,15 +17,16 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin(PictureInPictureRenderer.class)
 public class PictureInPictureRendererM<T extends PictureInPictureRenderState> {
 
-    @Shadow
-    private @Nullable GpuTextureView textureView;
+    @Shadow private @Nullable GpuTextureView textureView;
 
     @Overwrite
     public void blitTexture(T pictureInPictureRenderState, GuiRenderState guiRenderState) {
         guiRenderState.submitBlitToCurrentLayer(
                 new BlitRenderState(
                         RenderPipelines.GUI_TEXTURED_PREMULTIPLIED_ALPHA,
-                        TextureSetup.singleTexture(this.textureView, RenderSystem.getSamplerCache().getRepeat(FilterMode.NEAREST)),
+                        TextureSetup.singleTexture(
+                                this.textureView,
+                                RenderSystem.getSamplerCache().getRepeat(FilterMode.NEAREST)),
                         pictureInPictureRenderState.pose(),
                         pictureInPictureRenderState.x0(),
                         pictureInPictureRenderState.y0(),
@@ -37,8 +38,6 @@ public class PictureInPictureRendererM<T extends PictureInPictureRenderState> {
                         1.0F,
                         -1,
                         pictureInPictureRenderState.scissorArea(),
-                        null
-                )
-        );
+                        null));
     }
 }

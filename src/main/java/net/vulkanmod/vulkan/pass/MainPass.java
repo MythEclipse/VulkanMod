@@ -34,5 +34,4 @@ public interface MainPass {
     default GpuTexture getDepthAttachment() {
         return null;
     }
-
 }

@@ -4,9 +4,7 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
 import net.vulkanmod.render.chunk.cull.QuadFacing;
 
-/**
- * Only used by FluidRenderer
- */
+/** Only used by FluidRenderer */
 public class ModelQuad implements ModelQuadView {
     public static final int VERTEX_SIZE = 8;
 
@@ -20,7 +18,7 @@ public class ModelQuad implements ModelQuadView {
     TextureAtlasSprite sprite;
 
     private int flags;
-    
+
     @Override
     public int getFlags() {
         return flags;
@@ -91,17 +89,14 @@ public class ModelQuad implements ModelQuadView {
 
     public float setZ(int idx, float f) {
         return this.data[vertexOffset(idx) + 2] = Float.floatToRawIntBits(f);
-
     }
 
     public float setU(int idx, float f) {
         return this.data[vertexOffset(idx) + 4] = Float.floatToRawIntBits(f);
-
     }
 
     public float setV(int idx, float f) {
         return this.data[vertexOffset(idx) + 5] = Float.floatToRawIntBits(f);
-
     }
 
     public void setFlags(int f) {

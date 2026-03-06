@@ -1,8 +1,8 @@
 package net.vulkanmod.vulkan.memory.buffer;
 
-import net.vulkanmod.vulkan.memory.MemoryType;
-
 import static org.lwjgl.vulkan.VK10.*;
+
+import net.vulkanmod.vulkan.memory.MemoryType;
 
 public class IndexBuffer extends Buffer {
 
@@ -31,6 +31,4 @@ public class IndexBuffer extends Buffer {
             this.value = value;
         }
     }
-
-
 }

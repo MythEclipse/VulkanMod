@@ -36,19 +36,41 @@ public class RangeOptionWidget extends OptionWidget<RangeOption> {
 
             int y0 = (int) (this.y + this.height * 0.5f - 1.0f);
             int y1 = (int) (y0 + 2.0f);
-            GuiRenderer.fill(this.controlX, y0, this.controlX + this.controlWidth, y1, ColorUtil.ARGB.pack(1.0f, 1.0f, 1.0f, 0.1f));
-            GuiRenderer.fill(this.controlX, y0, valueX - halfWidth, y1, ColorUtil.ARGB.pack(1.0f, 1.0f, 1.0f, 0.3f));
+            GuiRenderer.fill(
+                    this.controlX,
+                    y0,
+                    this.controlX + this.controlWidth,
+                    y1,
+                    ColorUtil.ARGB.pack(1.0f, 1.0f, 1.0f, 0.1f));
+            GuiRenderer.fill(
+                    this.controlX,
+                    y0,
+                    valueX - halfWidth,
+                    y1,
+                    ColorUtil.ARGB.pack(1.0f, 1.0f, 1.0f, 0.3f));
 
             int color = ColorUtil.ARGB.pack(1.0f, 1.0f, 1.0f, 0.3f);
-            GuiRenderer.renderBorder(valueX - halfWidth, y0 - halfHeight, valueX + halfWidth, y1 + halfHeight, 1, color);
+            GuiRenderer.renderBorder(
+                    valueX - halfWidth,
+                    y0 - halfHeight,
+                    valueX + halfWidth,
+                    y1 + halfHeight,
+                    1,
+                    color);
 
         } else {
             int y0 = (int) (this.y + this.height - 5.0f);
             int y1 = (int) (y0 + 1.5f);
-            GuiRenderer.fill(this.controlX, y0, this.controlX + this.controlWidth, y1, ColorUtil.ARGB.pack(1.0f, 1.0f, 1.0f, 0.3f));
+            GuiRenderer.fill(
+                    this.controlX,
+                    y0,
+                    this.controlX + this.controlWidth,
+                    y1,
+                    ColorUtil.ARGB.pack(1.0f, 1.0f, 1.0f, 0.3f));
 
             float alpha = this.active ? 0.8f : 0.3f;
-            GuiRenderer.fill(this.controlX, y0, valueX, y1, ColorUtil.ARGB.pack(1.0f, 1.0f, 1.0f, alpha));
+            GuiRenderer.fill(
+                    this.controlX, y0, valueX, y1, ColorUtil.ARGB.pack(1.0f, 1.0f, 1.0f, alpha));
         }
 
         int color = this.active ? 0xFFFFFFFF : 0xFFA0A0A0;
@@ -112,8 +134,7 @@ public class RangeOptionWidget extends OptionWidget<RangeOption> {
     }
 
     @Override
-    public void playDownSound(SoundManager soundManager) {
-    }
+    public void playDownSound(SoundManager soundManager) {}
 
     @Override
     public void onRelease(double mouseX, double mouseY) {

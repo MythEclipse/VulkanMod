@@ -1,13 +1,12 @@
 package net.vulkanmod.config.video;
 
-import net.vulkanmod.Initializer;
-import org.lwjgl.glfw.GLFW;
-import org.lwjgl.glfw.GLFWVidMode;
+import static org.lwjgl.glfw.GLFW.*;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.lwjgl.glfw.GLFW.*;
+import net.vulkanmod.Initializer;
+import org.lwjgl.glfw.GLFW;
+import org.lwjgl.glfw.GLFWVidMode;
 
 public abstract class VideoModeManager {
     private static VideoModeSet.VideoMode osVideoMode;
@@ -30,23 +29,21 @@ public abstract class VideoModeManager {
     }
 
     public static VideoModeSet getFirstAvailable() {
-        if(videoModeSets != null)
-            return videoModeSets[videoModeSets.length - 1];
-        else
-            return VideoModeSet.getDummy();
+        if (videoModeSets != null) return videoModeSets[videoModeSets.length - 1];
+        else return VideoModeSet.getDummy();
     }
 
     public static VideoModeSet.VideoMode getOsVideoMode() {
         return osVideoMode;
     }
 
-    public static VideoModeSet.VideoMode getCurrentVideoMode(long monitor){
+    public static VideoModeSet.VideoMode getCurrentVideoMode(long monitor) {
         GLFWVidMode vidMode = GLFW.glfwGetVideoMode(monitor);
 
-        if (vidMode == null)
-            throw new NullPointerException("Unable to get current video mode");
+        if (vidMode == null) throw new NullPointerException("Unable to get current video mode");
 
-        return new VideoModeSet.VideoMode(vidMode.width(), vidMode.height(), vidMode.redBits(), vidMode.refreshRate());
+        return new VideoModeSet.VideoMode(
+                vidMode.width(), vidMode.height(), vidMode.redBits(), vidMode.refreshRate());
     }
 
     public static VideoModeSet[] populateVideoResolutions(long monitor) {
@@ -60,8 +57,9 @@ public abstract class VideoModeManager {
         for (int i = 0; i < buffer.limit(); i++) {
             buffer.position(i);
             int bitDepth = buffer.redBits();
-            if (buffer.redBits() < 8 || buffer.greenBits() != bitDepth || buffer.blueBits() != bitDepth)
-                continue;
+            if (buffer.redBits() < 8
+                    || buffer.greenBits() != bitDepth
+                    || buffer.blueBits() != bitDepth) continue;
 
             int width = buffer.width();
             int height = buffer.height();
@@ -87,8 +85,7 @@ public abstract class VideoModeManager {
 
     public static VideoModeSet getFromVideoMode(VideoModeSet.VideoMode videoMode) {
         for (var set : videoModeSets) {
-            if (set.width == videoMode.width && set.height == videoMode.height)
-                return set;
+            if (set.width == videoMode.width && set.height == videoMode.height) return set;
         }
 
         return null;

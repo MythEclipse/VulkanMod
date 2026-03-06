@@ -6,11 +6,15 @@ public class VkFbo {
     final net.vulkanmod.render.engine.VkTextureView colorAttachmentView;
     final net.vulkanmod.render.engine.VkGpuTexture depthAttachment;
 
-    protected VkFbo(net.vulkanmod.render.engine.VkTextureView colorAttachmentView, net.vulkanmod.render.engine.VkGpuTexture depthAttachment) {
+    protected VkFbo(
+            net.vulkanmod.render.engine.VkTextureView colorAttachmentView,
+            net.vulkanmod.render.engine.VkGpuTexture depthAttachment) {
         this.colorAttachmentView = colorAttachmentView;
         this.depthAttachment = depthAttachment;
-        net.vulkanmod.gl.VkGlFramebuffer fbo = net.vulkanmod.gl.VkGlFramebuffer.getFramebuffer(this.glId);
-        net.vulkanmod.render.engine.VkGpuTexture colorAttachmentTexture = this.colorAttachmentView.texture();
+        net.vulkanmod.gl.VkGlFramebuffer fbo =
+                net.vulkanmod.gl.VkGlFramebuffer.getFramebuffer(this.glId);
+        net.vulkanmod.render.engine.VkGpuTexture colorAttachmentTexture =
+                this.colorAttachmentView.texture();
         int mipLevel = colorAttachmentView.baseMipLevel();
         fbo.setAttachmentTextureLevel(36064, colorAttachmentTexture.id, mipLevel);
         if (depthAttachment != null) {
@@ -25,11 +29,16 @@ public class VkFbo {
 
     protected void clearAttachments() {
         int clear = 0;
-        net.vulkanmod.render.engine.VkGpuTexture colorAttachmentTexture = this.colorAttachmentView.texture();
+        net.vulkanmod.render.engine.VkGpuTexture colorAttachmentTexture =
+                this.colorAttachmentView.texture();
         if (colorAttachmentTexture.needsClear()) {
             clear = 0 | 16384;
             int clearColor = colorAttachmentTexture.clearColor;
-            net.vulkanmod.vulkan.VRenderSystem.setClearColor(net.minecraft.util.ARGB.redFloat(clearColor), net.minecraft.util.ARGB.greenFloat(clearColor), net.minecraft.util.ARGB.blueFloat(clearColor), net.minecraft.util.ARGB.alphaFloat(clearColor));
+            net.vulkanmod.vulkan.VRenderSystem.setClearColor(
+                    net.minecraft.util.ARGB.redFloat(clearColor),
+                    net.minecraft.util.ARGB.greenFloat(clearColor),
+                    net.minecraft.util.ARGB.blueFloat(clearColor),
+                    net.minecraft.util.ARGB.alphaFloat(clearColor));
             colorAttachmentTexture.needsClear = false;
         }
         if (this.depthAttachment != null && this.depthAttachment.needsClear()) {
@@ -48,6 +57,7 @@ public class VkFbo {
     }
 
     public boolean needsClear() {
-        return this.colorAttachmentView.texture().needsClear() || (this.depthAttachment != null && this.depthAttachment.needsClear());
+        return this.colorAttachmentView.texture().needsClear()
+                || (this.depthAttachment != null && this.depthAttachment.needsClear());
     }
 }

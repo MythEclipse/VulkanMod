@@ -37,7 +37,8 @@ public class MathUtil {
         return Math.fma(mat.m02(), x, Math.fma(mat.m12(), y, Math.fma(mat.m22(), z, mat.m32())));
     }
 
-    public static int packTransformedNorm(Matrix3f mat, boolean trustedNormals, float x, float y, float z) {
+    public static int packTransformedNorm(
+            Matrix3f mat, boolean trustedNormals, float x, float y, float z) {
         float nx = transformNormX(mat, x, y, z);
         float ny = transformNormY(mat, x, y, z);
         float nz = transformNormZ(mat, x, y, z);

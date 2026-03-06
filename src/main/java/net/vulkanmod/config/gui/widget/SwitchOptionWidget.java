@@ -40,14 +40,14 @@ public class SwitchOptionWidget extends OptionWidget<SwitchOption> {
         }
 
         color = ColorUtil.ARGB.pack(0.6f, 0.6f, 0.6f, 1.0f);
-        GuiRenderer.renderBoxBorder(x0, y0, halfWidth * 2, height, 1,  color);
+        GuiRenderer.renderBoxBorder(x0, y0, halfWidth * 2, height, 1, color);
 
         color = this.active ? 0xFFFFFFFF : 0xFFA0A0A0;
         Font textRenderer = Minecraft.getInstance().font;
-        int margin = Math.max(
-                textRenderer.width(Component.translatable("options.on").getString()) / 3,
-                textRenderer.width(Component.translatable("options.off").getString()) / 3
-        );
+        int margin =
+                Math.max(
+                        textRenderer.width(Component.translatable("options.on").getString()) / 3,
+                        textRenderer.width(Component.translatable("options.off").getString()) / 3);
 
         int x = this.controlX + this.controlWidth / 2 - (int) (halfWidth * 1.5f) - 4 - margin;
         int y = this.y + (this.height - 8) / 2;
@@ -60,19 +60,16 @@ public class SwitchOptionWidget extends OptionWidget<SwitchOption> {
     }
 
     @Override
-    public void onRelease(double mouseX, double mouseY) {
-
-    }
+    public void onRelease(double mouseX, double mouseY) {}
 
     @Override
-    protected void onDrag(double mouseX, double mouseY, double deltaX, double deltaY) {
-
-    }
+    protected void onDrag(double mouseX, double mouseY, double deltaX, double deltaY) {}
 
     protected void updateDisplayedValue() {
-        this.displayedValue = option.getNewValue()
-                ? Component.translatable("options.on")
-                : Component.translatable("options.off");
+        this.displayedValue =
+                option.getNewValue()
+                        ? Component.translatable("options.on")
+                        : Component.translatable("options.off");
     }
 
     @Override
@@ -84,5 +81,4 @@ public class SwitchOptionWidget extends OptionWidget<SwitchOption> {
     public boolean isFocused() {
         return this.focused;
     }
-
 }
