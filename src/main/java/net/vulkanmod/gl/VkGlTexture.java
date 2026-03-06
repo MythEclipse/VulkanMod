@@ -318,7 +318,7 @@ public class VkGlTexture {
 
     boolean needsUpdate = false;
     int maxLevel = 0;
-    int maxLod = 0;
+    int maxLod = 1000; // OpenGL default: GL_TEXTURE_MAX_LOD = 1000
     int minFilter = GL11.GL_NEAREST, magFilter = GL11.GL_NEAREST;
 
     boolean clamp = true;

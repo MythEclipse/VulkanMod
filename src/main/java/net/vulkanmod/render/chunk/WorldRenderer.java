@@ -330,8 +330,9 @@ public class WorldRenderer {
         net.vulkanmod.render.engine.VkGpuTexture texture =
                 (net.vulkanmod.render.engine.VkGpuTexture) texView.texture();
         if (this.terrainSampler == 0) {
+            // maxLod = 1000 (VK_LOD_CLAMP_NONE) so all mip levels are accessible
             this.terrainSampler =
-                    net.vulkanmod.vulkan.texture.SamplerManager.getSampler(true, true, 0, false, 0);
+                    net.vulkanmod.vulkan.texture.SamplerManager.getSampler(true, true, 1000, false, 0);
         }
         texture.getVulkanImage().setSampler(this.terrainSampler);
         net.vulkanmod.vulkan.VRenderSystem.setShaderTexture(0, texView);

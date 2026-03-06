@@ -106,7 +106,7 @@ public class VkGlRenderbuffer {
 
     boolean needsUpdate = false;
     int maxLevel = 0;
-    int maxLod = 0;
+    int maxLod = 1000; // OpenGL default: GL_TEXTURE_MAX_LOD = 1000
     int minFilter, magFilter = GL11.GL_LINEAR;
 
     public VkGlRenderbuffer(int id) {
