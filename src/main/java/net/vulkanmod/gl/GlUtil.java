@@ -53,7 +53,7 @@ public abstract class GlUtil {
         for (int i = 0; i < outSize ; i += 4) {
             int color = MemoryUtil.memGetInt(srcPtr + i);
 
-            color = (color << 24) & 0xFF000000 | (color >> 8) & 0xFFFFFF;
+            color = net.vulkanmod.vulkan.util.ColorUtil.BGRAtoRGBA(color);
 
             MemoryUtil.memPutInt(ptr + i, color);
         }

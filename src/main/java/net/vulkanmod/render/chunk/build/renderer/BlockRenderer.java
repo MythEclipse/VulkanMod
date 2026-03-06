@@ -2,9 +2,6 @@ package net.vulkanmod.render.chunk.build.renderer;
 
 /* JADX INFO: loaded from: VulkanMod_1.21.11-0.6.0.jar:net/vulkanmod/render/chunk/build/renderer/BlockRenderer.class */
 public class BlockRenderer extends net.vulkanmod.render.chunk.build.frapi.render.AbstractBlockRenderContext {
-    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger("VulkanMod/BlockRenderer");
-    private static int quadLogCounter = 0;
-
     private org.joml.Vector3f pos;
     private net.vulkanmod.render.chunk.build.thread.BuilderResources resources;
     private net.vulkanmod.render.vertex.TerrainBuilder terrainBuilder;
@@ -71,35 +68,6 @@ public class BlockRenderer extends net.vulkanmod.render.chunk.build.frapi.render
         net.vulkanmod.render.chunk.cull.QuadFacing quadFacing = quad.getQuadFacing();
         if (this.renderType == net.vulkanmod.render.vertex.TerrainRenderType.TRANSLUCENT || !this.backFaceCulling) {
             quadFacing = net.vulkanmod.render.chunk.cull.QuadFacing.UNDEFINED;
-        }
-
-        float minU = java.lang.Float.POSITIVE_INFINITY;
-        float maxU = java.lang.Float.NEGATIVE_INFINITY;
-        float minV = java.lang.Float.POSITIVE_INFINITY;
-        float maxV = java.lang.Float.NEGATIVE_INFINITY;
-        for (int j = 0; j < 4; j++) {
-            float u = quad.getU(j);
-            float v = quad.getV(j);
-            if (u < minU) minU = u;
-            if (u > maxU) maxU = u;
-            if (v < minV) minV = v;
-            if (v > maxV) maxV = v;
-        }
-
-        boolean suspiciousUV = java.lang.Float.isNaN(minU) || java.lang.Float.isNaN(maxU)
-                || java.lang.Float.isNaN(minV) || java.lang.Float.isNaN(maxV)
-                || minU < -0.01f || maxU > 1.01f || minV < -0.01f || maxV > 1.01f;
-
-        if (suspiciousUV || (quadLogCounter++ % 1200) == 0) {
-            LOGGER.info("[VulkanMod] QuadDiag: block={} renderType={} quadFacing={} lightFace={} uvU=[{}, {}] uvV=[{}, {}] color0=0x{} light0={} flags={}",
-                    this.blockState != null ? this.blockState.getBlock().getDescriptionId() : "null",
-                    this.renderType,
-                    quadFacing,
-                    quad.getFacingDirection(),
-                    minU, maxU, minV, maxV,
-                    java.lang.Integer.toHexString(quad.getColor(0)),
-                    quadLightData.lm[0],
-                    quad.getFlags());
         }
 
         net.vulkanmod.render.vertex.TerrainBufferBuilder bufferBuilder = terrainBuilder.getBufferBuilder(quadFacing.ordinal());

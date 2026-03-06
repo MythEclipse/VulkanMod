@@ -5,7 +5,6 @@ import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.fog.FogData;
 import net.minecraft.client.renderer.fog.FogRenderer;
-import net.vulkanmod.Initializer;
 import net.vulkanmod.vulkan.VRenderSystem;
 import org.joml.Vector4f;
 import org.spongepowered.asm.mixin.Mixin;
@@ -16,8 +15,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(FogRenderer.class)
 public class FogRendererMixin {
-    private static int fogLogCounter;
-
     @Inject(method = "setupFog", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;clamp(FFF)F"))
     private void onSetupFog(Camera camera, int i, DeltaTracker deltaTracker, float f,
                             ClientLevel clientLevel, CallbackInfoReturnable<Vector4f> cir) {
@@ -44,10 +41,5 @@ public class FogRendererMixin {
 
         float alpha = fogColor.w() <= 0.0f ? 1.0f : fogColor.w();
         VRenderSystem.setShaderFogColor(fogColor.x(), fogColor.y(), fogColor.z(), alpha);
-
-        if ((fogLogCounter++ % 300) == 0) {
-            Initializer.LOGGER.info("Fog buffer: env=({}, {}), render=({}, {}), sky={}, cloud={}, alpha={}",
-                    environmentalStart, environmentalEnd, renderDistanceStart, renderDistanceEnd, skyEnd, cloudEnd, alpha);
-        }
     }
 }

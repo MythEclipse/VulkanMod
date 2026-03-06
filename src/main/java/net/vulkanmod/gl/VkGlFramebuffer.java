@@ -149,6 +149,7 @@ public class VkGlFramebuffer {
 
     VulkanImage colorAttachment;
     VulkanImage depthAttachment;
+    int colorAttachmentMipLevel = 0;
 
     boolean needsUpdate;
 
@@ -165,6 +166,19 @@ public class VkGlFramebuffer {
 
         if (vkGlTexture == null)
             throw new NullPointerException(String.format("Texture %d is null", id));
+
+        setAttachmentImage(attachment, vkGlTexture.getVulkanImage());
+    }
+
+    public void setAttachmentTextureLevel(int attachment, int id, int mipLevel) {
+        VkGlTexture vkGlTexture = VkGlTexture.getTexture(id);
+
+        if (vkGlTexture == null)
+            throw new NullPointerException(String.format("Texture %d is null", id));
+
+        if (attachment == GL30.GL_COLOR_ATTACHMENT0) {
+            this.colorAttachmentMipLevel = mipLevel;
+        }
 
         setAttachmentImage(attachment, vkGlTexture.getVulkanImage());
     }
@@ -213,7 +227,7 @@ public class VkGlFramebuffer {
         boolean hasDepthImage = this.depthAttachment != null;
         VulkanImage depthImage = this.depthAttachment;
 
-        this.framebuffer = Framebuffer.builder(this.colorAttachment, depthImage)
+        this.framebuffer = Framebuffer.builder(this.colorAttachment, depthImage, this.colorAttachmentMipLevel)
                                       .build();
         RenderPass.Builder builder = RenderPass.builder(this.framebuffer);
 

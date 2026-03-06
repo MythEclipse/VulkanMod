@@ -11,7 +11,8 @@ public class VkFbo {
         this.depthAttachment = depthAttachment;
         net.vulkanmod.gl.VkGlFramebuffer fbo = net.vulkanmod.gl.VkGlFramebuffer.getFramebuffer(this.glId);
         net.vulkanmod.render.engine.VkGpuTexture colorAttachmentTexture = this.colorAttachmentView.texture();
-        fbo.setAttachmentTexture(36064, colorAttachmentTexture.id);
+        int mipLevel = colorAttachmentView.baseMipLevel();
+        fbo.setAttachmentTextureLevel(36064, colorAttachmentTexture.id, mipLevel);
         if (depthAttachment != null) {
             fbo.setAttachmentTexture(36096, depthAttachment.id);
         }

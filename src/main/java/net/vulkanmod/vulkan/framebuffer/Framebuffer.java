@@ -32,6 +32,7 @@ public class Framebuffer {
 
     private VulkanImage colorAttachment;
     protected VulkanImage depthAttachment;
+    private int colorAttachmentMipLevel = 0;
 
     private final Reference2LongArrayMap<RenderPass> renderpassToFramebufferMap = new Reference2LongArrayMap<>();
 
@@ -53,6 +54,7 @@ public class Framebuffer {
         else {
             this.colorAttachment = builder.colorAttachment;
             this.depthAttachment = builder.depthAttachment;
+            this.colorAttachmentMipLevel = builder.colorAttachmentMipLevel;
         }
     }
 
@@ -90,9 +92,9 @@ public class Framebuffer {
 
             LongBuffer attachments;
             if (colorAttachment != null && depthAttachment != null) {
-                attachments = stack.longs(colorAttachment.getImageView(), depthAttachment.getImageView());
+                attachments = stack.longs(colorAttachment.getLevelImageView(colorAttachmentMipLevel), depthAttachment.getImageView());
             } else if (colorAttachment != null) {
-                attachments = stack.longs(colorAttachment.getImageView());
+                attachments = stack.longs(colorAttachment.getLevelImageView(colorAttachmentMipLevel));
             } else {
                 throw new IllegalStateException();
             }
@@ -209,6 +211,10 @@ public class Framebuffer {
         return new Builder(colorAttachment, depthAttachment);
     }
 
+    public static Builder builder(VulkanImage colorAttachment, VulkanImage depthAttachment, int mipLevel) {
+        return new Builder(colorAttachment, depthAttachment, mipLevel);
+    }
+
     public static class Builder {
         final boolean createImages;
         final int width, height;
@@ -242,15 +248,22 @@ public class Framebuffer {
             this.hasDepthAttachment = hasDepthAttachment;
         }
 
+        int colorAttachmentMipLevel = 0;
+
         public Builder(VulkanImage colorAttachment, VulkanImage depthAttachment) {
+            this(colorAttachment, depthAttachment, 0);
+        }
+
+        public Builder(VulkanImage colorAttachment, VulkanImage depthAttachment, int mipLevel) {
             this.createImages = false;
             this.colorAttachment = colorAttachment;
             this.depthAttachment = depthAttachment;
+            this.colorAttachmentMipLevel = mipLevel;
 
             this.format = colorAttachment.format;
 
-            this.width = colorAttachment.width;
-            this.height = colorAttachment.height;
+            this.width = colorAttachment.width >> mipLevel;
+            this.height = colorAttachment.height >> mipLevel;
             this.hasColorAttachment = true;
             this.hasDepthAttachment = depthAttachment != null;
 
