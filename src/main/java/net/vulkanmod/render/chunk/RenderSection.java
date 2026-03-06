@@ -16,6 +16,7 @@ import net.vulkanmod.render.chunk.build.task.ChunkTask;
 import net.vulkanmod.render.chunk.build.task.CompiledSection;
 import net.vulkanmod.render.chunk.build.task.SortTransparencyTask;
 import net.vulkanmod.render.chunk.build.task.TaskDispatcher;
+import net.vulkanmod.render.chunk.build.thread.BuilderResources;
 import net.vulkanmod.render.chunk.cull.QuadFacing;
 import net.vulkanmod.render.chunk.graph.GraphDirections;
 import net.vulkanmod.render.chunk.util.Util;
@@ -220,9 +221,16 @@ public class RenderSection {
         return true;
     }
 
-    // TODO: sync rebuild
     public void rebuildChunkSync(
-            TaskDispatcher dispatcher, RenderRegionBuilder renderRegionCache) {}
+            TaskDispatcher dispatcher, RenderRegionBuilder renderRegionCache) {
+        BuildTask buildTask = this.createCompileTask(renderRegionCache);
+        if (buildTask == null) return;
+
+        BuilderResources[] resources = dispatcher.getResourcesArray();
+        if (resources == null || resources.length == 0) return;
+
+        buildTask.runTask(resources[0]);
+    }
 
     public BuildTask createCompileTask(RenderRegionBuilder renderRegionCache) {
         boolean flag = this.cancelTasks();
@@ -366,9 +374,10 @@ public class RenderSection {
             sectionSet.clear();
             sectionSet.addAll(fullSet);
 
-            // TODO
-            //            Minecraft.getInstance().levelRenderer.updateGlobalBlockEntities(toRemove,
-            // toAdd);
+            WorldRenderer worldRenderer = WorldRenderer.getInstance();
+            if (worldRenderer != null) {
+                worldRenderer.updateGlobalBlockEntities(toRemove, toAdd);
+            }
         }
     }
 

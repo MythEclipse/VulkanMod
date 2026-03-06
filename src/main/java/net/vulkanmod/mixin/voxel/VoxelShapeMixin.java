@@ -20,7 +20,7 @@ public class VoxelShapeMixin implements VoxelShapeExtended {
     private void initCornerOcclusion(DiscreteVoxelShape discreteVoxelShape, CallbackInfo ci) {
         var disShape = this.shape;
 
-        // TODO: lithium subclasses
+        // lithium subclasses
         // lithium is using its own classes for simple cube shapes
         VoxelShape shape = (VoxelShape) ((Object) this);
         if (!(shape instanceof CubeVoxelShape) || disShape == null) {

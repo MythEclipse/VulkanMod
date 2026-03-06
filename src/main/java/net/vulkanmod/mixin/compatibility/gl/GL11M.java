@@ -2,9 +2,12 @@ package net.vulkanmod.mixin.compatibility.gl;
 
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+import net.vulkanmod.gl.VkGlFramebuffer;
 import net.vulkanmod.gl.VkGlTexture;
 import net.vulkanmod.vulkan.Renderer;
 import net.vulkanmod.vulkan.VRenderSystem;
+import net.vulkanmod.vulkan.texture.ImageUtil;
+import net.vulkanmod.vulkan.texture.VulkanImage;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.system.MemoryUtil;
@@ -400,7 +403,18 @@ public class GL11M {
             @NativeType("GLint") int y,
             @NativeType("GLsizei") int width,
             @NativeType("GLsizei") int height) {
-        // TODO
+        VulkanImage dstImage = VkGlTexture.getBoundVulkanImage();
+        if (dstImage == null) return;
+
+        VulkanImage srcImage = VkGlFramebuffer.getReadBoundColorAttachment();
+        if (srcImage == null) {
+            srcImage = Renderer.getInstance().getSwapChain().getColorAttachment();
+        }
+
+        ImageUtil.blitFramebuffer(
+                srcImage, dstImage,
+                x, y, x + width, y + height,
+                xoffset, yoffset, xoffset + width, yoffset + height);
     }
 
     /**
@@ -410,7 +424,7 @@ public class GL11M {
     @Overwrite(remap = false)
     public static void glBlendFunc(
             @NativeType("GLenum") int sfactor, @NativeType("GLenum") int dfactor) {
-        // TODO
+        VRenderSystem.blendFunc(sfactor, dfactor);
     }
 
     /**

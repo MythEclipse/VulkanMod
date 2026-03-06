@@ -27,7 +27,6 @@ public class ChunkArea {
     }
 
     public void updateFrustum(VFrustum frustum) {
-        // TODO: maybe move to an aux class
         int frustumResult = frustum.cubeInFrustum(
                 this.position.x(),
                 this.position.y(),

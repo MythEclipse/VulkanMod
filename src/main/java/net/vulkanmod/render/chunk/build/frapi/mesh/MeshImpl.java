@@ -82,13 +82,16 @@ public class MeshImpl implements Mesh {
         cursor.data = null;
     }
 
-    // TODO: This could be optimized by checking if the emitter is that of a
-    // MutableMeshImpl and if
-    // it has no transforms, in which case the entire data array can be copied in
-    // bulk.
     @Override
     public void outputTo(QuadEmitter emitter) {
         MutableQuadViewImpl e = (MutableQuadViewImpl) emitter;
+
+        // Fast path: bulk copy when the target is a MutableMeshImpl with no active transforms
+        if (e.ownerMesh != null && !e.hasTransforms()) {
+            e.ownerMesh.appendMesh(this.data, this.limit);
+            return;
+        }
+
         final int[] data = this.data;
         final int limit = this.limit;
         int index = 0;

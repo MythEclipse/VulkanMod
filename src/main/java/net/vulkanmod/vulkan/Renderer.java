@@ -501,7 +501,6 @@ public class Renderer {
     }
 
     public boolean beginRenderPass(RenderPass renderPass, Framebuffer framebuffer) {
-        // TODO: minimizing could trigger this preventing rendering (e.g. texture atlas uploads)
         if (skipRendering) return false;
 
         if (!recordingCmds) {

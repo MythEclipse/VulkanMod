@@ -15,6 +15,9 @@ public abstract class MutableQuadViewImpl
         private static final int[] DEFAULT_QUAD_DATA = new int[net.vulkanmod.render.chunk.build.frapi.mesh.EncodingFormat.TOTAL_STRIDE];
         private net.fabricmc.fabric.api.renderer.v1.mesh.QuadTransform activeTransform = NO_TRANSFORM;
         private final it.unimi.dsi.fastutil.objects.ObjectArrayList<net.fabricmc.fabric.api.renderer.v1.mesh.QuadTransform> transformStack = new it.unimi.dsi.fastutil.objects.ObjectArrayList<>();
+
+        /** Back-reference to the owning {@link MutableMeshImpl}, if any. */
+        MutableMeshImpl ownerMesh = null;
         private final net.fabricmc.fabric.api.renderer.v1.mesh.QuadTransform stackTransform = q -> {
                 int i = this.transformStack.size() - 1;
                 while (i >= 0) {
@@ -335,6 +338,10 @@ public abstract class MutableQuadViewImpl
                 if (this.activeTransform.transform(this)) {
                         emitDirectly();
                 }
+        }
+
+        public final boolean hasTransforms() {
+                return !this.transformStack.isEmpty();
         }
 
         @Override // net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter

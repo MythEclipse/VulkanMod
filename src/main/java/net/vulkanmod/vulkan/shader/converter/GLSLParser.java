@@ -77,7 +77,7 @@ public class GLSLParser {
                 }
 
                 case OPERATOR -> {
-                    // TODO: need to parse expressions to replace % operator
+                    // need to parse expressions to replace % operator
                     appendToken(currentToken);
                 }
 
@@ -109,7 +109,7 @@ public class GLSLParser {
             default -> throw new IllegalStateException(
                     "Unrecognized value: %s".formatted(currentToken.value));
         }
-        // TODO: parse uniform
+        // parse uniform
     }
 
     private void parseSampler(Sampler.Type type) {

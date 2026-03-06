@@ -98,7 +98,7 @@ public class NewSmoothLightPipeline implements LightPipeline {
             BlockPos pos,
             SimpleDirection dir,
             QuadLightData out) {
-        // TODO stair lighting is inconsistent
+        // stair lighting is inconsistent
         // A solution might be an interpolation grid
         //        this.self.calculatePartialAlignedFace(this.lightCache, pos, dir);
 

@@ -41,23 +41,16 @@ public abstract class GlUtil {
     public static ByteBuffer BGRAtoRGBA_buffer(ByteBuffer in) {
         Validate.isTrue(in.remaining() % 4 == 0, "Unexpected buffer stride");
 
-        int outSize = in.remaining();
-        ByteBuffer out = MemoryUtil.memAlloc(outSize);
+        int size = in.remaining();
+        long ptr = MemoryUtil.memAddress0(in);
 
-        long ptr = MemoryUtil.memAddress0(out);
-
-        long srcPtr = MemoryUtil.memAddress0(in);
-
-        // TODO write in place (don't free the returned buffer in that case)
-        for (int i = 0; i < outSize; i += 4) {
-            int color = MemoryUtil.memGetInt(srcPtr + i);
-
+        for (int i = 0; i < size; i += 4) {
+            int color = MemoryUtil.memGetInt(ptr + i);
             color = net.vulkanmod.vulkan.util.ColorUtil.BGRAtoRGBA(color);
-
             MemoryUtil.memPutInt(ptr + i, color);
         }
 
-        return out;
+        return in;
     }
 
     public static int vulkanFormat(int glFormat, int type) {

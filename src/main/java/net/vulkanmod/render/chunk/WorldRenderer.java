@@ -492,7 +492,14 @@ public class WorldRenderer {
         }
         return this.sectionGraph.getStatistics();
     }
-
+    public void updateGlobalBlockEntities(
+            java.util.Collection<net.minecraft.world.level.block.entity.BlockEntity> toRemove,
+            java.util.Collection<net.minecraft.world.level.block.entity.BlockEntity> toAdd) {
+        synchronized (this.globalBlockEntities) {
+            this.globalBlockEntities.removeAll(toRemove);
+            this.globalBlockEntities.addAll(toAdd);
+        }
+    }
     public void cleanUp() {
         if (this.indirectBuffers != null) {
             java.util.Arrays.stream(this.indirectBuffers)

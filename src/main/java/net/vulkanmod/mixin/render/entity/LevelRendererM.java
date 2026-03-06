@@ -6,7 +6,6 @@ import org.spongepowered.asm.mixin.*;
 @Mixin(LevelRenderer.class)
 public class LevelRendererM {
 
-    // TODO
     //    @Shadow @Final private EntityRenderDispatcher entityRenderDispatcher;
     //    @Shadow @Final private Minecraft minecraft;
     //

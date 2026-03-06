@@ -174,7 +174,10 @@ public abstract class DeviceManager {
                     .features()
                     .samplerAnisotropy(device.availableFeatures.features().samplerAnisotropy());
             deviceFeatures.features().logicOp(device.availableFeatures.features().logicOp());
-            // TODO: Disable indirect draw option if unsupported.
+            // Disable indirect draw in the config if the device doesn't support it
+            if (!device.isDrawIndirectSupported()) {
+                Initializer.CONFIG.indirectDraw = false;
+            }
             deviceFeatures.features().multiDrawIndirect(device.isDrawIndirectSupported());
 
             // Must not set line width to anything other than 1.0 if this is not supported

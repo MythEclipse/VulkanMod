@@ -149,7 +149,7 @@ public class SPIRVUtils {
         }
     }
 
-    // TODO: Don't actually need the Releaser at all, (MemoryStack frees this for
+    // Don't actually need the Releaser at all, (MemoryStack frees this for
     // us)
     // But ShaderC won't let us create the Includer without a corresponding
     // Releaser, (so we need it
@@ -158,7 +158,7 @@ public class SPIRVUtils {
 
         @Override
         public void invoke(long user_data, long include_result) {
-            // TODO:Maybe dump Shader Compiled Binaries here to a .Misc Diretcory to allow
+            // Maybe dump Shader Compiled Binaries here to a .Misc Diretcory to allow
             // easy
             // caching.recompilation...
         }

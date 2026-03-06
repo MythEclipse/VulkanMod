@@ -249,7 +249,6 @@ public class Framebuffer {
             Validate.isTrue(
                     colorAttachments > 0 || hasDepthAttachment, "At least 1 attachment needed");
 
-            // TODO multi color attachments
             Validate.isTrue(colorAttachments <= 1, "Not supported");
 
             this.createImages = true;

@@ -75,6 +75,10 @@ public class VkGlTexture {
         return map.get(id);
     }
 
+    public static VulkanImage getBoundVulkanImage() {
+        return boundTexture != null ? boundTexture.vulkanImage : null;
+    }
+
     public static void activeTexture(int i) {
         activeTexture = i - GL30.GL_TEXTURE0;
         VTextureSelector.setActiveTexture(activeTexture);

@@ -6,7 +6,6 @@ import org.spongepowered.asm.mixin.Mixin;
 @Mixin(SectionRenderDispatcher.class)
 public class SectionRenderDispatcherM {
 
-    // TODO
     //	@Redirect(method = "<init>", at = @At(value = "INVOKE", target =
     // "Lnet/minecraft/util/thread/ProcessorMailbox;tell(Ljava/lang/Object;)V"))
     //	private void redirectTask(ProcessorMailbox instance, Object object) {}

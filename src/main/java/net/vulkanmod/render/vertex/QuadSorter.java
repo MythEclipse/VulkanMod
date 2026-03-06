@@ -109,12 +109,12 @@ public class QuadSorter {
             final int quadIndex = sortingPointsIndices[i];
             final int baseVertex = quadIndex * stride;
 
-            MemoryUtil.memPutInt(ptr + (size * 0L), baseVertex + 0);
-            MemoryUtil.memPutInt(ptr + (size * 1L), baseVertex + 1);
-            MemoryUtil.memPutInt(ptr + (size * 2L), baseVertex + 2);
-            MemoryUtil.memPutInt(ptr + (size * 3L), baseVertex + 2);
-            MemoryUtil.memPutInt(ptr + (size * 4L), baseVertex + 3);
-            MemoryUtil.memPutInt(ptr + (size * 5L), baseVertex + 0);
+            putIndex(ptr + (size * 0L), baseVertex, indexType);
+            putIndex(ptr + (size * 1L), baseVertex + 1, indexType);
+            putIndex(ptr + (size * 2L), baseVertex + 2, indexType);
+            putIndex(ptr + (size * 3L), baseVertex + 2, indexType);
+            putIndex(ptr + (size * 4L), baseVertex + 3, indexType);
+            putIndex(ptr + (size * 5L), baseVertex, indexType);
 
             ptr += size * 6L;
         }
@@ -122,34 +122,41 @@ public class QuadSorter {
 
     public void putSortedQuadIndices(
             TerrainBuilder bufferBuilder, VertexFormat.IndexType indexType) {
-        float[] distances = new float[this.sortingPoints.length];
-        int[] sortingPoints = new int[this.sortingPoints.length];
+        float[] distances = this.distances;
+        int[] sortingPointsIndices = this.sortingPointsIndices;
 
-        for (int i = 0; i < this.sortingPoints.length; sortingPoints[i] = i++) {
+        for (int i = 0; i < this.sortingPoints.length; sortingPointsIndices[i] = i++) {
             float dx = this.sortingPoints[i].x() - this.sortX;
             float dy = this.sortingPoints[i].y() - this.sortY;
             float dz = this.sortingPoints[i].z() - this.sortZ;
             distances[i] = dx * dx + dy * dy + dz * dz;
         }
 
-        SortUtil.mergeSort(sortingPoints, distances);
+        SortUtil.mergeSort(sortingPointsIndices, distances);
 
         long ptr = bufferBuilder.indexBufferPtr;
 
         final int size = indexType.bytes;
         final int stride = 4; // 4 vertices in a quad
-        for (int i = 0; i < sortingPoints.length; ++i) {
-            final int quadIndex = sortingPoints[i];
+        for (int i = 0; i < sortingPointsIndices.length; ++i) {
+            final int quadIndex = sortingPointsIndices[i];
             final int baseVertex = quadIndex * stride;
 
-            MemoryUtil.memPutInt(ptr + (size * 0L), baseVertex + 0);
-            MemoryUtil.memPutInt(ptr + (size * 1L), baseVertex + 1);
-            MemoryUtil.memPutInt(ptr + (size * 2L), baseVertex + 2);
-            MemoryUtil.memPutInt(ptr + (size * 3L), baseVertex + 2);
-            MemoryUtil.memPutInt(ptr + (size * 4L), baseVertex + 3);
-            MemoryUtil.memPutInt(ptr + (size * 5L), baseVertex + 0);
+            putIndex(ptr + (size * 0L), baseVertex, indexType);
+            putIndex(ptr + (size * 1L), baseVertex + 1, indexType);
+            putIndex(ptr + (size * 2L), baseVertex + 2, indexType);
+            putIndex(ptr + (size * 3L), baseVertex + 2, indexType);
+            putIndex(ptr + (size * 4L), baseVertex + 3, indexType);
+            putIndex(ptr + (size * 5L), baseVertex, indexType);
 
             ptr += size * 6L;
+        }
+    }
+
+    private static void putIndex(long ptr, int value, VertexFormat.IndexType indexType) {
+        switch (indexType) {
+            case SHORT -> MemoryUtil.memPutShort(ptr, (short) value);
+            case INT -> MemoryUtil.memPutInt(ptr, value);
         }
     }
 

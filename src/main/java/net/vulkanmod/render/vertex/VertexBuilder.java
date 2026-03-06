@@ -54,21 +54,34 @@ public interface VertexBuilder {
             MemoryUtil.memPutInt(ptr + 28, packedNormal);
         }
 
-        // TODO
         @Override
-        public void position(long ptr, float x, float y, float z) {}
+        public void position(long ptr, float x, float y, float z) {
+            MemoryUtil.memPutFloat(ptr + 0, x);
+            MemoryUtil.memPutFloat(ptr + 4, y);
+            MemoryUtil.memPutFloat(ptr + 8, z);
+        }
 
         @Override
-        public void color(long ptr, int color) {}
+        public void color(long ptr, int color) {
+            MemoryUtil.memPutInt(ptr + 12, color);
+        }
 
         @Override
-        public void uv(long ptr, float u, float v) {}
+        public void uv(long ptr, float u, float v) {
+            MemoryUtil.memPutFloat(ptr + 16, u);
+            MemoryUtil.memPutFloat(ptr + 20, v);
+        }
 
         @Override
-        public void light(long ptr, int light) {}
+        public void light(long ptr, int light) {
+            MemoryUtil.memPutShort(ptr + 24, (short) (light & '\uffff'));
+            MemoryUtil.memPutShort(ptr + 26, (short) (light >> 16 & '\uffff'));
+        }
 
         @Override
-        public void normal(long ptr, int normal) {}
+        public void normal(long ptr, int normal) {
+            MemoryUtil.memPutInt(ptr + 28, normal);
+        }
 
         @Override
         public int getStride() {

@@ -46,11 +46,7 @@ public class ChunkAreaManager {
                 ? (relativeHeight >> AREA_SH_Y)
                 : (relativeHeight >> AREA_SH_Y) + 1;
 
-        // check if width is even
-        if ((t & 1) == 0)
-            t++;
         this.xzSize = t;
-        // TODO make even size work
 
         this.size = xzSize * ySize * xzSize;
         this.chunkAreasArr = new ChunkArea[size];
@@ -107,7 +103,7 @@ public class ChunkAreaManager {
         } else {
             xRangeStart = 0;
             xRangeEnd = -deltaX - 1;
-            xComplStart = xRangeEnd;
+            xComplStart = xRangeEnd + 1;
             xComplEnd = this.xzSize - 1;
         }
 

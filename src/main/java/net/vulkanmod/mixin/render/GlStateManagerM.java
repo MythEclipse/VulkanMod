@@ -106,7 +106,6 @@ public class GlStateManagerM {
         Renderer.setScissor(x, y, width, height);
     }
 
-    // TODO
     /**
      * @author
      */

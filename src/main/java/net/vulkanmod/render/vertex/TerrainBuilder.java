@@ -21,6 +21,8 @@ public class TerrainBuilder {
 
     private boolean building;
 
+    private VertexFormat.IndexType indexType = VertexFormat.IndexType.SHORT;
+
     private final QuadSorter quadSorter = new QuadSorter();
 
     private boolean needsSorting;
@@ -31,11 +33,9 @@ public class TerrainBuilder {
     private final TerrainBufferBuilder[] bufferBuilders;
 
     public TerrainBuilder(int size, VertexBuilder vertexBuilder) {
-        // FIXME: same size is used for both index and vertex buffers
-        this.indexBufferCapacity = size;
-        this.indexBufferPtr = ALLOCATOR.malloc(this.indexBufferCapacity);
-
         this.format = PipelineManager.terrainVertexFormat;
+        this.indexBufferCapacity = getInitialIndexBufferCapacity(size, this.format.getVertexSize());
+        this.indexBufferPtr = ALLOCATOR.malloc(this.indexBufferCapacity);
         this.vertexBuilder = vertexBuilder;
 
         var bufferBuilders = new TerrainBufferBuilder[QuadFacing.COUNT];
@@ -45,6 +45,14 @@ public class TerrainBuilder {
         }
 
         this.bufferBuilders = bufferBuilders;
+    }
+
+    private static int getInitialIndexBufferCapacity(int vertexBufferSize, int vertexSize) {
+        int quadStride = vertexSize * 4;
+        int maxQuads = Math.max(vertexBufferSize / quadStride, 1);
+        int shortIndexBytes = maxQuads * 6 * Short.BYTES;
+
+        return Math.max(shortIndexBytes, 256);
     }
 
     public TerrainBufferBuilder getBufferBuilder(int i) {
@@ -121,10 +129,10 @@ public class TerrainBuilder {
 
         int indexCount = vertexCount / 4 * 6;
 
-        VertexFormat.IndexType indexType = VertexFormat.IndexType.least(indexCount);
+        this.indexType = VertexFormat.IndexType.least(indexCount);
+        VertexFormat.IndexType indexType = this.indexType;
         boolean sequentialIndexing;
 
-        // TODO sorting
         if (this.needsSorting) {
             int indexBufferSize = indexCount * indexType.bytes;
             this.ensureIndexCapacity(indexBufferSize);
@@ -144,11 +152,10 @@ public class TerrainBuilder {
                 sequentialIndexing);
     }
 
-    // TODO hardcoded index type size
     public ByteBuffer getIndexBuffer() {
         int indexCount = this.quadSorter.getVertexCount() * 6 / 4;
 
-        return MemoryUtil.memByteBuffer(this.indexBufferPtr, indexCount * 2);
+        return MemoryUtil.memByteBuffer(this.indexBufferPtr, indexCount * this.indexType.bytes);
     }
 
 

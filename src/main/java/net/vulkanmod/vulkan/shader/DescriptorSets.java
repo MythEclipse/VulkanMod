@@ -162,7 +162,6 @@ public class DescriptorSets {
         VkDescriptorBufferInfo.Buffer[] bufferInfos =
                 new VkDescriptorBufferInfo.Buffer[pipeline.buffers.size()];
 
-        // TODO maybe ubo update is not needed everytime
         int i = 0;
         for (UBO ubo : pipeline.getBuffers()) {
             Buffer ub = ubo.getBufferSlice().getBuffer();

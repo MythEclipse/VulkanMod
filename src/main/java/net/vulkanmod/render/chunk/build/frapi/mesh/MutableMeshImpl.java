@@ -52,6 +52,7 @@ public class MutableMeshImpl extends MeshImpl implements MutableMesh {
         ensureCapacity(EncodingFormat.TOTAL_STRIDE);
         emitter.data = data;
         emitter.baseIndex = limit;
+        emitter.ownerMesh = this;
         emitter.clear();
     }
 
@@ -90,5 +91,17 @@ public class MutableMeshImpl extends MeshImpl implements MutableMesh {
         limit = 0;
         emitter.baseIndex = limit;
         emitter.clear();
+    }
+
+    /**
+     * Bulk-appends the data from another mesh's raw int[] array, bypassing the
+     * per-quad emitter path. Only safe to call when the emitter has no transforms.
+     */
+    void appendMesh(int[] srcData, int srcLimit) {
+        ensureCapacity(srcLimit);
+        System.arraycopy(srcData, 0, data, limit, srcLimit);
+        limit += srcLimit;
+        emitter.data = data;
+        emitter.baseIndex = limit;
     }
 }

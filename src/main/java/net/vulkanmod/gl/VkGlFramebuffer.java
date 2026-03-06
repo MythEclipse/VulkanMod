@@ -18,9 +18,11 @@ public class VkGlFramebuffer {
 
     private static final Int2ReferenceOpenHashMap<VkGlFramebuffer> map = new Int2ReferenceOpenHashMap<>();
     private static VkGlFramebuffer boundFramebuffer;
+    private static VkGlFramebuffer readBoundFramebuffer;
 
     public static void resetBoundFramebuffer() {
         boundFramebuffer = null;
+        readBoundFramebuffer = null;
     }
 
     public static void beginRendering(VkGlFramebuffer glFramebuffer) {
@@ -77,6 +79,7 @@ public class VkGlFramebuffer {
                 boundFramebuffer = glFramebuffer;
             }
             case GL30.GL_READ_FRAMEBUFFER -> {
+                readBoundFramebuffer = glFramebuffer;
             }
         }
     }
@@ -133,7 +136,11 @@ public class VkGlFramebuffer {
             int dstY1,
             int mask,
             int filter) {
+        VulkanImage srcImage = (readBoundFramebuffer != null && readBoundFramebuffer.colorAttachment != null)
+                ? readBoundFramebuffer.colorAttachment
+                : Renderer.getInstance().getSwapChain().getColorAttachment();
         ImageUtil.blitFramebuffer(
+                srcImage,
                 boundFramebuffer.colorAttachment,
                 srcX0,
                 srcY0,
@@ -151,6 +158,12 @@ public class VkGlFramebuffer {
 
     public static VkGlFramebuffer getBoundFramebuffer() {
         return boundFramebuffer;
+    }
+
+    public static VulkanImage getReadBoundColorAttachment() {
+        return (readBoundFramebuffer != null && readBoundFramebuffer.colorAttachment != null)
+                ? readBoundFramebuffer.colorAttachment
+                : null;
     }
 
     public static VkGlFramebuffer getFramebuffer(int id) {

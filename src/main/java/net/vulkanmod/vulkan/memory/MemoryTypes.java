@@ -100,7 +100,19 @@ public class MemoryTypes {
 
         @Override
         public void copyFromBuffer(Buffer buffer, long bufferSize, ByteBuffer byteBuffer) {
-            // TODO
+            // Create a temporary host-visible buffer for GPU→CPU readback
+            Buffer stagingBuffer = new Buffer(VK_BUFFER_USAGE_TRANSFER_DST_BIT, MemoryTypes.HOST_MEM);
+            stagingBuffer.createBuffer(bufferSize);
+
+            // Blocking copy from device-local buffer to the host-visible staging buffer
+            DeviceManager.getTransferQueue().uploadBufferImmediate(
+                    buffer.getId(), 0, stagingBuffer.getId(), 0, bufferSize);
+
+            // Copy from mapped staging buffer memory to the target ByteBuffer
+            MemoryUtil.memCopy(stagingBuffer.getDataPtr(), MemoryUtil.memAddress(byteBuffer), bufferSize);
+
+            // Free the temporary staging buffer
+            MemoryManager.freeBuffer(stagingBuffer.getId(), stagingBuffer.getAllocation());
         }
 
         public long copyBuffer(Buffer src, Buffer dst) {

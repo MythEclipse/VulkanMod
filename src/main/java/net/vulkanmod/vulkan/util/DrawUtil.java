@@ -31,7 +31,6 @@ public class DrawUtil {
         VRenderSystem.enableCull();
     }
 
-    // TODO
     //    public static void defualtBlit() {
     //        Matrix4f matrix4f = new Matrix4f().setOrtho(0.0F, 1.0F, 1.0F, 0.0F, 0.0F, 1.0F);
     //        RenderSystem.setProjectionMatrix(matrix4f, ProjectionType.ORTHOGRAPHIC);
