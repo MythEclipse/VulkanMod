@@ -1,12 +1,7 @@
 package net.vulkanmod.render.chunk;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /* JADX INFO: loaded from: VulkanMod_1.21.11-0.6.0.jar:net/vulkanmod/render/chunk/WorldRenderer.class */
 public class WorldRenderer {
-    private static final Logger LOGGER = LoggerFactory.getLogger(WorldRenderer.class);
-    private static int debugLogCounter = 0;
     private static net.vulkanmod.render.chunk.WorldRenderer INSTANCE;
     private net.minecraft.client.multiplayer.ClientLevel level;
     private int renderDistance;
@@ -179,11 +174,6 @@ public class WorldRenderer {
         mcProfiler.pop();
         profiler.pop();
 
-        // Debug logging every 200 frames
-        if ((debugLogCounter++ % 200) == 0) {
-            String stats = this.sectionGraph != null ? this.sectionGraph.getStatistics() : "null";
-            LOGGER.info("[VulkanMod] setupRenderer stats: {}", stats);
-        }
     }
 
     public void uploadSections() {
@@ -279,17 +269,6 @@ public class WorldRenderer {
             double camZ,
             org.joml.Matrix4f modelView,
             org.joml.Matrix4f projection) {
-        if ((debugLogCounter % 200) < 4) {
-            int sectionCount =
-                    this.sectionGraph != null ? this.sectionGraph.getSectionQueue().size() : -1;
-            LOGGER.info(
-                    "[VulkanMod] renderSectionLayer called: type={}, visibleSections={}, cam=({},{},{})",
-                    renderType,
-                    sectionCount,
-                    (int) camX,
-                    (int) camY,
-                    (int) camZ);
-        }
         net.vulkanmod.vulkan.Renderer.getInstance().getMainPass().rebindMainTarget();
         sortTranslucentSections(camX, camY, camZ);
         net.minecraft.util.profiling.ProfilerFiller mcProfiler =
